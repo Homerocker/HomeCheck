@@ -1,0 +1,27 @@
+## Interface: 30300
+## Title: HomeCheck
+## Notes: Tracks specific cooldowns of players in a raid/party
+## Version: 1.0.0
+## OptionalDeps: LibStub, CallbackHandler-1.0, ChatThrottleLib, Ace3, LibSharedMedia-3.0, LibTalentQuery-1.0, LibGroupTalents-1.0, LibRangeCheck-2.0
+## SavedVariables: HomeCheck_DB
+
+Lib\LibStub.lua
+Lib\CallbackHandler-1.0.lua
+Lib\AceTimer-3.0.lua
+Lib\AceDB-3.0.lua
+Lib\AceLocale-3.0.lua
+Lib\AceConsole-3.0.lua
+Lib\AceGUI-3.0\AceGUI-3.0.xml
+Lib\AceConfig-3.0\AceConfig-3.0.xml
+Lib\AceComm-3.0\AceComm-3.0.xml
+Lib\AceSerializer-3.0.lua
+Lib\LibSharedMedia-3.0.lua
+Lib\LibTalentQuery-1.0.lua
+Lib\LibGroupTalents-1.0.lua
+Lib\LibRangeCheck-2.0.lua
+Locale\enUS.lua
+Locale\ruRU.lua
+Core.lua
+Spells.lua
+Defaults.lua
+OptionsPanel.lua
