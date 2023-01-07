@@ -1,7 +1,7 @@
 ## Interface: 30300
 ## Title: HomeCheck
 ## Notes: Tracks specific cooldowns of players in a raid/party
-## Version: 1.0.0
+## Version: 1.0.1
 ## OptionalDeps: LibStub, CallbackHandler-1.0, ChatThrottleLib, Ace3, LibSharedMedia-3.0, LibTalentQuery-1.0, LibGroupTalents-1.0, LibRangeCheck-2.0
 ## SavedVariables: HomeCheck_DB
 

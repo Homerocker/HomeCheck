@@ -27,7 +27,8 @@ HomeCheck.comms = {
 local groups = 10
 
 local abs, date, floor, ipairs, max, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = abs, date, floor, ipairs, max, pairs, select, {
-    find = string.find
+    find = string.find,
+    gmatch = string.gmatch
 }, strsplit, {
     insert = table.insert,
     remove = table.remove,
