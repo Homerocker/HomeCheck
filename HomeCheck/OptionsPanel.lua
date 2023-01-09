@@ -1,6 +1,6 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("HomeCheck")
 local AceConfig = LibStub("AceConfig-3.0")
-local ipairs, pairs, tonumber = ipairs, pairs, tonumber
+local ipairs, pairs, tonumber = ipairs, max, min, pairs, tonumber
 
 local myOptionsTable = {
     type = "group",
@@ -46,6 +46,7 @@ local myOptionsTable = {
 }
 
 function HomeCheck:OptionsPanel()
+    InterfaceOptionsFrame:SetWidth(max(min(1000, GetScreenWidth()), InterfaceOptionsFrame:GetWidth()))
     for i = 1, #self.groups do
         myOptionsTable.args.frames.args["frame" .. i] = {
             name = L["Frame"] .. " " .. i,
