@@ -26,7 +26,7 @@ HomeCheck.comms = {
 
 local groups = 10
 
-local date, floor, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, pairs, select, {
+local date, floor, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, min, pairs, select, {
     find = string.find,
     gmatch = string.gmatch
 }, strsplit, {
@@ -830,26 +830,7 @@ function HomeCheck:UnitInRange(unit)
 end
 
 function HomeCheck:updateCooldownBarProgress(frame)
-    local pct = frame.CDLeft / self:getSpellCooldown(frame.spellID, frame.playerName)
-    if pct == 0 then
-        if self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].invertColors then
-            if frame.bar:IsShown() then
-                frame.bar:Hide()
-            end
-        else
-            if frame.bar:IsShown() then
-                frame.bar:Hide()
-            end
-        end
-    elseif pct == 1 then
-        if not self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].invertColors then
-            if frame.bar:IsShown() then
-                frame.bar:Hide()
-            end
-        else
-
-        end
-    end
+    local pct = min(frame.CDLeft / self:getSpellCooldown(frame.spellID, frame.playerName), 1)
     if self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].invertColors then
         if pct == 0 then
             if frame.bar:IsShown() then
