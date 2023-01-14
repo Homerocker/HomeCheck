@@ -1,6 +1,6 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("HomeCheck")
 local AceConfig = LibStub("AceConfig-3.0")
-local ipairs, pairs, tonumber = ipairs, max, min, pairs, tonumber
+local ipairs, max, min, pairs, tonumber = ipairs, max, min, pairs, tonumber
 
 local myOptionsTable = {
     type = "group",

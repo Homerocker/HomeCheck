@@ -26,7 +26,7 @@ HomeCheck.comms = {
 
 local groups = 10
 
-local abs, date, floor, ipairs, max, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = abs, date, floor, ipairs, max, pairs, select, {
+local date, floor, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, pairs, select, {
     find = string.find,
     gmatch = string.gmatch
 }, strsplit, {
@@ -437,15 +437,17 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
     frame.inactiveBar:SetPoint("TOPLEFT", frame.bar, "TOPRIGHT")
     frame.inactiveBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
 
-    frame.playerNameFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    local textframe = CreateFrame("Frame", nil, frame)
+
+    frame.playerNameFontString = textframe:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.playerNameFontString:SetText(frame.playerName)
     frame.playerNameFontString:SetTextColor(1, 1, 1, 1)
 
-    frame.targetFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.targetFontString = textframe:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.targetFontString:SetPoint("LEFT", frame.playerNameFontString, "RIGHT", 1, 0)
     frame.targetFontString:SetJustifyH("LEFT")
 
-    frame.timerFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.timerFontString = textframe:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 
     self:applyGroupSettings(frame)
 
@@ -829,10 +831,47 @@ end
 
 function HomeCheck:updateCooldownBarProgress(frame)
     local pct = frame.CDLeft / self:getSpellCooldown(frame.spellID, frame.playerName)
+    if pct == 0 then
+        if self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].invertColors then
+            if frame.bar:IsShown() then
+                frame.bar:Hide()
+            end
+        else
+            if frame.bar:IsShown() then
+                frame.bar:Hide()
+            end
+        end
+    elseif pct == 1 then
+        if not self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].invertColors then
+            if frame.bar:IsShown() then
+                frame.bar:Hide()
+            end
+        else
+
+        end
+    end
     if self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].invertColors then
-        frame.bar:SetWidth(max((self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].frameWidth - self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].iconSize) * pct, 0.01))
+        if pct == 0 then
+            if frame.bar:IsShown() then
+                frame.bar:Hide()
+            end
+        else
+            if not frame.bar:IsShown() then
+                frame.bar:Show()
+            end
+            frame.bar:SetWidth((self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].frameWidth - self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].iconSize) * pct)
+        end
     else
-        frame.bar:SetWidth(max((self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].frameWidth - self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].iconSize) * (1 - pct), 0.01))
+        if pct == 1 then
+            if frame.bar:IsShown() then
+                frame.bar:Hide()
+            end
+        else
+            if not frame.bar:IsShown() then
+                frame.bar:Show()
+            end
+            frame.bar:SetWidth((self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].frameWidth - self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].iconSize) * (1 - pct))
+        end
     end
 end
 
