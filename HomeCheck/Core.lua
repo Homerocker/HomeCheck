@@ -434,20 +434,17 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
     frame.inactiveBar = CreateFrame("Frame", nil, frame)
     frame.inactiveBar.texture = frame.inactiveBar:CreateTexture(nil, "BACKGROUND")
     frame.inactiveBar.texture:SetAllPoints()
-    frame.inactiveBar:SetPoint("TOPLEFT", frame.bar, "TOPRIGHT")
-    frame.inactiveBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
+    frame.inactiveBar:SetPoint("BOTTOMRIGHT")
 
-    local textframe = CreateFrame("Frame", nil, frame)
-
-    frame.playerNameFontString = textframe:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.playerNameFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.playerNameFontString:SetText(frame.playerName)
     frame.playerNameFontString:SetTextColor(1, 1, 1, 1)
 
-    frame.targetFontString = textframe:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.targetFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.targetFontString:SetPoint("LEFT", frame.playerNameFontString, "RIGHT", 1, 0)
     frame.targetFontString:SetJustifyH("LEFT")
 
-    frame.timerFontString = textframe:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.timerFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 
     self:applyGroupSettings(frame)
 
@@ -832,26 +829,26 @@ end
 function HomeCheck:updateCooldownBarProgress(frame)
     local pct = min(frame.CDLeft / self:getSpellCooldown(frame.spellID, frame.playerName), 1)
     if self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].invertColors then
-        if pct == 0 then
-            if frame.bar:IsShown() then
-                frame.bar:Hide()
-            end
-        else
-            if not frame.bar:IsShown() then
-                frame.bar:Show()
+        if pct ~= 0 then
+            if not frame.bar.texture:IsShown() then
+                frame.bar.texture:Show()
+                frame.inactiveBar:SetPoint("TOPLEFT", frame.bar, "TOPRIGHT")
             end
             frame.bar:SetWidth((self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].frameWidth - self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].iconSize) * pct)
+        elseif frame.bar.texture:IsShown() then
+            frame.bar.texture:Hide()
+            frame.inactiveBar:SetPoint("TOPLEFT", frame.iconFrame, "TOPRIGHT")
         end
     else
-        if pct == 1 then
-            if frame.bar:IsShown() then
-                frame.bar:Hide()
-            end
-        else
-            if not frame.bar:IsShown() then
-                frame.bar:Show()
+        if pct ~= 1 then
+            if not frame.bar.texture:IsShown() then
+                frame.bar.texture:Show()
+                frame.inactiveBar:SetPoint("TOPLEFT", frame.bar, "TOPRIGHT")
             end
             frame.bar:SetWidth((self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].frameWidth - self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].iconSize) * (1 - pct))
+        elseif frame.bar.texture:IsShown() then
+            frame.bar.texture:Hide()
+            frame.inactiveBar:SetPoint("TOPLEFT", frame.iconFrame, "TOPRIGHT")
         end
     end
 end
