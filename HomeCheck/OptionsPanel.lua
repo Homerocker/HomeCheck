@@ -200,6 +200,28 @@ function HomeCheck:OptionsPanel()
                                 end
                             end
                         },
+                        targetJustify = {
+                            name = L["Target alignment"],
+                            type = "select",
+                            values = {
+                                l = L["Left"],
+                                r = L["Right"]
+                            },
+                            order = 11,
+                            get = function()
+                                return self.db.global[i].targetJustify
+                            end,
+                            set = function(_, val)
+                                self.db.global[i].targetJustify = val
+                                for j = 1, #self.groups do
+                                    if j == i or self.db.global[j].inherit == i then
+                                        for k = 1, #self.groups[j].CooldownFrames do
+                                            self.groups[j].CooldownFrames[k].targetFontString:SetJustifyH(val == "l" and "LEFT" or "RIGHT")
+                                        end
+                                    end
+                                end
+                            end
+                        },
                         timerPosition = {
                             name = L["Timer position"],
                             type = "select",
@@ -207,7 +229,7 @@ function HomeCheck:OptionsPanel()
                                 l = L["Left"],
                                 r = L["Right"]
                             },
-                            order = 11,
+                            order = 12,
                             get = function()
                                 return self.db.global[i].timerPosition
                             end,

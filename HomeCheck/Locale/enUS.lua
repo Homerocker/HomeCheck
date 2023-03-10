@@ -39,3 +39,4 @@ L["Dim out"] = true
 L["Dim out cooldown bars of spells that are out of range"] = true
 L["Ungroup"] = true
 L["Ignore priority and move out of range spells to the bottom of the list"] = true
+L["Target alignment"] = true

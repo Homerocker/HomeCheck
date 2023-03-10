@@ -442,7 +442,6 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
 
     frame.targetFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.targetFontString:SetPoint("LEFT", frame.playerNameFontString, "RIGHT", 1, 0)
-    frame.targetFontString:SetJustifyH("LEFT")
 
     frame.timerFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 
@@ -797,11 +796,13 @@ function HomeCheck:applyGroupSettings(frame, groupIndex)
     frame.iconFrame:SetSize(self.db.global[groupIndex].iconSize, self.db.global[groupIndex].iconSize)
     frame.playerNameFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.global[groupIndex].fontPlayer), self.db.global[groupIndex].fontSize)
     frame.targetFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.global[groupIndex].fontTarget), self.db.global[groupIndex].fontSizeTarget)
+    frame.targetFontString:SetJustifyH(self.db.global[groupIndex].targetJustify == "l" and "LEFT" or "RIGHT")
     frame.bar:SetSize(self.db.global[groupIndex].frameWidth - self.db.global[groupIndex].iconSize, self.db.global[groupIndex].iconSize)
     frame.bar.texture:SetTexture(self.LibSharedMedia:Fetch("statusbar", self.db.global[groupIndex].statusbar))
     frame.inactiveBar.texture:SetTexture(self.LibSharedMedia:Fetch("statusbar", self.db.global[groupIndex].statusbar))
     frame.inactiveBar.texture:SetVertexColor(unpack(self.db.global[groupIndex].background))
     frame.timerFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.global[groupIndex].fontTimer), self.db.global[groupIndex].fontSizeTimer)
+
     self:setTimerPosition(frame)
 end
 
