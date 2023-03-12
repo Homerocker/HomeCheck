@@ -82,6 +82,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
         end
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+        --[[
         local Unit, SpellName = ...
         if UnitInRaid(Unit) or UnitInParty(Unit) then
             local spellID = self.localizedSpellNames[SpellName]
@@ -93,6 +94,19 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
 
             self:setCooldown(spellID, Unit, true)
+        end
+        ]]--
+    elseif event == "UNIT_SPELLCAST_SENT" then
+        local Unit, SpellName, _, target = ...
+        if UnitInRaid(Unit) or UnitInParty(Unit) then
+            local spellID = self.localizedSpellNames[SpellName]
+
+            Unit = UnitName(Unit)
+
+            if self.spells[spellID] and self:getCDLeft(Unit, spellID) == 0 then
+                self:SendCommMessage("HomeCheck", self:Serialize(spellID, Unit, target), "RAID")
+                self:setCooldown(spellID, Unit, true, target)
+            end
         end
     elseif event == "RAID_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then
         self:removePlayersNotInRaid()
@@ -144,6 +158,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         self:UnregisterEvent("ADDON_LOADED")
         self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         --self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+        self:RegisterEvent("UNIT_SPELLCAST_SENT")
         self:RegisterEvent("RAID_ROSTER_UPDATE")
         self:RegisterEvent("PARTY_MEMBERS_CHANGED")
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
