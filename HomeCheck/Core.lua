@@ -11,6 +11,7 @@ LibStub("AceSerializer-3.0"):Embed(HomeCheck)
 HomeCheck.groups = {}
 HomeCheck.localizedSpellNames = {}
 HomeCheck.deadUnits = {}
+HomeCheck.RebirthTargets = {}
 HomeCheck.db_ver = 1
 
 HomeCheck.comms = {
@@ -81,31 +82,39 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 self.deadUnits[playerName] = true
             end
         end
+
+        -- UNIT_SPELLCAST events are used to detect double Rebirth only
+    elseif event == "UNIT_SPELLCAST_SENT" then
+        local unit, spellName, _, targetName = ...
+        local spellID = self.localizedSpellNames[spellName]
+        if spellID == 48477 then
+            self.RebirthTargets[(UnitName(unit))] = targetName
+        end
+    elseif event == "UNIT_SPELLCAST_FAILED" then
+        local unit, spellName = ...
+        local spellID = self.localizedSpellNames[spellName]
+        if spellID == 48477 then
+            self.RebirthTargets[(UnitName(unit))] = nil
+        end
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        --[[
-        local Unit, SpellName = ...
-        if UnitInRaid(Unit) or UnitInParty(Unit) then
-            local spellID = self.localizedSpellNames[SpellName]
+        local unit, spellName = ...
+        local spellID = self.localizedSpellNames[spellName]
 
-            Unit = UnitName(Unit)
+        if spellID == 48477 then
+            local playerName = UnitName(unit)
+            local targetName
 
-            if self.spells[spellID] then
-                self:SendCommMessage("HomeCheck", self:Serialize(spellID, Unit), "RAID")
+            if self.RebirthTargets[playerName] then
+                targetName = self.RebirthTargets[playerName]
+                self.RebirthTargets[playerName] = nil
             end
 
-            self:setCooldown(spellID, Unit, true)
-        end
-        ]]--
-    elseif event == "UNIT_SPELLCAST_SENT" then
-        local Unit, SpellName, _, target = ...
-        if UnitInRaid(Unit) or UnitInParty(Unit) then
-            local spellID = self.localizedSpellNames[SpellName]
+            if self.spells[spellID] then
+                self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, targetName), "RAID")
+            end
 
-            Unit = UnitName(Unit)
-
-            if self.spells[spellID] and self:getCDLeft(Unit, spellID) == 0 then
-                self:SendCommMessage("HomeCheck", self:Serialize(spellID, Unit, target), "RAID")
-                self:setCooldown(spellID, Unit, true, target)
+            if self:getCDLeft(playerName, spellID) == 0 then
+                self:setCooldown(spellID, playerName, true, targetName)
             end
         end
     elseif event == "RAID_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then
@@ -157,8 +166,9 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
 
         self:UnregisterEvent("ADDON_LOADED")
         self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-        --self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
         self:RegisterEvent("UNIT_SPELLCAST_SENT")
+        self:RegisterEvent("UNIT_SPELLCAST_FAILED")
+        self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
         self:RegisterEvent("RAID_ROSTER_UPDATE")
         self:RegisterEvent("PARTY_MEMBERS_CHANGED")
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
