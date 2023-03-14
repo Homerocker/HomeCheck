@@ -18,6 +18,7 @@
 - Correct Misdirection and Tricks of Trade cooldown duration (can be more than 30 sec)
 - Track Guardian Spirit proc
 - Track Readiness
+- correctly display double Rebirth
 - etc.
 
 # Settings
