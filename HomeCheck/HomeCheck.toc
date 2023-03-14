@@ -1,6 +1,5 @@
 ## Interface: 30300
 ## Title: HomeCheck
-## Title-ruRU: Хомчек
 ## Notes: Tracks specific cooldowns of players in a raid/party
 ## Notes-ruRU: Отслеживает кулдауны игроков в группе/рейде
 ## Version: 1.0.5
