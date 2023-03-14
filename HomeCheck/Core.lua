@@ -143,8 +143,6 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         end
         self.db = LibStub("AceDB-3.0"):New("HomeCheck_DB", self.defaults, true)
 
-        self.db.global.db_ver = self.db.global.db_ver or self.db_ver
-
         if self.db.global.db_ver ~= self.db_ver then
             self.db:ResetProfile()
             self.db.global.db_ver = self.db_ver
