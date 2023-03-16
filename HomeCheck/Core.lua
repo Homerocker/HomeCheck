@@ -335,7 +335,13 @@ function HomeCheck:OnCommReceived(...)
         return
     end
 
-    CDLeft = CDLeft and tonumber(CDLeft) or true
+    CDLeft = CDLeft and tonumber(CDLeft)
+
+    if not CDLeft then
+        CDLeft = true
+    elseif CDLeft <= 0 and not self.db.global.spells[spellID].alwaysShow then
+        return
+    end
 
     if target then
         if target == "" then
