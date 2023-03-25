@@ -93,14 +93,14 @@ HomeCheck.spells = {
     -- Aura Mastery
     [31821] = {
         cd = 120,
-        class = "Paladin",
+        class = "PALADIN",
         talentTab = 1,
         talentIndex = 6
     },
     -- Fear Ward
     [6346] = {
         cd = 180,
-        class = "Priest"
+        class = "PRIEST"
     },
     -- Hymn of Hope
     [64901] = {
@@ -171,7 +171,7 @@ HomeCheck.spells = {
     -- Hand of Salvation
     [1038] = {
         cd = 120,
-        class = "Paladin"
+        class = "PALADIN"
     },
     -- Ardent Defender
     [66233] = {
