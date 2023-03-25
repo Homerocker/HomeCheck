@@ -548,16 +548,18 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
     if not class then
         class = select(2, UnitClass(playerName))
     end
+
+
     for spellID, spellConfig in pairs(self.spells) do
         if not spellConfig.class or spellConfig.class == class then
-            if self.db.global.spells[spellID] and self.db.global.spells[spellID].enable and self.db.global.spells[spellID].alwaysShow then
-                if not spellConfig.talentTab or not spellConfig.talentIndex or self:UnitHasAbility(playerName, spellID) then
+            if self.db.global.spells[spellID] and self.db.global.spells[spellID].enable and (not spellConfig.talentTab or not spellConfig.talentIndex or self:UnitHasAbility(playerName, spellID)) then
+                if self.db.global.spells[spellID].alwaysShow then
                     self:setCooldown(spellID, playerName)
                 else
-                    self:removeCooldownFrames(playerName, spellID)
+                    self:removeCooldownFrames(playerName, spellID, true)
                 end
             else
-                self:removeCooldownFrames(playerName, spellID, true)
+                self:removeCooldownFrames(playerName, spellID)
             end
         end
     end
