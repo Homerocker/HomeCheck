@@ -274,11 +274,19 @@ function HomeCheck:OnCommReceived(...)
         return
     end
 
-    spellID = tonumber(spellID)
-
     playerName = playerName and tostring(playerName) or sender
 
     if not UnitInRaid(playerName) and not UnitInParty(playerName) then
+        return
+    end
+
+    spellID = tonumber(spellID)
+
+    CDLeft = CDLeft and tonumber(CDLeft)
+
+    if not CDLeft then
+        CDLeft = true
+    elseif CDLeft <= 0 and not self.db.global.spells[spellID].alwaysShow then
         return
     end
 
@@ -331,15 +339,11 @@ function HomeCheck:OnCommReceived(...)
         return
     end
 
-    if self:getCDLeft(playerName, spellID) ~= 0 then
+    if prefix == "RCD2" and CDLeft == 0 and not self:UnitHasAbility(playerName, spellID) then
         return
     end
 
-    CDLeft = CDLeft and tonumber(CDLeft)
-
-    if not CDLeft then
-        CDLeft = true
-    elseif CDLeft <= 0 and not self.db.global.spells[spellID].alwaysShow then
+    if self:getCDLeft(playerName, spellID) ~= 0 then
         return
     end
 
@@ -549,10 +553,9 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
         class = select(2, UnitClass(playerName))
     end
 
-
     for spellID, spellConfig in pairs(self.spells) do
         if not spellConfig.class or spellConfig.class == class then
-            if self.db.global.spells[spellID] and self.db.global.spells[spellID].enable and (not spellConfig.talentTab or not spellConfig.talentIndex or self:UnitHasAbility(playerName, spellID)) then
+            if self.db.global.spells[spellID] and self.db.global.spells[spellID].enable and self:UnitHasAbility(playerName, spellID) then
                 if self.db.global.spells[spellID].alwaysShow then
                     self:setCooldown(spellID, playerName)
                 else
@@ -566,7 +569,7 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
 end
 
 function HomeCheck:UnitHasAbility(playerName, spellID)
-    return self.LibGroupTalents:UnitHasTalent(playerName, (GetSpellInfo(spellID)))
+    return not self.spells[spellID].talentTab or not self.spells[spellID].talentIndex or self.LibGroupTalents:UnitHasTalent(playerName, (GetSpellInfo(spellID)))
 end
 
 function HomeCheck:saveFramePosition(groupIndex)
@@ -591,7 +594,6 @@ function HomeCheck:Readiness(hunterName)
 end
 
 function HomeCheck:sortFrames(groupIndex)
-    --self:cooldownSorter()
     if not groupIndex then
         for i = 1, #self.groups do
             self:sortFrames(i)
