@@ -40,3 +40,7 @@ L["Dim out cooldown bars of spells that are out of range"] = "Затемнять
 L["Ungroup"] = "Разгруппировать"
 L["Ignore priority and move out of range spells to the bottom of the list"] = "Игнорировать приоритет и перемещать заклинание не в рендже в самый низ списка"
 L["Target alignment"] = "Выравнивание цели"
+L["Profiles"] = "Профили"
+L["Account"] = "Аккаунт"
+L["Save"] = "Сохранить"
+L["Load"] = "Загрузить"

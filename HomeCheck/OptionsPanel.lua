@@ -31,6 +31,59 @@ local myOptionsTable = {
             args = {},
             order = 2
         },
+        profiles = {
+            name = L["Profiles"],
+            type = "group",
+            args = {
+                account = {
+                    name = L["Account"],
+                    type = "select",
+                    values = {}
+                },
+                account_save = {
+                    name = L["Save"],
+                    type = "execute",
+                    func = function()  end
+                },
+                account_load = {
+                    name = L["Load"],
+                    type = "execute",
+                    func = function()  end
+                },
+                character = {
+                    name = UnitName("player"),
+                    type = "select",
+                    values = {}
+                },
+                character_save = {
+                    name = L["Save"],
+                    type = "execute",
+                    func = function()  end
+                },
+                character_load = {
+                    name = L["Load"],
+                    type = "execute",
+                    func = function()  end
+                },
+                spec = {
+                    name = CLASS .. " - " .. SPEC,
+                    type = "select",
+                    values = {}
+                },
+                spec_save = {
+                    name = L["Save"],
+                    type = "execute",
+                    func = function()  end
+                },
+                spec_load = {
+                    name = L["Load"],
+                    type = "execute",
+                    func = function()  end
+                },
+            },
+            order = 3
+        },
+        profiles_test = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db),
         comms = {
             name = L["Comms"],
             type = "group",
