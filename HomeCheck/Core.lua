@@ -12,7 +12,7 @@ HomeCheck.groups = {}
 HomeCheck.localizedSpellNames = {}
 HomeCheck.deadUnits = {}
 HomeCheck.RebirthTargets = {}
-HomeCheck.db_ver = 1
+HomeCheck.db_ver = 2
 
 HomeCheck.comms = {
     oRA = "oRA",
@@ -74,7 +74,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
 
             self:setCooldown(spellID, playerName, true, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil)
-        elseif combatEvent == "SPELL_HEAL" and spellID == 48153 and self.db.global.spells[47788] then
+        elseif combatEvent == "SPELL_HEAL" and spellID == 48153 and self.db.profile.spells[47788] then
             -- Guardian Spirit proced
             self:GSTriggered(playerName)
         elseif combatEvent == "UNIT_DIED" then
@@ -144,7 +144,18 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         self.db = LibStub("AceDB-3.0"):New("HomeCheck_DB", self.defaults, true)
 
         if self.db.global.db_ver ~= self.db_ver then
-            self.db:ResetProfile()
+            if self.db.global.db_ver == 1 and self.db_ver == 2 then
+                -- upgrading db
+                for k, _ in pairs(self.db.global) do
+                    if k ~= "db_ver" and k ~= "CDs" and k ~= "comms" then
+                        self.db.profile[k] = self.db.global[k]
+                        self.db.global[k] = nilo
+                    end
+                end
+            else
+                -- unknown db version, resetting db to defaults
+                self.db:ResetProfile()
+            end
             self.db.global.db_ver = self.db_ver
         end
 
@@ -159,6 +170,10 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         for i = 1, groups do
             self:getGroup(i)
         end
+
+        self.db.RegisterCallback(self, "OnProfileChanged", "loadProfile")
+        self.db.RegisterCallback(self, "OnProfileCopied", "loadProfile")
+        self.db.RegisterCallback(self, "OnProfileReset", "loadProfile")
 
         self:OptionsPanel()
 
@@ -258,7 +273,7 @@ function HomeCheck:OnCommReceived(...)
                 end
             end
 
-            if spellID and self.db.global.spells[spellID].enable and self:getCDLeft(playerName, spellID) == 0 then
+            if spellID and self.db.profile.spells[spellID].enable and self:getCDLeft(playerName, spellID) == 0 then
                 self:setCooldown(spellID, playerName, CDLeft)
             end
         end
@@ -286,7 +301,7 @@ function HomeCheck:OnCommReceived(...)
 
     if not CDLeft then
         CDLeft = true
-    elseif CDLeft <= 0 and not self.db.global.spells[spellID].alwaysShow then
+    elseif CDLeft <= 0 and not self.db.profile.spells[spellID].alwaysShow then
         return
     end
 
@@ -314,13 +329,13 @@ function HomeCheck:OnCommReceived(...)
         return
     elseif spellID == 34477 then
         -- Misdirection initial cast
-        if self.db.global.spells[35079].enable and self:getCDLeft(playerName, 35079) == 0 then
+        if self.db.profile.spells[35079].enable and self:getCDLeft(playerName, 35079) == 0 then
             self:setCooldown(35079, playerName, 60, target)
         end
         return
     elseif spellID == 57934 then
         -- Tricks of the Trade initial cast
-        if self.db.global.spells[59628].enable and self:getCDLeft(playerName, 59628) == 0 then
+        if self.db.profile.spells[59628].enable and self:getCDLeft(playerName, 59628) == 0 then
             self:setCooldown(59628, playerName, 60, target)
         end
         return
@@ -335,7 +350,7 @@ function HomeCheck:OnCommReceived(...)
         end
     end
 
-    if not self.spells[spellID] or not self.db.global.spells[spellID].enable then
+    if not self.spells[spellID] or not self.db.profile.spells[spellID].enable then
         return
     end
 
@@ -359,7 +374,7 @@ function HomeCheck:OnCommReceived(...)
 end
 
 function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
-    if not spellID or not self.spells[spellID] or not self.db.global.spells[spellID].enable then
+    if not spellID or not self.spells[spellID] or not self.db.profile.spells[spellID].enable then
         return
     end
 
@@ -383,7 +398,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
         frame.CDLeft = CDLeft
     end
 
-    self:sortFrames(self.db.global.spells[spellID].group)
+    self:sortFrames(self.db.profile.spells[spellID].group)
 
     self:updateCooldownBarProgress(frame)
 
@@ -403,9 +418,9 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
                 if frame.CDLeft <= 0 then
                     self:CancelTimer(frame.CDtimer)
                     frame.CDtimer = nil
-                    if not self.db.global.spells[spellID].alwaysShow then
+                    if not self.db.profile.spells[spellID].alwaysShow then
                         self:removeCooldownFrames(playerName, spellID)
-                        self:repositionFrames(self.db.global.spells[spellID].group)
+                        self:repositionFrames(self.db.profile.spells[spellID].group)
                     else
                         frame.timerFontString:SetText("R")
                         self:setTimerColor(frame)
@@ -434,7 +449,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
 end
 
 function HomeCheck:createCooldownFrame(playerName, spellID)
-    local group = self:getGroup(self.db.global.spells[spellID].group)
+    local group = self:getGroup(self.db.profile.spells[spellID].group)
     for i = 1, #group.CooldownFrames do
         if group.CooldownFrames[i].playerName == playerName and group.CooldownFrames[i].spellID == spellID then
             return group.CooldownFrames[i]
@@ -492,13 +507,21 @@ function HomeCheck:repositionFrames(groupIndex)
         return
     end
     for j = 1, #self.groups[groupIndex].CooldownFrames do
-        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -(self.db.global[self.db.global[groupIndex].inherit or groupIndex].iconSize + self.db.global[self.db.global[groupIndex].inherit or groupIndex].padding) * (j - 1))
+        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -(self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].iconSize + self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].padding) * (j - 1))
     end
+end
+
+function HomeCheck:loadProfile()
+    for i = 1, #self.groups do
+        self.groups[i]:ClearAllPoints()
+        self.groups[i]:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
+    end
+    self:scanRaid()
 end
 
 function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, startGroup, startIndex)
     if spellID then
-        startGroup = self.db.global.spells[spellID].group
+        startGroup = self.db.profile.spells[spellID].group
     end
     for i = startGroup or 1, #self.groups do
         for j = startIndex or 1, #self.groups[i].CooldownFrames do
@@ -555,8 +578,8 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
 
     for spellID, spellConfig in pairs(self.spells) do
         if not spellConfig.class or spellConfig.class == class then
-            if self.db.global.spells[spellID] and self.db.global.spells[spellID].enable and self:UnitHasAbility(playerName, spellID) then
-                if self.db.global.spells[spellID].alwaysShow then
+            if self.db.profile.spells[spellID] and self.db.profile.spells[spellID].enable and self:UnitHasAbility(playerName, spellID) then
+                if self.db.profile.spells[spellID].alwaysShow then
                     self:setCooldown(spellID, playerName)
                 else
                     self:removeCooldownFrames(playerName, spellID, true)
@@ -574,7 +597,7 @@ end
 
 function HomeCheck:saveFramePosition(groupIndex)
     local point, relativeTo, relativePoint, xOfs, yOfs = self.groups[groupIndex]:GetPoint(0)
-    self.db.global[groupIndex].pos = {
+    self.db.profile[groupIndex].pos = {
         point = point,
         relativeTo = relativeTo and relativeTo:GetName(),
         relativePoint = relativePoint,
@@ -616,26 +639,26 @@ end
 ---@param frame2 table cooldown frame to compare against
 ---@return boolean true if frame1 should be below frame2
 function HomeCheck:cooldownSorter(frame1, frame2)
-    local groupIndex = self.db.global.spells[frame1.spellID].group
+    local groupIndex = self.db.profile.spells[frame1.spellID].group
     if frame1.inRange < frame2.inRange then
-        if self.db.global[self.db.global[groupIndex].inherit or groupIndex].rangeUngroup then
+        if self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeUngroup then
             return true
-        elseif frame1.spellID == frame2.spellID and self.db.global[self.db.global[groupIndex].inherit or groupIndex].rangeDimout then
+        elseif frame1.spellID == frame2.spellID and self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeDimout then
             return true
         end
     elseif frame1.inRange > frame2.inRange then
-        if self.db.global[self.db.global[groupIndex].inherit or groupIndex].rangeUngroup or frame1.spellID == frame2.spellID then
+        if self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeUngroup or frame1.spellID == frame2.spellID then
             return
         end
     end
 
-    if self.db.global.spells[frame1.spellID].priority < self.db.global.spells[frame2.spellID].priority then
+    if self.db.profile.spells[frame1.spellID].priority < self.db.profile.spells[frame2.spellID].priority then
         return true
     elseif frame1.spellID == frame2.spellID then
         if frame1.CDLeft > frame2.CDLeft then
             return true
         end
-    elseif self.db.global.spells[frame1.spellID].priority == self.db.global.spells[frame2.spellID].priority and frame1.spellID < frame2.spellID then
+    elseif self.db.profile.spells[frame1.spellID].priority == self.db.profile.spells[frame2.spellID].priority and frame1.spellID < frame2.spellID then
         -- attempt to group spells by ID
         return true
     end
@@ -650,11 +673,11 @@ function HomeCheck:groupSpells()
 end
 
 function HomeCheck:GSTriggered(playerName)
-    for i = 1, #self.groups[self.db.global.spells[47788].group].CooldownFrames do
-        if self.groups[self.db.global.spells[47788].group].CooldownFrames[i].playerName == playerName and self.groups[self.db.global.spells[47788].group].CooldownFrames[i].spellID == 47788 then
-            if self.groups[self.db.global.spells[47788].group].CooldownFrames[i].CDLeft <= self.spells[47788].cd then
-                self.groups[self.db.global.spells[47788].group].CooldownFrames[i].CDLeft = self.groups[self.db.global.spells[47788].group].CooldownFrames[i].CDLeft + 110
-                self:sortFrames(self.db.global.spells[47788].group)
+    for i = 1, #self.groups[self.db.profile.spells[47788].group].CooldownFrames do
+        if self.groups[self.db.profile.spells[47788].group].CooldownFrames[i].playerName == playerName and self.groups[self.db.profile.spells[47788].group].CooldownFrames[i].spellID == 47788 then
+            if self.groups[self.db.profile.spells[47788].group].CooldownFrames[i].CDLeft <= self.spells[47788].cd then
+                self.groups[self.db.profile.spells[47788].group].CooldownFrames[i].CDLeft = self.groups[self.db.profile.spells[47788].group].CooldownFrames[i].CDLeft + 110
+                self:sortFrames(self.db.profile.spells[47788].group)
             end
             return
         end
@@ -673,7 +696,7 @@ function HomeCheck:getGroup(i)
     frame:SetClampedToScreen(true)
     frame:RegisterForDrag("LeftButton")
     frame:ClearAllPoints()
-    frame:SetPoint(self.db.global[i].pos.point, self.db.global[i].pos.relativeTo, self.db.global[i].pos.relativePoint, self.db.global[i].pos.xOfs, self.db.global[i].pos.yOfs)
+    frame:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
     frame:SetSize(20, 20)
     frame:SetScript("OnDragStart", function(s)
         s:StartMoving()
@@ -689,10 +712,10 @@ function HomeCheck:getGroup(i)
 end
 
 function HomeCheck:getCDLeft(playerName, spellID)
-    for i = 1, #self.groups[self.db.global.spells[spellID].group].CooldownFrames do
-        if playerName == self.groups[self.db.global.spells[spellID].group].CooldownFrames[i].playerName
-                and spellID == self.groups[self.db.global.spells[spellID].group].CooldownFrames[i].spellID then
-            return self.groups[self.db.global.spells[spellID].group].CooldownFrames[i].CDLeft
+    for i = 1, #self.groups[self.db.profile.spells[spellID].group].CooldownFrames do
+        if playerName == self.groups[self.db.profile.spells[spellID].group].CooldownFrames[i].playerName
+                and spellID == self.groups[self.db.profile.spells[spellID].group].CooldownFrames[i].spellID then
+            return self.groups[self.db.profile.spells[spellID].group].CooldownFrames[i].CDLeft
         end
     end
     return 0
@@ -706,14 +729,14 @@ function HomeCheck:updateRange(frame)
     elseif frame.inRange == 1 then
         if not self:UnitInRange(frame.playerName) then
             frame.inRange = 0
-            if self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].rangeDimout then
+            if self.db.profile[self.db.profile[self.db.profile.spells[frame.spellID].group].inherit or self.db.profile.spells[frame.spellID].group].rangeDimout then
                 self:setBarColor(frame)
             end
             self:sortFrames()
         end
     elseif self:UnitInRange(frame.playerName) then
         frame.inRange = 1
-        if self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].rangeDimout then
+        if self.db.profile[self.db.profile[self.db.profile.spells[frame.spellID].group].inherit or self.db.profile.spells[frame.spellID].group].rangeDimout then
             self:setBarColor(frame)
         end
         self:sortFrames()
@@ -722,11 +745,11 @@ end
 
 ---@param frame table
 function HomeCheck:setBarColor(frame)
-    if frame.inRange == 1 or not self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].rangeDimout then
+    if frame.inRange == 1 or not self.db.profile[self.db.profile[self.db.profile.spells[frame.spellID].group].inherit or self.db.profile.spells[frame.spellID].group].rangeDimout then
         local playerClassColor = RAID_CLASS_COLORS[frame.class]
-        frame.bar.texture:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self.db.global[self.db.global.spells[frame.spellID].group].opacity)
+        frame.bar.texture:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self.db.profile[self.db.profile.spells[frame.spellID].group].opacity)
     else
-        frame.bar.texture:SetVertexColor(0.5, 0.5, 0.5, self.db.global[self.db.global.spells[frame.spellID].group].opacity)
+        frame.bar.texture:SetVertexColor(0.5, 0.5, 0.5, self.db.profile[self.db.profile.spells[frame.spellID].group].opacity)
     end
 end
 
@@ -734,7 +757,7 @@ function HomeCheck:setTimerColor(frame)
     if self.deadUnits[frame.playerName] then
         frame.timerFontString:SetTextColor(1, 0, 0, 1)
     elseif frame.CDLeft <= 0 then
-        if self.db.global.spells[frame.spellID].alwaysShow then
+        if self.db.profile.spells[frame.spellID].alwaysShow then
             frame.timerFontString:SetTextColor(0, 1, 0, 1)
         end
     else
@@ -821,39 +844,39 @@ function HomeCheck:cacheLocalizedSpellNames()
 end
 
 function HomeCheck:applyGroupSettings(frame, groupIndex)
-    groupIndex = groupIndex or self.db.global.spells[frame.spellID].group
+    groupIndex = groupIndex or self.db.profile.spells[frame.spellID].group
     frame:SetParent(self:getGroup(groupIndex))
 
-    groupIndex = self.db.global[groupIndex].inherit or groupIndex
-    frame:SetSize(self.db.global[groupIndex].frameWidth, self.db.global[groupIndex].iconSize)
-    frame.iconFrame:SetSize(self.db.global[groupIndex].iconSize, self.db.global[groupIndex].iconSize)
-    frame.playerNameFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.global[groupIndex].fontPlayer), self.db.global[groupIndex].fontSize)
-    frame.targetFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.global[groupIndex].fontTarget), self.db.global[groupIndex].fontSizeTarget)
-    frame.targetFontString:SetJustifyH(self.db.global[groupIndex].targetJustify == "l" and "LEFT" or "RIGHT")
-    frame.bar:SetSize(self.db.global[groupIndex].frameWidth - self.db.global[groupIndex].iconSize, self.db.global[groupIndex].iconSize)
-    frame.bar.texture:SetTexture(self.LibSharedMedia:Fetch("statusbar", self.db.global[groupIndex].statusbar))
-    frame.inactiveBar.texture:SetTexture(self.LibSharedMedia:Fetch("statusbar", self.db.global[groupIndex].statusbar))
-    frame.inactiveBar.texture:SetVertexColor(unpack(self.db.global[groupIndex].background))
-    frame.timerFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.global[groupIndex].fontTimer), self.db.global[groupIndex].fontSizeTimer)
+    groupIndex = self.db.profile[groupIndex].inherit or groupIndex
+    frame:SetSize(self.db.profile[groupIndex].frameWidth, self.db.profile[groupIndex].iconSize)
+    frame.iconFrame:SetSize(self.db.profile[groupIndex].iconSize, self.db.profile[groupIndex].iconSize)
+    frame.playerNameFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontPlayer), self.db.profile[groupIndex].fontSize)
+    frame.targetFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontTarget), self.db.profile[groupIndex].fontSizeTarget)
+    frame.targetFontString:SetJustifyH(self.db.profile[groupIndex].targetJustify == "l" and "LEFT" or "RIGHT")
+    frame.bar:SetSize(self.db.profile[groupIndex].frameWidth - self.db.profile[groupIndex].iconSize, self.db.profile[groupIndex].iconSize)
+    frame.bar.texture:SetTexture(self.LibSharedMedia:Fetch("statusbar", self.db.profile[groupIndex].statusbar))
+    frame.inactiveBar.texture:SetTexture(self.LibSharedMedia:Fetch("statusbar", self.db.profile[groupIndex].statusbar))
+    frame.inactiveBar.texture:SetVertexColor(unpack(self.db.profile[groupIndex].background))
+    frame.timerFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontTimer), self.db.profile[groupIndex].fontSizeTimer)
 
     self:setTimerPosition(frame)
 end
 
 function HomeCheck:setSpellGroupIndex(spellID, groupIndex, startIndex)
-    if self.db.global.spells[spellID].group == groupIndex then
+    if self.db.profile.spells[spellID].group == groupIndex then
         return
     end
-    for i = startIndex or 1, #self.groups[self.db.global.spells[spellID].group].CooldownFrames do
-        if spellID == self.groups[self.db.global.spells[spellID].group].CooldownFrames[i].spellID then
-            local frame = table.remove(self.groups[self.db.global.spells[spellID].group].CooldownFrames, i)
+    for i = startIndex or 1, #self.groups[self.db.profile.spells[spellID].group].CooldownFrames do
+        if spellID == self.groups[self.db.profile.spells[spellID].group].CooldownFrames[i].spellID then
+            local frame = table.remove(self.groups[self.db.profile.spells[spellID].group].CooldownFrames, i)
             self:applyGroupSettings(frame, groupIndex)
             table.insert(self.groups[groupIndex].CooldownFrames, frame)
             return self:setSpellGroupIndex(spellID, groupIndex, i)
         end
     end
-    self:sortFrames(self.db.global.spells[spellID].group)
+    self:sortFrames(self.db.profile.spells[spellID].group)
     self:sortFrames(groupIndex)
-    self.db.global.spells[spellID].group = groupIndex
+    self.db.profile.spells[spellID].group = groupIndex
 end
 
 function HomeCheck:UnitInRange(unit)
@@ -862,13 +885,13 @@ end
 
 function HomeCheck:updateCooldownBarProgress(frame)
     local pct = min(frame.CDLeft / self:getSpellCooldown(frame.spellID, frame.playerName), 1)
-    if self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].invertColors then
+    if self.db.profile[self.db.profile[self.db.profile.spells[frame.spellID].group].inherit or self.db.profile.spells[frame.spellID].group].invertColors then
         if pct ~= 0 then
             if not frame.bar.texture:IsShown() then
                 frame.bar.texture:Show()
                 frame.inactiveBar:SetPoint("TOPLEFT", frame.bar, "TOPRIGHT")
             end
-            frame.bar:SetWidth((self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].frameWidth - self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].iconSize) * pct)
+            frame.bar:SetWidth((self.db.profile[self.db.profile[self.db.profile.spells[frame.spellID].group].inherit or self.db.profile.spells[frame.spellID].group].frameWidth - self.db.profile[self.db.profile[self.db.profile.spells[frame.spellID].group].inherit or self.db.profile.spells[frame.spellID].group].iconSize) * pct)
         elseif frame.bar.texture:IsShown() then
             frame.bar.texture:Hide()
             frame.inactiveBar:SetPoint("TOPLEFT", frame.iconFrame, "TOPRIGHT")
@@ -879,7 +902,7 @@ function HomeCheck:updateCooldownBarProgress(frame)
                 frame.bar.texture:Show()
                 frame.inactiveBar:SetPoint("TOPLEFT", frame.bar, "TOPRIGHT")
             end
-            frame.bar:SetWidth((self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].frameWidth - self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].iconSize) * (1 - pct))
+            frame.bar:SetWidth((self.db.profile[self.db.profile[self.db.profile.spells[frame.spellID].group].inherit or self.db.profile.spells[frame.spellID].group].frameWidth - self.db.profile[self.db.profile[self.db.profile.spells[frame.spellID].group].inherit or self.db.profile.spells[frame.spellID].group].iconSize) * (1 - pct))
         elseif frame.bar.texture:IsShown() then
             frame.bar.texture:Hide()
             frame.inactiveBar:SetPoint("TOPLEFT", frame.iconFrame, "TOPRIGHT")
@@ -888,7 +911,7 @@ function HomeCheck:updateCooldownBarProgress(frame)
 end
 
 function HomeCheck:setTimerPosition(frame)
-    if self.db.global[self.db.global[self.db.global.spells[frame.spellID].group].inherit or self.db.global.spells[frame.spellID].group].timerPosition == "l" then
+    if self.db.profile[self.db.profile[self.db.profile.spells[frame.spellID].group].inherit or self.db.profile.spells[frame.spellID].group].timerPosition == "l" then
         frame.timerFontString:ClearAllPoints()
         frame.timerFontString:SetPoint("LEFT", frame.iconFrame, "RIGHT", 1, 0)
         frame.playerNameFontString:SetPoint("LEFT", frame.timerFontString, "RIGHT", 2, 0)

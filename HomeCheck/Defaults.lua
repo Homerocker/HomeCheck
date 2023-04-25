@@ -1,5 +1,22 @@
 HomeCheck.defaults = {
     global = {
+        CDs = {
+            ['*'] = {
+                ['*'] = {}
+            }
+        },
+        comms = {
+            oRA3 = true,
+            BLT = true,
+            oRA = true,
+            CTRA = true,
+            RCD2 = true,
+            FRCD3S = true,
+            HomeCheck = true,
+            FRCD3 = true
+        }
+    },
+    profile = {
         ['*'] = {
             frameWidth = 155,
             iconSize = 14,
@@ -24,12 +41,8 @@ HomeCheck.defaults = {
             targetJustify = "r",
             inherit = 1,
             rangeDimout = true,
-            rangeUngroup = true
-        },
-        CDs = {
-            ['*'] = {
-                ['*'] = {}
-            }
+            rangeUngroup = true,
+            invertColors = false
         },
         spells = {
             -- DSac
@@ -123,16 +136,6 @@ HomeCheck.defaults = {
                 group = 2,
                 priority = 100
             }
-        },
-        comms = {
-            oRA3 = true,
-            BLT = true,
-            oRA = true,
-            CTRA = true,
-            RCD2 = true,
-            FRCD3S = true,
-            HomeCheck = true,
-            FRCD3 = true
         }
     }
 }

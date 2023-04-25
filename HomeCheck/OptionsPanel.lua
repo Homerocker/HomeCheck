@@ -2,103 +2,50 @@ local L = LibStub("AceLocale-3.0"):GetLocale("HomeCheck")
 local AceConfig = LibStub("AceConfig-3.0")
 local ipairs, max, min, pairs, tonumber = ipairs, max, min, pairs, tonumber
 
-local myOptionsTable = {
-    type = "group",
-    childGroups = "tab",
-    args = {
-        --[[
-        enable = {
-            name = "Enable",
-            desc = "Enables / disables the addon",
-            type = "toggle",
-            set = function(info, val)
-                HomeCheck.enabled = val
-            end,
-            get = function(info)
-                return HomeCheck.enabled
-            end
-        },
-        ]]--
-        frames = {
-            name = L["Frames"],
-            type = "group",
-            args = {},
-            order = 1
-        },
-        spells = {
-            name = L["Spells"],
-            type = "group",
-            args = {},
-            order = 2
-        },
-        profiles = {
-            name = L["Profiles"],
-            type = "group",
-            args = {
-                account = {
-                    name = L["Account"],
-                    type = "select",
-                    values = {}
-                },
-                account_save = {
-                    name = L["Save"],
-                    type = "execute",
-                    func = function()  end
-                },
-                account_load = {
-                    name = L["Load"],
-                    type = "execute",
-                    func = function()  end
-                },
-                character = {
-                    name = UnitName("player"),
-                    type = "select",
-                    values = {}
-                },
-                character_save = {
-                    name = L["Save"],
-                    type = "execute",
-                    func = function()  end
-                },
-                character_load = {
-                    name = L["Load"],
-                    type = "execute",
-                    func = function()  end
-                },
-                spec = {
-                    name = CLASS .. " - " .. SPEC,
-                    type = "select",
-                    values = {}
-                },
-                spec_save = {
-                    name = L["Save"],
-                    type = "execute",
-                    func = function()  end
-                },
-                spec_load = {
-                    name = L["Load"],
-                    type = "execute",
-                    func = function()  end
-                },
+function HomeCheck:OptionsPanel()
+    local myOptionsTable = {
+        type = "group",
+        childGroups = "tab",
+        args = {
+            --[[
+            enable = {
+                name = "Enable",
+                desc = "Enables / disables the addon",
+                type = "toggle",
+                set = function(info, val)
+                    HomeCheck.enabled = val
+                end,
+                get = function(info)
+                    return HomeCheck.enabled
+                end
             },
-            order = 3
-        },
-        profiles_test = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db),
-        comms = {
-            name = L["Comms"],
-            type = "group",
-            args = {
-                desc = {
-                    type = "header",
-                    name = L["Only change this if you have specific issues. Otherwise should be enabled. Requires UI reload."],
-                    order = 1
+            ]]--
+            frames = {
+                name = L["Frames"],
+                type = "group",
+                args = {},
+                order = 1
+            },
+            spells = {
+                name = L["Spells"],
+                type = "group",
+                args = {},
+                order = 2
+            },
+            profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db),
+            comms = {
+                name = L["Comms"],
+                type = "group",
+                args = {
+                    desc = {
+                        type = "header",
+                        name = L["Only change this if you have specific issues. Otherwise should be enabled. Requires UI reload."],
+                        order = 4
+                    }
                 }
             }
         }
     }
-}
-
-function HomeCheck:OptionsPanel()
     InterfaceOptionsFrame:SetWidth(max(min(1000, GetScreenWidth()), InterfaceOptionsFrame:GetWidth()))
     for i = 1, #self.groups do
         myOptionsTable.args.frames.args["frame" .. i] = {
@@ -110,7 +57,7 @@ function HomeCheck:OptionsPanel()
                 size = {
                     name = L["Size and position"],
                     type = "group",
-                    disabled = self.db.global[i].inherit and i ~= 1,
+                    disabled = self.db.profile[i].inherit and i ~= 1,
                     args = {
                         frameWidth = {
                             name = L["Frame width"],
@@ -120,12 +67,12 @@ function HomeCheck:OptionsPanel()
                             step = 1,
                             order = 1,
                             get = function()
-                                return self.db.global[i].frameWidth
+                                return self.db.profile[i].frameWidth
                             end,
                             set = function(_, val)
-                                self.db.global[i].frameWidth = val
+                                self.db.profile[i].frameWidth = val
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             self.groups[j].CooldownFrames[k]:SetWidth(val)
                                             self:updateCooldownBarProgress(self.groups[j].CooldownFrames[k])
@@ -142,13 +89,13 @@ function HomeCheck:OptionsPanel()
                             step = 1,
                             order = 3,
                             get = function()
-                                return self.db.global[i].fontSize
+                                return self.db.profile[i].fontSize
                             end,
                             set = function(_, val)
-                                self.db.global[i].fontSize = val
+                                self.db.profile[i].fontSize = val
                                 local font
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             if not font then
                                                 font = self.groups[j].CooldownFrames[k].playerNameFontString:GetFont()
@@ -167,13 +114,13 @@ function HomeCheck:OptionsPanel()
                             step = 1,
                             order = 4,
                             get = function()
-                                return self.db.global[i].fontSizeTarget
+                                return self.db.profile[i].fontSizeTarget
                             end,
                             set = function(_, val)
-                                self.db.global[i].fontSizeTarget = val
+                                self.db.profile[i].fontSizeTarget = val
                                 local font
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             if not font then
                                                 font = self.groups[j].CooldownFrames[k].targetFontString:GetFont()
@@ -192,13 +139,13 @@ function HomeCheck:OptionsPanel()
                             step = 1,
                             order = 5,
                             get = function()
-                                return self.db.global[i].fontSizeTimer
+                                return self.db.profile[i].fontSizeTimer
                             end,
                             set = function(_, val)
-                                self.db.global[i].fontSizeTimer = val
+                                self.db.profile[i].fontSizeTimer = val
                                 local font
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             if not font then
                                                 font = self.groups[j].CooldownFrames[k].timerFontString:GetFont()
@@ -217,12 +164,12 @@ function HomeCheck:OptionsPanel()
                             step = 1,
                             order = 2,
                             get = function()
-                                return self.db.global[i].iconSize
+                                return self.db.profile[i].iconSize
                             end,
                             set = function(_, val)
-                                self.db.global[i].iconSize = val
+                                self.db.profile[i].iconSize = val
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             self.groups[j].CooldownFrames[k].iconFrame:SetSize(val, val)
                                             self.groups[j].CooldownFrames[k]:SetHeight(val)
@@ -242,12 +189,12 @@ function HomeCheck:OptionsPanel()
                             step = 1,
                             order = 6,
                             get = function()
-                                return self.db.global[i].padding
+                                return self.db.profile[i].padding
                             end,
                             set = function(_, val)
-                                self.db.global[i].padding = val
+                                self.db.profile[i].padding = val
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         self:repositionFrames(j)
                                     end
                                 end
@@ -262,12 +209,12 @@ function HomeCheck:OptionsPanel()
                             },
                             order = 11,
                             get = function()
-                                return self.db.global[i].targetJustify
+                                return self.db.profile[i].targetJustify
                             end,
                             set = function(_, val)
-                                self.db.global[i].targetJustify = val
+                                self.db.profile[i].targetJustify = val
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             self.groups[j].CooldownFrames[k].targetFontString:SetJustifyH(val == "l" and "LEFT" or "RIGHT")
                                         end
@@ -284,12 +231,12 @@ function HomeCheck:OptionsPanel()
                             },
                             order = 12,
                             get = function()
-                                return self.db.global[i].timerPosition
+                                return self.db.profile[i].timerPosition
                             end,
                             set = function(_, val)
-                                self.db.global[i].timerPosition = val
+                                self.db.profile[i].timerPosition = val
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             self:setTimerPosition(self.groups[j].CooldownFrames[k])
                                         end
@@ -302,7 +249,7 @@ function HomeCheck:OptionsPanel()
                 colors = {
                     name = L["Colors"],
                     type = "group",
-                    disabled = self.db.global[i].inherit and i ~= 1,
+                    disabled = self.db.profile[i].inherit and i ~= 1,
                     args = {
                         invertColors = {
                             name = L["Invert colors"],
@@ -310,12 +257,12 @@ function HomeCheck:OptionsPanel()
                             desc = L["Makes cooldown bar transparent when spell is ready"],
                             order = 5,
                             get = function()
-                                return self.db.global[i].invertColors
+                                return self.db.profile[i].invertColors
                             end,
                             set = function(_, val)
-                                self.db.global[i].invertColors = val
+                                self.db.profile[i].invertColors = val
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             self:updateCooldownBarProgress(self.groups[j].CooldownFrames[k])
                                         end
@@ -337,15 +284,15 @@ function HomeCheck:OptionsPanel()
                             isPercent = true,
                             order = 15,
                             get = function()
-                                return tonumber((("%%.%df"):format(2)):format(1 - self.db.global[i].opacity))
+                                return tonumber((("%%.%df"):format(2)):format(1 - self.db.profile[i].opacity))
                             end,
                             set = function(_, val)
-                                self.db.global[i].opacity = tonumber((("%%.%df"):format(2)):format(1 - val))
+                                self.db.profile[i].opacity = tonumber((("%%.%df"):format(2)):format(1 - val))
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             local r, g, b = self.groups[j].CooldownFrames[k].bar.texture:GetVertexColor()
-                                            self.groups[j].CooldownFrames[k].bar.texture:SetVertexColor(r, g, b, self.db.global[i].opacity)
+                                            self.groups[j].CooldownFrames[k].bar.texture:SetVertexColor(r, g, b, self.db.profile[i].opacity)
                                         end
                                     end
                                 end
@@ -362,12 +309,12 @@ function HomeCheck:OptionsPanel()
                             hasAlpha = true,
                             order = 25,
                             get = function()
-                                return unpack(self.db.global[i].background)
+                                return unpack(self.db.profile[i].background)
                             end,
                             set = function(_, r, g, b, a)
-                                self.db.global[i].background = { r, g, b, a }
+                                self.db.profile[i].background = { r, g, b, a }
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             self.groups[j].CooldownFrames[k].inactiveBar.texture:SetVertexColor(r, g, b, a)
                                         end
@@ -380,7 +327,7 @@ function HomeCheck:OptionsPanel()
                 textures = {
                     name = L["Textures and fonts"],
                     type = "group",
-                    disabled = self.db.global[i].inherit and i ~= 1,
+                    disabled = self.db.profile[i].inherit and i ~= 1,
                     args = {
                         barTexture = {
                             name = L["Bar texture"],
@@ -389,16 +336,16 @@ function HomeCheck:OptionsPanel()
                             order = 7,
                             get = function()
                                 for key, name in ipairs(self.LibSharedMedia:List("statusbar")) do
-                                    if name == self.db.global[i].statusbar then
+                                    if name == self.db.profile[i].statusbar then
                                         return key
                                     end
                                 end
                             end,
                             set = function(_, val)
-                                self.db.global[i].statusbar = self.LibSharedMedia:List("statusbar")[val]
-                                local texture = self.LibSharedMedia:Fetch("statusbar", self.db.global[i].statusbar)
+                                self.db.profile[i].statusbar = self.LibSharedMedia:List("statusbar")[val]
+                                local texture = self.LibSharedMedia:Fetch("statusbar", self.db.profile[i].statusbar)
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             self.groups[j].CooldownFrames[k].bar.texture:SetTexture(texture)
                                             self.groups[j].CooldownFrames[k].inactiveBar.texture:SetTexture(texture)
@@ -414,17 +361,17 @@ function HomeCheck:OptionsPanel()
                             order = 8,
                             get = function()
                                 for key, name in ipairs(self.LibSharedMedia:List("font")) do
-                                    if name == self.db.global[i].fontPlayer then
+                                    if name == self.db.profile[i].fontPlayer then
                                         return key
                                     end
                                 end
                             end,
                             set = function(_, val)
-                                self.db.global[i].fontPlayer = self.LibSharedMedia:List("font")[val]
+                                self.db.profile[i].fontPlayer = self.LibSharedMedia:List("font")[val]
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
-                                            self.groups[j].CooldownFrames[k].playerNameFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.global[i].fontPlayer), self.db.global[i].fontSize)
+                                            self.groups[j].CooldownFrames[k].playerNameFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[i].fontPlayer), self.db.profile[i].fontSize)
                                         end
                                     end
                                 end
@@ -437,17 +384,17 @@ function HomeCheck:OptionsPanel()
                             order = 9,
                             get = function()
                                 for key, name in ipairs(self.LibSharedMedia:List("font")) do
-                                    if name == self.db.global[i].fontTarget then
+                                    if name == self.db.profile[i].fontTarget then
                                         return key
                                     end
                                 end
                             end,
                             set = function(_, val)
-                                self.db.global[i].fontTarget = self.LibSharedMedia:List("font")[val]
+                                self.db.profile[i].fontTarget = self.LibSharedMedia:List("font")[val]
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
-                                            self.groups[j].CooldownFrames[k].targetFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.global[i].fontTarget), self.db.global[i].fontSizeTarget)
+                                            self.groups[j].CooldownFrames[k].targetFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[i].fontTarget), self.db.profile[i].fontSizeTarget)
                                         end
                                     end
                                 end
@@ -460,17 +407,17 @@ function HomeCheck:OptionsPanel()
                             order = 10,
                             get = function()
                                 for key, name in ipairs(self.LibSharedMedia:List("font")) do
-                                    if name == self.db.global[i].fontTimer then
+                                    if name == self.db.profile[i].fontTimer then
                                         return key
                                     end
                                 end
                             end,
                             set = function(_, val)
-                                self.db.global[i].fontTimer = self.LibSharedMedia:List("font")[val]
+                                self.db.profile[i].fontTimer = self.LibSharedMedia:List("font")[val]
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
-                                            self.groups[j].CooldownFrames[k].timerFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.global[i].fontTimer), self.db.global[i].fontSizeTimer)
+                                            self.groups[j].CooldownFrames[k].timerFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[i].fontTimer), self.db.profile[i].fontSizeTimer)
                                         end
                                     end
                                 end
@@ -481,19 +428,19 @@ function HomeCheck:OptionsPanel()
                 range = {
                     name = L["Range"],
                     type = "group",
-                    disabled = self.db.global[i].inherit and i ~= 1,
+                    disabled = self.db.profile[i].inherit and i ~= 1,
                     args = {
                         dimout = {
                             name = L["Dim out"],
                             desc = L["Dim out cooldown bars of spells that are out of range"],
                             type = "toggle",
                             get = function()
-                                return self.db.global[i].rangeDimout
+                                return self.db.profile[i].rangeDimout
                             end,
                             set = function(_, val)
-                                self.db.global[i].rangeDimout = val
+                                self.db.profile[i].rangeDimout = val
                                 for j = 1, #self.groups do
-                                    if j == i or self.db.global[j].inherit == i then
+                                    if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             self:setBarColor(self.groups[j].CooldownFrames[k])
                                         end
@@ -506,10 +453,10 @@ function HomeCheck:OptionsPanel()
                             desc = L["Ignore priority and move out of range spells to the bottom of the list"],
                             type = "toggle",
                             get = function()
-                                return self.db.global[i].rangeUngroup
+                                return self.db.profile[i].rangeUngroup
                             end,
                             set = function(_, val)
-                                self.db.global[i].rangeUngroup = val
+                                self.db.profile[i].rangeUngroup = val
                                 self:sortFrames(i)
                             end
                         }
@@ -527,7 +474,7 @@ function HomeCheck:OptionsPanel()
                     if val == 0 then
                         val = nil
                     end
-                    self.db.global[i].inherit = val
+                    self.db.profile[i].inherit = val
                     for j = 1, #self.groups[i].CooldownFrames do
                         self:applyGroupSettings(self.groups[i].CooldownFrames[j])
                     end
@@ -537,7 +484,7 @@ function HomeCheck:OptionsPanel()
                     LibStub("AceConfigRegistry-3.0"):NotifyChange("HomeCheck")
                 end,
                 get = function()
-                    return self.db.global[i].inherit or 0
+                    return self.db.profile[i].inherit or 0
                 end
             }
             myOptionsTable.args.frames.args["frame" .. i].args.inheritSettings.values[0] = "disabled"
@@ -561,7 +508,7 @@ function HomeCheck:OptionsPanel()
                     type = "toggle",
                     order = 1,
                     set = function(_, val)
-                        self.db.global.spells[spellID].enable = val
+                        self.db.profile.spells[spellID].enable = val
                         if val then
                             for k, _ in pairs(myOptionsTable.args.spells.args[tostring(spellID)].args) do
                                 if k ~= "enable" then
@@ -579,7 +526,7 @@ function HomeCheck:OptionsPanel()
                         self:scanRaid()
                     end,
                     get = function(_)
-                        return self.db.global.spells[spellID].enable
+                        return self.db.profile.spells[spellID].enable
                     end
                 },
                 alwaysShow = {
@@ -587,14 +534,14 @@ function HomeCheck:OptionsPanel()
                     type = "toggle",
                     desc = L["Do not hide cooldown bar when spell is ready"],
                     order = 2,
-                    disabled = not self.db.global.spells[spellID].enable,
+                    disabled = not self.db.profile.spells[spellID].enable,
                     set = function(_, val)
-                        self.db.global.spells[spellID].alwaysShow = val
+                        self.db.profile.spells[spellID].alwaysShow = val
                         -- TODO is scan neccessary?
                         self:scanRaid()
                     end,
                     get = function(_)
-                        return self.db.global.spells[spellID].alwaysShow
+                        return self.db.profile.spells[spellID].alwaysShow
                     end
                 },
                 frame = {
@@ -604,28 +551,28 @@ function HomeCheck:OptionsPanel()
                     max = #self.groups,
                     step = 1,
                     order = 3,
-                    disabled = not self.db.global.spells[spellID].enable,
+                    disabled = not self.db.profile.spells[spellID].enable,
                     get = function()
-                        return self.db.global.spells[spellID].group
+                        return self.db.profile.spells[spellID].group
                     end,
                     set = function(_, val)
                         self:setSpellGroupIndex(spellID, val)
                     end
                 },
                 priority = {
-                    name = "Priority",
+                    name = L["Priority"],
                     type = "range",
                     min = 1,
                     max = 200,
                     step = 1,
                     order = 4,
-                    disabled = not self.db.global.spells[spellID].enable,
+                    disabled = not self.db.profile.spells[spellID].enable,
                     get = function()
-                        return self.db.global.spells[spellID].priority
+                        return self.db.profile.spells[spellID].priority
                     end,
                     set = function(_, val)
-                        self.db.global.spells[spellID].priority = val
-                        self:sortFrames(self.db.global.spells[spellID].group)
+                        self.db.profile.spells[spellID].priority = val
+                        self:sortFrames(self.db.profile.spells[spellID].group)
                     end
                 }
             }
