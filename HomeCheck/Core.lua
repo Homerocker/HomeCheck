@@ -149,7 +149,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 for k, _ in pairs(self.db.global) do
                     if k ~= "db_ver" and k ~= "CDs" and k ~= "comms" then
                         self.db.profile[k] = self.db.global[k]
-                        self.db.global[k] = nilo
+                        self.db.global[k] = nil
                     end
                 end
             else
