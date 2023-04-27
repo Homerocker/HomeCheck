@@ -146,9 +146,21 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         if self.db.global.db_ver ~= self.db_ver then
             if self.db.global.db_ver == 1 and self.db_ver == 2 then
                 -- upgrading db
+
+                local function tablecopy(t, copyto)
+                    for k, v in pairs(t) do
+                        if type(v) == "table" then
+                            copyto[k] = tablecopy(v, copyto[k])
+                        else
+                            copyto[k] = v
+                        end
+                    end
+                    return copyto
+                end
+
                 for k, v in pairs(self.db.global) do
                     if k ~= "db_ver" and k ~= "CDs" and k ~= "comms" then
-                        self.db.profile[k], self.db.global[k] = v, nil
+                        self.db.profile[k], self.db.global[k] = tablecopy(v, self.db.profile[k]), nil
                     end
                 end
             else
