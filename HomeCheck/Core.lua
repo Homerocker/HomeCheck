@@ -146,15 +146,14 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         if self.db.global.db_ver ~= self.db_ver then
             if self.db.global.db_ver == 1 and self.db_ver == 2 then
                 -- upgrading db
-                for k, _ in pairs(self.db.global) do
+                for k, v in pairs(self.db.global) do
                     if k ~= "db_ver" and k ~= "CDs" and k ~= "comms" then
-                        self.db.profile[k] = self.db.global[k]
-                        self.db.global[k] = nil
+                        self.db.profile[k], self.db.global[k] = v, nil
                     end
                 end
             else
                 -- unknown db version, resetting db to defaults
-                self.db:ResetProfile()
+                self.db:ResetDB("Default")
             end
             self.db.global.db_ver = self.db_ver
         end
