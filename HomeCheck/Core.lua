@@ -384,13 +384,18 @@ function HomeCheck:OnCommReceived(...)
     self:setCooldown(spellID, playerName, CDLeft, target)
 end
 
-function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
+function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     if not spellID or not self.spells[spellID] or not self.db.profile.spells[spellID].enable then
         return
     end
 
     if CDLeft == true then
         CDLeft = self:getSpellCooldown(spellID, playerName)
+    end
+
+    local currentCD = self:getCDLeft(playerName, spellID)
+    if currentCD ~= 0 then
+        print("overwriting " .. playerName .. " " .. (GetSpellInfo(spellID)) .. " CD " .. currentCD .. "->" .. tostring(CDLeft) .. " (" .. tostring(source) .. ")")
     end
 
     local frame = self:createCooldownFrame(playerName, spellID)
