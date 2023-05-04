@@ -57,11 +57,11 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
             if spellID == 34477 then
                 -- Misdirection initial cast
-                self:setCooldown(35079, playerName, 60, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil)
+                self:setCooldown(35079, playerName, 60, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil, combatEvent)
                 return
             elseif spellID == 57934 then
                 -- Tricks of the Trade initial cast
-                self:setCooldown(59628, playerName, 60, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil)
+                self:setCooldown(59628, playerName, 60, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil, combatEvent)
                 return
             end
 
@@ -73,7 +73,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, targetName), "RAID")
             end
 
-            self:setCooldown(spellID, playerName, true, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil)
+            self:setCooldown(spellID, playerName, true, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil, combatEvent)
         elseif combatEvent == "SPELL_HEAL" and spellID == 48153 and self.db.profile.spells[47788] then
             -- Guardian Spirit proced
             self:GSTriggered(playerName)
@@ -114,7 +114,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
 
             if self:getCDLeft(playerName, spellID) == 0 then
-                self:setCooldown(spellID, playerName, true, targetName)
+                self:setCooldown(spellID, playerName, true, targetName, event)
             end
         end
     elseif event == "RAID_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then
@@ -285,7 +285,7 @@ function HomeCheck:OnCommReceived(...)
             end
 
             if spellID and self.db.profile.spells[spellID].enable and self:getCDLeft(playerName, spellID) == 0 then
-                self:setCooldown(spellID, playerName, CDLeft)
+                self:setCooldown(spellID, playerName, CDLeft, nil, prefix)
             end
         end
         return
@@ -341,13 +341,13 @@ function HomeCheck:OnCommReceived(...)
     elseif spellID == 34477 then
         -- Misdirection initial cast
         if self.db.profile.spells[35079].enable and self:getCDLeft(playerName, 35079) == 0 then
-            self:setCooldown(35079, playerName, 60, target)
+            self:setCooldown(35079, playerName, 60, target, prefix)
         end
         return
     elseif spellID == 57934 then
         -- Tricks of the Trade initial cast
         if self.db.profile.spells[59628].enable and self:getCDLeft(playerName, 59628) == 0 then
-            self:setCooldown(59628, playerName, 60, target)
+            self:setCooldown(59628, playerName, 60, target, prefix)
         end
         return
     end
@@ -381,16 +381,23 @@ function HomeCheck:OnCommReceived(...)
         end
     end
 
-    self:setCooldown(spellID, playerName, CDLeft, target)
+    self:setCooldown(spellID, playerName, CDLeft, target, prefix)
 end
 
-function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
+function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     if not spellID or not self.spells[spellID] or not self.db.profile.spells[spellID].enable then
         return
     end
 
     if CDLeft == true then
         CDLeft = self:getSpellCooldown(spellID, playerName)
+    end
+
+    local currentCD = self:getCDLeft(playerName, spellID)
+    if currentCD ~= 0 then
+        print("overwriting " .. playerName .. " " .. (GetSpellInfo(spellID)) .. " CD:" .. currentCD .. "->" .. tostring(CDLeft) .. " (" .. tostring(source) .. ")")
+    else
+        print("initializing " .. playerName .. " " .. (GetSpellInfo(spellID)) .. " CD:" .. tostring(CDLeft) .. " (" .. tostring(source) .. ")")
     end
 
     local frame = self:createCooldownFrame(playerName, spellID)
@@ -591,7 +598,7 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
         if not spellConfig.class or spellConfig.class == class then
             if self.db.profile.spells[spellID] and self.db.profile.spells[spellID].enable and self:UnitHasAbility(playerName, spellID) then
                 if self.db.profile.spells[spellID].alwaysShow then
-                    self:setCooldown(spellID, playerName)
+                    self:setCooldown(spellID, playerName, nil, nil, "refresh")
                 else
                     self:removeCooldownFrames(playerName, spellID, true)
                 end
@@ -621,7 +628,7 @@ function HomeCheck:Readiness(hunterName)
     for i = 1, #self.groups do
         for j = 1, #self.groups[i].CooldownFrames do
             if self.groups[i].CooldownFrames[j].playerName == hunterName then
-                self:setCooldown(self.groups[i].CooldownFrames[j].spellID, hunterName, 0)
+                self:setCooldown(self.groups[i].CooldownFrames[j].spellID, hunterName, 0, nil, "Readiness")
             end
         end
     end
