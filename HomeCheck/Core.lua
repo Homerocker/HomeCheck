@@ -402,6 +402,9 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
             target = self.db.global.CDs[playerName][spellID].target
         end
     else
+        if frame.CDLeft > 0 and CDLeft - frame.CDLeft < 2 then
+            return
+        end
         self.db.global.CDs[playerName][spellID].timestamp = time() + CDLeft
     end
 
