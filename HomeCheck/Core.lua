@@ -25,6 +25,8 @@ HomeCheck.comms = {
     HomeCheck = "HomeCheck",
 }
 
+local playerInRaid = UnitInRaid("player")
+
 local groups = 10
 
 local date, floor, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, min, pairs, select, {
@@ -117,7 +119,23 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 self:setCooldown(spellID, playerName, true, targetName, event)
             end
         end
-    elseif event == "RAID_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then
+    elseif event == "RAID_ROSTER_UPDATE" then
+        if playerInRaid ~= UnitInRaid("player") then
+            -- current player joined/left raid
+            if playerInRaid then
+                -- player WAS in raid
+                self:RegisterEvent("PARTY_MEMBERS_CHANGED")
+            else
+                self:UnregisterEvent("PARTY_MEMBERS_CHANGED")
+            end
+            -- updating raid status
+            playerInRaid = UnitInRaid("player")
+        end
+        if playerInRaid then
+            self:removePlayersNotInRaid()
+            self:scanRaid()
+        end
+    elseif event == "PARTY_MEMBERS_CHANGED" then
         self:removePlayersNotInRaid()
         self:scanRaid()
     elseif event == "PLAYER_ENTERING_WORLD" then
@@ -188,7 +206,9 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         self:RegisterEvent("UNIT_SPELLCAST_FAILED")
         self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
         self:RegisterEvent("RAID_ROSTER_UPDATE")
-        self:RegisterEvent("PARTY_MEMBERS_CHANGED")
+        if not playerInRaid then
+            self:RegisterEvent("PARTY_MEMBERS_CHANGED")
+        end
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
         self.LibGroupTalents.RegisterCallback(self, "LibGroupTalents_Update")
 
