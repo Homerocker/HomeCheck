@@ -416,7 +416,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
         self:setTarget(frame, target)
     end
 
-    if not CDLeft and self.db.global.CDs[playerName][spellID].timestamp and self.db.global.CDs[playerName][spellID].timestamp > time() then
+    if not CDLeft and frame.CDLeft == 0 and self.db.global.CDs[playerName][spellID].timestamp and self.db.global.CDs[playerName][spellID].timestamp > time() then
         -- restoring CD info from SV
         CDLeft = self.db.global.CDs[playerName][spellID].timestamp - time()
         target = self.db.global.CDs[playerName][spellID].target
@@ -427,6 +427,8 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
             return
         end
         frame.CDLeft = CDLeft
+    elseif frame.initialized then
+        return
     end
 
     if frame.CDLeft == 0 and frame.initialized then
@@ -462,6 +464,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
                         frame.timerFontString:SetText("R")
                         self:setTimerColor(frame)
                     end
+                    self.db.global.CDs[playerName][spellID] = nil
                 elseif frame.CDLeft == floor(frame.CDLeft) then
                     frame.timerFontString:SetText(date("!%M:%S", frame.CDLeft):gsub('^0+:?0?', ''))
                     self:setTimerColor(frame)
