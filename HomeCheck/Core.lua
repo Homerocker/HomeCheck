@@ -33,7 +33,7 @@ local updateRaidRosterScheduleTimer
 
 local groups = 10
 
-local date, floor, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, min, pairs, select, {
+local abs, date, floor, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = abs, date, floor, min, pairs, select, {
     find = string.find,
     gmatch = string.gmatch
 }, strsplit, {
@@ -412,18 +412,25 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
 
     local frame = self:createCooldownFrame(playerName, spellID)
 
-    if not CDLeft then
-        if self.db.global.CDs[playerName][spellID].timestamp and self.db.global.CDs[playerName][spellID].timestamp > time() then
-            -- restoring CD info from SV
-            CDLeft = self.db.global.CDs[playerName][spellID].timestamp - time()
-            target = self.db.global.CDs[playerName][spellID].target
-        end
-    else
-        self.db.global.CDs[playerName][spellID].timestamp = time() + CDLeft
+    if target and frame.target ~= target then
+        self:setTarget(frame, target)
+    end
+
+    if not CDLeft and self.db.global.CDs[playerName][spellID].timestamp and self.db.global.CDs[playerName][spellID].timestamp > time() then
+        -- restoring CD info from SV
+        CDLeft = self.db.global.CDs[playerName][spellID].timestamp - time()
+        target = self.db.global.CDs[playerName][spellID].target
     end
 
     if CDLeft then
+        if frame.CDLeft ~= 0 and abs(CDLeft - frame.CDLeft) < 3 then
+            return
+        end
         frame.CDLeft = CDLeft
+    end
+
+    if frame.CDLeft == 0 and frame.initialized then
+        return
     end
 
     self:sortFrames(self.db.profile.spells[spellID].group)
@@ -431,6 +438,8 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     self:updateCooldownBarProgress(frame)
 
     if frame.CDLeft > 0 then
+        self.db.global.CDs[playerName][spellID].timestamp = time() + CDLeft
+
         frame.timerFontString:SetText(date("!%M:%S", frame.CDLeft):gsub('^0+:?0?', ''))
 
         if not frame.CDtimer then
@@ -465,15 +474,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
 
     self:setTimerColor(frame)
 
-    if target then
-        self.db.global.CDs[playerName][spellID].target = target
-        frame.targetFontString:SetText(target)
-        local class = select(2, UnitClass(target))
-        if class then
-            local targetClassColor = RAID_CLASS_COLORS[class]
-            frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
-        end
-    end
+    frame.initialized = true
 end
 
 function HomeCheck:createCooldownFrame(playerName, spellID)
@@ -525,6 +526,16 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
 
     table.insert(group.CooldownFrames, frame)
     return frame
+end
+
+function HomeCheck:setTarget(frame, target)
+    self.db.global.CDs[frame.playerName][frame.spellID].target = target
+    frame.targetFontString:SetText(target)
+    local class = select(2, UnitClass(target))
+    if class then
+        local targetClassColor = RAID_CLASS_COLORS[class]
+        frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
+    end
 end
 
 function HomeCheck:repositionFrames(groupIndex)
