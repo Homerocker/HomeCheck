@@ -523,7 +523,7 @@ function HomeCheck:OptionsPanel()
                             end
                         end
                         LibStub("AceConfigRegistry-3.0"):NotifyChange("HomeCheck")
-                        self:scanRaid()
+                        self:updateRaidCooldowns()
                     end,
                     get = function(_)
                         return self.db.profile.spells[spellID].enable
@@ -538,7 +538,7 @@ function HomeCheck:OptionsPanel()
                     set = function(_, val)
                         self.db.profile.spells[spellID].alwaysShow = val
                         -- TODO is scan neccessary?
-                        self:scanRaid()
+                        self:updateRaidCooldowns()
                     end,
                     get = function(_)
                         return self.db.profile.spells[spellID].alwaysShow

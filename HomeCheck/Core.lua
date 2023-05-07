@@ -27,6 +27,10 @@ HomeCheck.comms = {
 
 local playerInRaid = UnitInRaid("player")
 
+local updateRaidRosterCooldown = 2
+local updateRaidRosterTimestamp
+local updateRaidRosterScheduleTimer
+
 local groups = 10
 
 local date, floor, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, min, pairs, select, {
@@ -120,6 +124,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
         end
     elseif event == "RAID_ROSTER_UPDATE" then
+        local instant
         if playerInRaid ~= UnitInRaid("player") then
             -- current player joined/left raid
             if playerInRaid then
@@ -127,27 +132,26 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 self:RegisterEvent("PARTY_MEMBERS_CHANGED")
             else
                 self:UnregisterEvent("PARTY_MEMBERS_CHANGED")
+                instant = true
             end
             -- updating raid status
             playerInRaid = UnitInRaid("player")
         end
         if playerInRaid then
-            self:removePlayersNotInRaid()
-            self:scanRaid()
+            self:updateRaidRoster(instant)
         end
     elseif event == "PARTY_MEMBERS_CHANGED" then
-        self:removePlayersNotInRaid()
-        self:scanRaid()
+        self:updateRaidRoster()
     elseif event == "PLAYER_ENTERING_WORLD" then
         self:cacheLocalizedSpellNames()
         self:ScheduleTimer(function()
-            self:scanRaid()
+            self:updateRaidCooldowns()
         end, 2)
         self:ScheduleTimer(function()
-            self:scanRaid()
+            self:updateRaidCooldowns()
         end, 10)
         self:ScheduleTimer(function()
-            self:scanRaid()
+            self:updateRaidCooldowns()
         end, 30)
     elseif event == "ADDON_LOADED" then
         if (...) ~= "HomeCheck" then
@@ -210,6 +214,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             self:RegisterEvent("PARTY_MEMBERS_CHANGED")
         end
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
+
         self.LibGroupTalents.RegisterCallback(self, "LibGroupTalents_Update")
 
         for k, _ in pairs(self.comms) do
@@ -405,13 +410,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
         CDLeft = self:getSpellCooldown(spellID, playerName)
     end
 
-    local currentCD = self:getCDLeft(playerName, spellID)
-    if currentCD ~= 0 then
-        print("overwriting " .. playerName .. " " .. (GetSpellInfo(spellID)) .. " CD:" .. currentCD .. "->" .. tostring(CDLeft) .. " (" .. tostring(source) .. ")")
-    else
-        print("initializing " .. playerName .. " " .. (GetSpellInfo(spellID)) .. " CD:" .. tostring(CDLeft) .. " (" .. tostring(source) .. ")")
-    end
-
     local frame = self:createCooldownFrame(playerName, spellID)
 
     if not CDLeft then
@@ -546,7 +544,7 @@ function HomeCheck:loadProfile()
         self.groups[i]:ClearAllPoints()
         self.groups[i]:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
     end
-    self:scanRaid()
+    self:updateRaidCooldowns()
 end
 
 function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, startGroup, startIndex)
@@ -570,18 +568,36 @@ function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, star
     end
 end
 
-function HomeCheck:removePlayersNotInRaid(startGroup, startIndex)
+function HomeCheck:updateRaidRoster(instant, startGroup, startIndex)
+    if not instant then
+        if updateRaidRosterScheduleTimer then
+            -- update is scheduled
+            return
+        end
+
+        if updateRaidRosterTimestamp and time() - updateRaidRosterTimestamp < updateRaidRosterCooldown then
+            -- update is on cooldown
+            updateRaidRosterScheduleTimer = self:ScheduleTimer(function()
+                self:updateRaidRoster()
+                updateRaidRosterScheduleTimer = nil
+            end, updateRaidRosterCooldown)
+            return
+        end
+    end
+
     for i = startGroup or 1, #self.groups do
         for j = startIndex or 1, #self.groups[i].CooldownFrames do
             if not UnitInRaid(self.groups[i].CooldownFrames[j].playerName) and not UnitInParty(self.groups[i].CooldownFrames[j].playerName) or not UnitIsConnected(self.groups[i].CooldownFrames[j].playerName) then
                 self:removeCooldownFrames(self.groups[i].CooldownFrames[j].playerName)
-                return self:removePlayersNotInRaid(i, j)
+                return self:updateRaidRoster(true, i, j)
             end
         end
     end
+    self:updateRaidCooldowns()
+    updateRaidRosterTimestamp = time()
 end
 
-function HomeCheck:scanRaid()
+function HomeCheck:updateRaidCooldowns()
     if GetNumRaidMembers() > 0 then
         for i = 1, 40 do
             local playerName, _, _, _, _, class, _, online, isDead = GetRaidRosterInfo(i)
