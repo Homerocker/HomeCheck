@@ -301,9 +301,7 @@ function HomeCheck:OnCommReceived(...)
                 end
             end
 
-            if spellID and self.db.profile.spells[spellID].enable and self:getCDLeft(playerName, spellID) == 0 then
-                self:setCooldown(spellID, playerName, CDLeft)
-            end
+            self:setCooldown(spellID, playerName, CDLeft)
         end
         return
     elseif prefix == "HomeCheck" then
@@ -353,19 +351,16 @@ function HomeCheck:OnCommReceived(...)
 
     if spellID == 23983 then
         -- Readiness
+        -- TODO implement double-call protection and enable
         --self:Readiness(playerName)
         return
     elseif spellID == 34477 then
         -- Misdirection initial cast
-        if self.db.profile.spells[35079].enable and self:getCDLeft(playerName, 35079) == 0 then
-            self:setCooldown(35079, playerName, 60, target)
-        end
+        self:setCooldown(35079, playerName, 60, target)
         return
     elseif spellID == 57934 then
         -- Tricks of the Trade initial cast
-        if self.db.profile.spells[59628].enable and self:getCDLeft(playerName, 59628) == 0 then
-            self:setCooldown(59628, playerName, 60, target)
-        end
+        self:setCooldown(59628, playerName, 60, target)
         return
     end
 
@@ -383,10 +378,6 @@ function HomeCheck:OnCommReceived(...)
     end
 
     if prefix == "RCD2" and CDLeft == 0 and not self:UnitHasAbility(playerName, spellID) then
-        return
-    end
-
-    if self:getCDLeft(playerName, spellID) ~= 0 then
         return
     end
 
