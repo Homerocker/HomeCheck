@@ -63,11 +63,11 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
             if spellID == 34477 then
                 -- Misdirection initial cast
-                self:setCooldown(35079, playerName, 60, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil, combatEvent)
+                self:setCooldown(35079, playerName, 60, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil)
                 return
             elseif spellID == 57934 then
                 -- Tricks of the Trade initial cast
-                self:setCooldown(59628, playerName, 60, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil, combatEvent)
+                self:setCooldown(59628, playerName, 60, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil)
                 return
             end
 
@@ -79,7 +79,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, targetName), "RAID")
             end
 
-            self:setCooldown(spellID, playerName, true, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil, combatEvent)
+            self:setCooldown(spellID, playerName, true, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil)
         elseif combatEvent == "SPELL_HEAL" and spellID == 48153 and self.db.profile.spells[47788] then
             -- Guardian Spirit proced
             self:GSTriggered(playerName)
@@ -120,7 +120,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
 
             if self:getCDLeft(playerName, spellID) == 0 then
-                self:setCooldown(spellID, playerName, true, targetName, event)
+                self:setCooldown(spellID, playerName, true, targetName)
             end
         end
     elseif event == "RAID_ROSTER_UPDATE" then
@@ -302,7 +302,7 @@ function HomeCheck:OnCommReceived(...)
             end
 
             if spellID and self.db.profile.spells[spellID].enable and self:getCDLeft(playerName, spellID) == 0 then
-                self:setCooldown(spellID, playerName, CDLeft, nil, prefix)
+                self:setCooldown(spellID, playerName, CDLeft)
             end
         end
         return
@@ -358,13 +358,13 @@ function HomeCheck:OnCommReceived(...)
     elseif spellID == 34477 then
         -- Misdirection initial cast
         if self.db.profile.spells[35079].enable and self:getCDLeft(playerName, 35079) == 0 then
-            self:setCooldown(35079, playerName, 60, target, prefix)
+            self:setCooldown(35079, playerName, 60, target)
         end
         return
     elseif spellID == 57934 then
         -- Tricks of the Trade initial cast
         if self.db.profile.spells[59628].enable and self:getCDLeft(playerName, 59628) == 0 then
-            self:setCooldown(59628, playerName, 60, target, prefix)
+            self:setCooldown(59628, playerName, 60, target)
         end
         return
     end
@@ -398,10 +398,10 @@ function HomeCheck:OnCommReceived(...)
         end
     end
 
-    self:setCooldown(spellID, playerName, CDLeft, target, prefix)
+    self:setCooldown(spellID, playerName, CDLeft, target)
 end
 
-function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
+function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
     if not spellID or not self.spells[spellID] or not self.db.profile.spells[spellID].enable then
         return
     end
@@ -640,7 +640,7 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
         if not spellConfig.class or spellConfig.class == class then
             if self.db.profile.spells[spellID] and self.db.profile.spells[spellID].enable and self:UnitHasAbility(playerName, spellID) then
                 if self.db.profile.spells[spellID].alwaysShow then
-                    self:setCooldown(spellID, playerName, nil, nil, "refresh")
+                    self:setCooldown(spellID, playerName)
                 else
                     self:removeCooldownFrames(playerName, spellID, true)
                 end
@@ -670,7 +670,7 @@ function HomeCheck:Readiness(hunterName)
     for i = 1, #self.groups do
         for j = 1, #self.groups[i].CooldownFrames do
             if self.groups[i].CooldownFrames[j].playerName == hunterName then
-                self:setCooldown(self.groups[i].CooldownFrames[j].spellID, hunterName, 0, nil, "Readiness")
+                self:setCooldown(self.groups[i].CooldownFrames[j].spellID, hunterName, 0)
             end
         end
     end
