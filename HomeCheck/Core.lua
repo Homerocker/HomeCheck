@@ -120,12 +120,6 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
     elseif event == "RAID_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then
         self:removePlayersNotInRaid()
         self:scanRaid()
-    elseif event == "PARTY_MEMBER_DISABLE" and not UnitInRaid("player") then
-        self:removePlayersNotInRaid()
-        self:scanRaid()
-    elseif event == "PARTY_MEMBER_ENABLE" and not UnitInRaid("player") then
-        self:removePlayersNotInRaid()
-        self:scanRaid()
     elseif event == "PLAYER_ENTERING_WORLD" then
         self:cacheLocalizedSpellNames()
         self:ScheduleTimer(function()
@@ -196,8 +190,6 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         self:RegisterEvent("RAID_ROSTER_UPDATE")
         self:RegisterEvent("PARTY_MEMBERS_CHANGED")
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
-        self:RegisterEvent("PARTY_MEMBER_ENABLE")
-        self:RegisterEvent("PARTY_MEMBER_DISABLE")
         self.LibGroupTalents.RegisterCallback(self, "LibGroupTalents_Update")
 
         for k, _ in pairs(self.comms) do
