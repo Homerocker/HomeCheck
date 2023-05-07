@@ -589,8 +589,8 @@ function HomeCheck:updateRaidRoster(instant, startGroup, startIndex)
         if updateRaidRosterTimestamp and time() - updateRaidRosterTimestamp < updateRaidRosterCooldown then
             -- update is on cooldown
             updateRaidRosterScheduleTimer = self:ScheduleTimer(function()
-                self:updateRaidRoster()
                 updateRaidRosterScheduleTimer = nil
+                self:updateRaidRoster()
             end, updateRaidRosterCooldown)
             return
         end
