@@ -959,13 +959,12 @@ function HomeCheck:updateCooldownBarProgress(frame)
 end
 
 function HomeCheck:setTimerPosition(frame)
+    frame.timerFontString:ClearAllPoints()
     if self.db.profile[self.db.profile[self.db.profile.spells[frame.spellID].group].inherit or self.db.profile.spells[frame.spellID].group].timerPosition == "l" then
-        frame.timerFontString:ClearAllPoints()
         frame.timerFontString:SetPoint("LEFT", frame.iconFrame, "RIGHT", 1, 0)
         frame.playerNameFontString:SetPoint("LEFT", frame.timerFontString, "RIGHT", 2, 0)
         frame.targetFontString:SetPoint("RIGHT", frame, "RIGHT", -2, 0)
     else
-        frame.timerFontString:ClearAllPoints()
         frame.timerFontString:SetPoint("RIGHT", frame, "RIGHT", -2, 0)
         frame.playerNameFontString:SetPoint("LEFT", frame.iconFrame, "RIGHT", 1, 0)
         frame.targetFontString:SetPoint("RIGHT", frame.timerFontString, "LEFT", -1, 0)

@@ -276,5 +276,12 @@ HomeCheck.spells = {
         class = "PRIEST",
         talentTab = 1,
         talentIndex = 19
+    },
+    -- Readiness
+    [23989] = {
+        cd = 180,
+        class = "HUNTER",
+        talentTab = 2,
+        talentIndex = 14
     }
 }
