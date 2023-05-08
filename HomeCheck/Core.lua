@@ -403,8 +403,15 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
 
     local frame = self:createCooldownFrame(playerName, spellID)
 
-    if target and frame.target ~= target then
-        self:setTarget(frame, target)
+    if target and not frame.target then
+        frame.target = target
+        self.db.global.CDs[frame.playerName][frame.spellID].target = target
+        frame.targetFontString:SetText(frame.target)
+        local class = select(2, UnitClass(frame.target))
+        if class then
+            local targetClassColor = RAID_CLASS_COLORS[class]
+            frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
+        end
     end
 
     if not CDLeft and frame.CDLeft == 0 and self.db.global.CDs[playerName][spellID].timestamp and self.db.global.CDs[playerName][spellID].timestamp > time() then
@@ -520,16 +527,6 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
 
     table.insert(group.CooldownFrames, frame)
     return frame
-end
-
-function HomeCheck:setTarget(frame, target)
-    self.db.global.CDs[frame.playerName][frame.spellID].target = target
-    frame.targetFontString:SetText(target)
-    local class = select(2, UnitClass(target))
-    if class then
-        local targetClassColor = RAID_CLASS_COLORS[class]
-        frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
-    end
 end
 
 function HomeCheck:repositionFrames(groupIndex)
