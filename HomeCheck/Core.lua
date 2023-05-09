@@ -365,10 +365,6 @@ function HomeCheck:OnCommReceived(...)
         end
     end
 
-    if not self.spells[spellID] or not self.db.profile.spells[spellID].enable then
-        return
-    end
-
     if prefix == "RCD2" and CDLeft == 0 and not self:UnitHasAbility(playerName, spellID) then
         return
     end
