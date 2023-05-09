@@ -31,6 +31,8 @@ local updateRaidRosterCooldown = 2
 local updateRaidRosterTimestamp
 local updateRaidRosterScheduleTimer
 
+local ReadinessTimestamp = {}
+
 local groups = 10
 
 local abs, date, floor, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = abs, date, floor, min, pairs, select, {
@@ -54,11 +56,6 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         local _, combatEvent, _, playerName, _, _, targetName, _, spellID, spellName = ...
         if combatEvent == "SPELL_CAST_SUCCESS" or combatEvent == "SPELL_RESURRECT" or combatEvent == "SPELL_AURA_APPLIED" then
             if not UnitInRaid(playerName) and not UnitInParty(playerName) then
-                return
-            end
-            if spellID == 23983 then
-                -- Readiness
-                self:Readiness(playerName)
                 return
             end
             if spellID == 34477 then
@@ -349,12 +346,7 @@ function HomeCheck:OnCommReceived(...)
         end
     end
 
-    if spellID == 23983 then
-        -- Readiness
-        -- TODO implement double-call protection and enable
-        --self:Readiness(playerName)
-        return
-    elseif spellID == 34477 then
+    if spellID == 34477 then
         -- Misdirection initial cast
         self:setCooldown(35079, playerName, 60, target)
         return
@@ -393,6 +385,11 @@ function HomeCheck:OnCommReceived(...)
 end
 
 function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
+    if spellID == 23983 then
+        -- Readiness
+        self:Readiness(playerName)
+    end
+
     if not spellID or not self.spells[spellID] or not self.db.profile.spells[spellID].enable then
         return
     end
@@ -654,6 +651,9 @@ function HomeCheck:saveFramePosition(groupIndex)
 end
 
 function HomeCheck:Readiness(hunterName)
+    if ReadinessTimestamp[hunterName] and time() - ReadinessTimestamp[hunterName] < 100 then
+        return
+    end
     for i = 1, #self.groups do
         for j = 1, #self.groups[i].CooldownFrames do
             if self.groups[i].CooldownFrames[j].playerName == hunterName then
@@ -661,6 +661,7 @@ function HomeCheck:Readiness(hunterName)
             end
         end
     end
+    ReadinessTimestamp[hunterName] = time()
 end
 
 function HomeCheck:sortFrames(groupIndex)
