@@ -404,10 +404,14 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
         return
     end
 
-    if self.spells[spellID].child then
-        self:removeCooldownFrames(playerName, self.spells[spellID].child)
-    elseif self.spells[spellID].parent then
+    if self.spells[spellID].parent then
         self:removeCooldownFrames(playerName, self.spells[spellID].parent)
+    else
+        for childSpellID, childSpellConfig in pairs(self.spells) do
+            if childSpellConfig.parent and childSpellConfig.parent == spellID then
+                self:removeCooldownFrames(playerName, childSpellID)
+            end
+        end
     end
 
     self:sortFrames(self:getSpellGroup(spellID))

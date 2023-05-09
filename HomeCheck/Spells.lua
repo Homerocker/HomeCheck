@@ -56,8 +56,7 @@ HomeCheck.spells = {
     -- Misdirection
     [35079] = {
         cd = 30,
-        class = "HUNTER",
-        child = 34477
+        class = "HUNTER"
     },
     -- Tricks of the Trade initial cast
     [57934] = {
