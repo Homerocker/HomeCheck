@@ -339,6 +339,12 @@ function HomeCheck:OnCommReceived(...)
         elseif spellID == 4 then
             spellID = 19752 -- Divine Intervention
         end
+    elseif prefix == "BLT" then
+        if spellID == 57934 then
+            spellID = 59628
+        elseif spellID == 34477 then
+            spellID = 35079
+        end
     end
 
     if not self.spells[spellID] then
