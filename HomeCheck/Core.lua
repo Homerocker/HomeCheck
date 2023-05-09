@@ -461,8 +461,8 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
 
     if target then
         self.db.global.CDs[frame.playerName][frame.spellID].target = target
-        frame.targetFontString:SetText(frame.target)
-        local class = select(2, UnitClass(frame.target))
+        frame.targetFontString:SetText(target)
+        local class = select(2, UnitClass(target))
         if class then
             local targetClassColor = RAID_CLASS_COLORS[class]
             frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
