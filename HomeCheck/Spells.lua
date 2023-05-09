@@ -47,15 +47,29 @@ HomeCheck.spells = {
         cd = 180,
         class = "DRUID"
     },
+    -- Misdirection initial cast
+    [34477] = {
+        cd = 60,
+        class = "HUNTER",
+        parent = 35079
+    },
     -- Misdirection
     [35079] = {
         cd = 30,
-        class = "HUNTER"
+        class = "HUNTER",
+        child = 34477
+    },
+    -- Tricks of the Trade initial cast
+    [57934] = {
+        cd = 60,
+        class = "ROGUE",
+        parent = 59628
     },
     -- Tricks of the Trade
     [59628] = {
         cd = 30,
-        class = "ROGUE"
+        class = "ROGUE",
+        child = 57934
     },
     -- Divine Shield
     [642] = {

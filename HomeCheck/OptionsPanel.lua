@@ -496,87 +496,89 @@ function HomeCheck:OptionsPanel()
         end
     end
     for spellID, spellConfig in pairs(self.spells) do
-        local name, _, icon = GetSpellInfo(spellID)
-        myOptionsTable.args.spells.args[tostring(spellID)] = {
-            name = name,
-            icon = icon,
-            type = "group",
-            order = 200 - (spellConfig.priority or 100),
-            args = {
-                enable = {
-                    name = L["Enabled"],
-                    type = "toggle",
-                    order = 1,
-                    set = function(_, val)
-                        self.db.profile.spells[spellID].enable = val
-                        if val then
-                            for k, _ in pairs(myOptionsTable.args.spells.args[tostring(spellID)].args) do
-                                if k ~= "enable" then
-                                    myOptionsTable.args.spells.args[tostring(spellID)].args[k].disabled = false
+        if not spellConfig.parent then
+            local name, _, icon = GetSpellInfo(spellID)
+            myOptionsTable.args.spells.args[tostring(spellID)] = {
+                name = name,
+                icon = icon,
+                type = "group",
+                order = 200 - (spellConfig.priority or 100),
+                args = {
+                    enable = {
+                        name = L["Enabled"],
+                        type = "toggle",
+                        order = 1,
+                        set = function(_, val)
+                            self.db.profile.spells[spellID].enable = val
+                            if val then
+                                for k, _ in pairs(myOptionsTable.args.spells.args[tostring(spellID)].args) do
+                                    if k ~= "enable" then
+                                        myOptionsTable.args.spells.args[tostring(spellID)].args[k].disabled = false
+                                    end
+                                end
+                            else
+                                for k, _ in pairs(myOptionsTable.args.spells.args[tostring(spellID)].args) do
+                                    if k ~= "enable" then
+                                        myOptionsTable.args.spells.args[tostring(spellID)].args[k].disabled = true
+                                    end
                                 end
                             end
-                        else
-                            for k, _ in pairs(myOptionsTable.args.spells.args[tostring(spellID)].args) do
-                                if k ~= "enable" then
-                                    myOptionsTable.args.spells.args[tostring(spellID)].args[k].disabled = true
-                                end
-                            end
+                            LibStub("AceConfigRegistry-3.0"):NotifyChange("HomeCheck")
+                            self:updateRaidCooldowns()
+                        end,
+                        get = function(_)
+                            return self.db.profile.spells[spellID].enable
                         end
-                        LibStub("AceConfigRegistry-3.0"):NotifyChange("HomeCheck")
-                        self:updateRaidCooldowns()
-                    end,
-                    get = function(_)
-                        return self.db.profile.spells[spellID].enable
-                    end
-                },
-                alwaysShow = {
-                    name = L["Always visible"],
-                    type = "toggle",
-                    desc = L["Do not hide cooldown bar when spell is ready"],
-                    order = 2,
-                    disabled = not self.db.profile.spells[spellID].enable,
-                    set = function(_, val)
-                        self.db.profile.spells[spellID].alwaysShow = val
-                        -- TODO is scan neccessary?
-                        self:updateRaidCooldowns()
-                    end,
-                    get = function(_)
-                        return self.db.profile.spells[spellID].alwaysShow
-                    end
-                },
-                frame = {
-                    name = L["Frame"],
-                    type = "range",
-                    min = 1,
-                    max = #self.groups,
-                    step = 1,
-                    order = 3,
-                    disabled = not self.db.profile.spells[spellID].enable,
-                    get = function()
-                        return self.db.profile.spells[spellID].group
-                    end,
-                    set = function(_, val)
-                        self:setSpellGroupIndex(spellID, val)
-                    end
-                },
-                priority = {
-                    name = L["Priority"],
-                    type = "range",
-                    min = 1,
-                    max = 200,
-                    step = 1,
-                    order = 4,
-                    disabled = not self.db.profile.spells[spellID].enable,
-                    get = function()
-                        return self.db.profile.spells[spellID].priority
-                    end,
-                    set = function(_, val)
-                        self.db.profile.spells[spellID].priority = val
-                        self:sortFrames(self.db.profile.spells[spellID].group)
-                    end
+                    },
+                    alwaysShow = {
+                        name = L["Always visible"],
+                        type = "toggle",
+                        desc = L["Do not hide cooldown bar when spell is ready"],
+                        order = 2,
+                        disabled = not self.db.profile.spells[spellID].enable,
+                        set = function(_, val)
+                            self.db.profile.spells[spellID].alwaysShow = val
+                            -- TODO is scan neccessary?
+                            self:updateRaidCooldowns()
+                        end,
+                        get = function(_)
+                            return self.db.profile.spells[spellID].alwaysShow
+                        end
+                    },
+                    frame = {
+                        name = L["Frame"],
+                        type = "range",
+                        min = 1,
+                        max = #self.groups,
+                        step = 1,
+                        order = 3,
+                        disabled = not self.db.profile.spells[spellID].enable,
+                        get = function()
+                            return self.db.profile.spells[spellID].group
+                        end,
+                        set = function(_, val)
+                            self:setSpellGroupIndex(spellID, val)
+                        end
+                    },
+                    priority = {
+                        name = L["Priority"],
+                        type = "range",
+                        min = 1,
+                        max = 200,
+                        step = 1,
+                        order = 4,
+                        disabled = not self.db.profile.spells[spellID].enable,
+                        get = function()
+                            return self.db.profile.spells[spellID].priority
+                        end,
+                        set = function(_, val)
+                            self.db.profile.spells[spellID].priority = val
+                            self:sortFrames(self.db.profile.spells[spellID].group)
+                        end
+                    }
                 }
             }
-        }
+        end
     end
     for prefix, addonName in pairs(self.comms) do
         myOptionsTable.args.comms.args[prefix] = {
