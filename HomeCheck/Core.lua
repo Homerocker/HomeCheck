@@ -385,7 +385,7 @@ function HomeCheck:OnCommReceived(...)
 end
 
 function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
-    if spellID == 23983 then
+    if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)
     end
