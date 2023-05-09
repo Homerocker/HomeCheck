@@ -72,11 +72,15 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 spellID = self.localizedSpellNames[spellName]
             end
 
+            if combatEvent ~= "SPELL_AURA_APPLIED" then
+                targetName = nil
+            end
+
             if self.spells[spellID] then
                 self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, targetName), "RAID")
             end
 
-            self:setCooldown(spellID, playerName, true, combatEvent ~= "SPELL_AURA_APPLIED" and targetName or nil)
+            self:setCooldown(spellID, playerName, true, targetName)
         elseif combatEvent == "SPELL_HEAL" and spellID == 48153 and self.db.profile.spells[47788] then
             -- Guardian Spirit proced
             self:GSTriggered(playerName)
