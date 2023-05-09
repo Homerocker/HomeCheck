@@ -33,6 +33,8 @@ local updateRaidRosterScheduleTimer
 
 local ReadinessTimestamp = {}
 
+local childSpells = {}
+
 local groups = 10
 
 local abs, date, floor, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = abs, date, floor, min, pairs, select, {
@@ -181,6 +183,12 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 if cd.timestamp < time() then
                     table.wipe(self.db.global.CDs[playerName][spellID])
                 end
+            end
+        end
+
+        for childSpellID, childSpellConfig in pairs(self.spells) do
+            if childSpellConfig.parent then
+                childSpells[childSpellConfig.parent] = childSpellID
             end
         end
 
@@ -406,12 +414,8 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
 
     if self.spells[spellID].parent then
         self:removeCooldownFrames(playerName, self.spells[spellID].parent)
-    else
-        for childSpellID, childSpellConfig in pairs(self.spells) do
-            if childSpellConfig.parent == spellID then
-                self:removeCooldownFrames(playerName, childSpellID)
-            end
-        end
+    elseif childSpells[spellID] then
+        self:removeCooldownFrames(playerName, childSpells[spellID])
     end
 
     self:sortFrames(self:getSpellGroup(spellID))
