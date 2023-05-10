@@ -8,3 +8,5 @@
 - do not send target name to raid channel for auras
 - addon communication channel load reduced (performance improvement)
 - Guardian Spirit proc shared to all players with HomeCheck installed
+- Fixed Mana Tide Totem talent requirements
+- added Heroism

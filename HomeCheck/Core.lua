@@ -39,7 +39,7 @@ local childSpells = {}
 
 local groups = 10
 
-local abs, date, floor, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = abs, date, floor, min, pairs, select, {
+local date, floor, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, min, pairs, select, {
     find = string.find,
     gmatch = string.gmatch
 }, strsplit, {
@@ -377,7 +377,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     end
 
     if CDLeft then
-        if (CDLeft ~= 0 or frame.CDLeft == 0) and CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < min(3, self:getSpellCooldown(spellID, playerName) * 0.7) then
+        if (CDLeft ~= 0 or frame.CDLeft == 0) and CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
             return
         end
         frame.CDLeft = CDLeft
