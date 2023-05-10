@@ -376,17 +376,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
         target = self.db.global.CDs[playerName][spellID].target
     end
 
-    if target and frame.target ~= target then
-        frame.target = target
-        self.db.global.CDs[frame.playerName][frame.spellID].target = target
-        frame.targetFontString:SetText(target)
-        local class = select(2, UnitClass(target))
-        if class then
-            local targetClassColor = RAID_CLASS_COLORS[class]
-            frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
-        end
-    end
-
     if CDLeft then
         if (CDLeft ~= 0 or frame.CDLeft == 0) and CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
             return
@@ -452,6 +441,17 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     end
 
     self:setTimerColor(frame)
+
+    if target then
+        frame.target = target
+        self.db.global.CDs[frame.playerName][frame.spellID].target = target
+        frame.targetFontString:SetText(target)
+        local class = select(2, UnitClass(target))
+        if class then
+            local targetClassColor = RAID_CLASS_COLORS[class]
+            frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
+        end
+    end
 
     frame.initialized = true
 end
