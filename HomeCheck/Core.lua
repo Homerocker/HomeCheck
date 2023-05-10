@@ -33,6 +33,8 @@ local updateRaidRosterScheduleTimer
 
 local ReadinessTimestamp = {}
 
+local GSHealTimestamp = {}
+
 local childSpells = {}
 
 local groups = 10
@@ -70,9 +72,9 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
 
             self:setCooldown(spellID, playerName, true, targetName, event)
-        elseif combatEvent == "SPELL_HEAL" and spellID == 48153 and self.db.profile.spells[47788] then
+        elseif combatEvent == "SPELL_HEAL" and spellID == 48153 then
             -- Guardian Spirit proced
-            self:GSTriggered(playerName)
+            self:setCooldown(48153, playerName, nil, nil, event)
         elseif combatEvent == "UNIT_DIED" then
             if UnitInRaid(playerName) or UnitInParty(playerName) then
                 self.deadUnits[playerName] = true
@@ -348,6 +350,14 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)
+    elseif spellID == 48153 then
+        -- Guardian Spirit heal
+        if GSHealTimestamp[playerName] and time() - GSHealTimestamp[playerName] < 100 then
+            return
+        end
+
+        self:setCooldown(47788, playerName, self:getCDLeft(playerName, 47788) + 110, nil, source)
+        GSHealTimestamp[playerName] = time()
     end
 
     if not spellID or not self.spells[spellID] then
@@ -694,18 +704,6 @@ function HomeCheck:groupSpells()
     for i = 1, #self.groups do
         for j = 1, #self.groups[i].CooldownFrames do
 
-        end
-    end
-end
-
-function HomeCheck:GSTriggered(playerName)
-    for i = 1, #self.groups[self.db.profile.spells[47788].group].CooldownFrames do
-        if self.groups[self.db.profile.spells[47788].group].CooldownFrames[i].playerName == playerName and self.groups[self.db.profile.spells[47788].group].CooldownFrames[i].spellID == 47788 then
-            if self.groups[self.db.profile.spells[47788].group].CooldownFrames[i].CDLeft <= self.spells[47788].cd then
-                self.groups[self.db.profile.spells[47788].group].CooldownFrames[i].CDLeft = self.groups[self.db.profile.spells[47788].group].CooldownFrames[i].CDLeft + 110
-                self:sortFrames(self.db.profile.spells[47788].group)
-            end
-            return
         end
     end
 end
