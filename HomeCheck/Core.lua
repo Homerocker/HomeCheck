@@ -80,32 +80,13 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         end
 
         -- UNIT_SPELLCAST events are used to detect double Rebirth only
-    elseif event == "UNIT_SPELLCAST_SENT" then
+    elseif event == "UNIT_SPELLCAST_SENT"
+            or event == "UNIT_SPELLCAST_FAILED"
+            or event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unit, spellName, _, targetName = ...
         local spellID = self.localizedSpellNames[spellName]
         if spellID == 48477 then
-            self.RebirthTargets[(UnitName(unit))] = targetName
-        end
-    elseif event == "UNIT_SPELLCAST_FAILED" then
-        local unit, spellName = ...
-        local spellID = self.localizedSpellNames[spellName]
-        if spellID == 48477 then
-            self.RebirthTargets[(UnitName(unit))] = nil
-        end
-    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        local unit, spellName = ...
-        local spellID = self.localizedSpellNames[spellName]
-
-        if spellID == 48477 then
-            local playerName = UnitName(unit)
-            local targetName
-
-            if self.RebirthTargets[playerName] then
-                targetName = self.RebirthTargets[playerName]
-                self.RebirthTargets[playerName] = nil
-            end
-
-            self:setCooldown(spellID, playerName, true, targetName, event)
+            self:Rebirth(event, (UnitName(unit)), targetName)
         end
     elseif event == "RAID_ROSTER_UPDATE" then
         local instant
@@ -981,4 +962,15 @@ end
 
 function HomeCheck:isSpellEnabled(spellID)
     return self.spells[spellID].parent and self.db.profile.spells[self.spells[spellID].parent].enable or self.db.profile.spells[spellID].enable
+end
+
+function HomeCheck:Rebirth(event, playerName, target)
+    if event == "UNIT_SPELLCAST_SENT" then
+        self.RebirthTargets[playerName] = target
+    elseif event == "UNIT_SPELLCAST_FAILED" then
+        self.RebirthTargets[playerName] = nil
+    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+        self:setCooldown(48477, playerName, true, self.RebirthTargets[playerName], event)
+        self.RebirthTargets[playerName] = nil
+    end
 end
