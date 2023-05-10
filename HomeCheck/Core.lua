@@ -392,6 +392,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
         return
     elseif childSpells[spellID] then
+        target = target or self:getTarget(playerName, childSpells[spellID])
         self:removeCooldownFrames(playerName, childSpells[spellID])
     end
 
@@ -439,7 +440,10 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
         frame.timerFontString:SetText("R")
     end
 
+    self:setTimerColor(frame)
+
     if target then
+        frame.target = target
         self.db.global.CDs[frame.playerName][frame.spellID].target = target
         frame.targetFontString:SetText(target)
         local class = select(2, UnitClass(target))
@@ -448,8 +452,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
             frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
         end
     end
-
-    self:setTimerColor(frame)
 
     frame.initialized = true
 end
@@ -739,6 +741,15 @@ function HomeCheck:getCDLeft(playerName, spellID)
         end
     end
     return 0
+end
+
+function HomeCheck:getTarget(playerName, spellID)
+    for i = 1, #self.groups[self:getSpellGroup(spellID)].CooldownFrames do
+        if playerName == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].playerName
+                and spellID == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].spellID then
+            return self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].target
+        end
+    end
 end
 
 function HomeCheck:updateRange(frame)
