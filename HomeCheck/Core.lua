@@ -69,11 +69,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 targetName = nil
             end
 
-            if self.spells[spellID] then
-                self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, targetName), "RAID")
-            end
-
-            self:setCooldown(spellID, playerName, true, targetName)
+            self:setCooldown(spellID, playerName, true, targetName, event)
         elseif combatEvent == "SPELL_HEAL" and spellID == 48153 and self.db.profile.spells[47788] then
             -- Guardian Spirit proced
             self:GSTriggered(playerName)
@@ -109,11 +105,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 self.RebirthTargets[playerName] = nil
             end
 
-            if self.spells[spellID] then
-                self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, targetName), "RAID")
-            end
-
-            self:setCooldown(spellID, playerName, true, targetName)
+            self:setCooldown(spellID, playerName, true, targetName, event)
         end
     elseif event == "RAID_ROSTER_UPDATE" then
         local instant
@@ -371,7 +363,7 @@ function HomeCheck:OnCommReceived(...)
     self:setCooldown(spellID, playerName, CDLeft, target)
 end
 
-function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
+function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)
@@ -410,6 +402,10 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target)
 
     if frame.CDLeft == 0 and frame.initialized then
         return
+    end
+
+    if source == "COMBAT_LOG_EVENT_UNFILTERED" or source == "UNIT_SPELLCAST_SUCCEEDED" then
+        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
     end
 
     if self.spells[spellID].parent then
