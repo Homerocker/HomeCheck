@@ -140,6 +140,11 @@ HomeCheck.spells = {
         talentTab = 3,
         talentIndex = 17
     },
+    -- Heroism
+    [32182] = {
+        cd = 300,
+        class = "SHAMAN"
+    },
     -- Vampiric Blood
     [55233] = {
         cd = 60,
