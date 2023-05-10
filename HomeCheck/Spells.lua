@@ -133,10 +133,12 @@ HomeCheck.spells = {
     [75495] = {
         cd = 120
     },
-    -- Heroism
+    -- Mana Tide Totem
     [16190] = {
         cd = 300,
-        class = "SHAMAN"
+        class = "SHAMAN",
+        talentTab = 3,
+        talentIndex = 17
     },
     -- Vampiric Blood
     [55233] = {
