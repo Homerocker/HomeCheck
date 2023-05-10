@@ -960,7 +960,12 @@ function HomeCheck:setTimerPosition(frame)
 end
 
 function HomeCheck:getSpellAlwaysShow(spellID)
-    return self.spells[spellID].parent and self.db.profile.spells[self.spells[spellID].parent].alwaysShow or self.db.profile.spells[spellID].alwaysShow
+    print(spellID)
+    print(self.db.profile.spells[self.spells[spellID].parent].alwaysShow)
+    return self.spells[spellID].parent
+    and self.db.profile.spells[self.spells[spellID].parent]
+            and self.db.profile.spells[self.spells[spellID].parent].alwaysShow
+            or self.db.profile.spells[spellID].alwaysShow
 end
 
 function HomeCheck:isSpellEnabled(spellID)

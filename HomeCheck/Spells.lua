@@ -67,8 +67,7 @@ HomeCheck.spells = {
     -- Tricks of the Trade
     [59628] = {
         cd = 30,
-        class = "ROGUE",
-        child = 57934
+        class = "ROGUE"
     },
     -- Divine Shield
     [642] = {

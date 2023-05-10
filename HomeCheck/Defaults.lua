@@ -45,6 +45,10 @@ HomeCheck.defaults = {
             invertColors = false
         },
         spells = {
+            ["**"] = {
+                group = 2,
+                priority = 100
+            },
             -- DSac
             [64205] = {
                 enable = true,
@@ -131,10 +135,6 @@ HomeCheck.defaults = {
             -- PI
             [10060] = {
                 enable = true
-            },
-            ["**"] = {
-                group = 2,
-                priority = 100
             }
         }
     }
