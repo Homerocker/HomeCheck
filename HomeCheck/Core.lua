@@ -383,7 +383,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     end
 
     if CDLeft then
-        if frame.CDLeft ~= 0 and abs(CDLeft - frame.CDLeft) < 3 then
+        if (CDLeft ~= 0 or frame.CDLeft == 0) and abs(CDLeft - frame.CDLeft) < 3 then
             return
         end
         frame.CDLeft = CDLeft
