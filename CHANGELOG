@@ -1,0 +1,9 @@
+- useless PARTY_MEMBER_ENABLE and PARTY_MEMBER_DISABLE events removed (performance improvement)
+- unregister PARTY_MEMBERS_CHANGED event when in raid (performance improvement)
+- throttle raid scan (performance improvement)
+- do not overwrite cooldown data that had been already set (performance improvement)
+- removed excessive cooldown verifications (code cleanup and very minor performance improvement)
+- hunter Readiness added to spells list
+- hunter Readiness fully implemented, including cross-addon communications
+- do not send target name to raid channel for auras
+- addon communication channel load reduced (performance improvement)
