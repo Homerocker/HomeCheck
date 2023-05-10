@@ -65,7 +65,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 spellID = self.localizedSpellNames[spellName]
             end
 
-            if combatEvent ~= "SPELL_AURA_APPLIED" then
+            if combatEvent == "SPELL_AURA_APPLIED" then
                 targetName = nil
             end
 
