@@ -404,14 +404,14 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
         return
     end
 
-    if source == "COMBAT_LOG_EVENT_UNFILTERED" or source == "UNIT_SPELLCAST_SUCCEEDED" then
-        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
-    end
-
-    if self.spells[spellID].parent then
-        self:removeCooldownFrames(playerName, self.spells[spellID].parent)
+    if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
+        return
     elseif childSpells[spellID] then
         self:removeCooldownFrames(playerName, childSpells[spellID])
+    end
+
+    if source == "COMBAT_LOG_EVENT_UNFILTERED" or source == "UNIT_SPELLCAST_SUCCEEDED" then
+        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
     end
 
     self:sortFrames(self:getSpellGroup(spellID))
@@ -756,6 +756,8 @@ function HomeCheck:getGroup(i)
     return frame
 end
 
+---@param playerName string
+---@param spellID number
 function HomeCheck:getCDLeft(playerName, spellID)
     for i = 1, #self.groups[self:getSpellGroup(spellID)].CooldownFrames do
         if playerName == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].playerName
