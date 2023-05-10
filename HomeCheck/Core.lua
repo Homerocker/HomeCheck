@@ -300,7 +300,7 @@ function HomeCheck:OnCommReceived(...)
 
     if not CDLeft then
         CDLeft = true
-    elseif CDLeft <= 0 and not self:isSpellAlwaysShow(spellID) then
+    elseif CDLeft <= 0 and not self:getSpellAlwaysShow(spellID) then
         return
     end
 
@@ -360,14 +360,8 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
         GSHealTimestamp[playerName] = time()
     end
 
-    if not spellID or not self.spells[spellID] then
+    if not spellID or not self.spells[spellID] or not self:isSpellEnabled(spellID) then
         return
-    end
-
-    if not self.db.profile.spells[spellID].enable then
-        if not self.spells[spellID].parent or not self.db.profile.spells[self.spells[spellID].parent].enable then
-            return
-        end
     end
 
     if CDLeft == true then
@@ -383,7 +377,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     end
 
     if CDLeft then
-        if (CDLeft ~= 0 or frame.CDLeft == 0) and abs(CDLeft - frame.CDLeft) < 3 then
+        if (CDLeft ~= 0 or frame.CDLeft == 0) and CDLeft > frame.CDLeft and CDLeft - frame.CDLeft < 3 then
             return
         end
         frame.CDLeft = CDLeft
@@ -427,7 +421,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
                 if frame.CDLeft <= 0 then
                     self:CancelTimer(frame.CDtimer)
                     frame.CDtimer = nil
-                    if not self:isSpellAlwaysShow(spellID) then
+                    if not self:getSpellAlwaysShow(spellID) then
                         self:removeCooldownFrames(playerName, spellID)
                         self:repositionFrames(self:getSpellGroup(spellID))
                     else
@@ -954,7 +948,7 @@ function HomeCheck:setTimerPosition(frame)
     end
 end
 
-function HomeCheck:isSpellAlwaysShow(spellID)
+function HomeCheck:getSpellAlwaysShow(spellID)
     return self.spells[spellID].parent and self.db.profile.spells[self.spells[spellID].parent].alwaysShow or self.db.profile.spells[spellID].alwaysShow
 end
 
