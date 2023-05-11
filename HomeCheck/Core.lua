@@ -418,6 +418,8 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         frame.CDLeft = CDLeft
     end
 
+    frame.CDLeft = CDLeft or frame.CDLeft
+
     if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
         return
     elseif childSpells[spellID] then
