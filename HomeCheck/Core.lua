@@ -418,8 +418,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         frame.CDLeft = CDLeft
     end
 
-    frame.CDLeft = CDLeft or frame.CDLeft
-
     if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
         return
     elseif childSpells[spellID] then
@@ -429,7 +427,9 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         self:removeCooldownFrames(playerName, childSpells[spellID])
     end
 
+    frame.CDLeft = CDLeft or frame.CDLeft
     frame.isRemote = isRemote
+    frame.CD = self:getSpellCooldown(spellID, playerName)
 
     if not isRemote then
         self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
