@@ -439,7 +439,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     self:updateCooldownBarProgress(frame)
 
     if frame.CDLeft > 0 then
-        self.db.global.CDs[playerName][spellID].timestamp = time() + CDLeft
+        self.db.global.CDs[playerName][spellID].timestamp = time() + frame.CDLeft
 
         frame.timerFontString:SetText(date("!%M:%S", frame.CDLeft):gsub('^0+:?0?', ''))
 
