@@ -278,7 +278,7 @@ function HomeCheck:OnCommReceived(...)
         end
         return
     elseif prefix == "HomeCheck" then
-        success, spellID, playerName, target, CDLeft = self:Deserialize(message)
+        success, spellID, playerName, target = self:Deserialize(message)
         if not success then
             return
         end
@@ -378,6 +378,8 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         -- restoring CD info from SV
         CDLeft = self.db.global.CDs[playerName][spellID].timestamp - time()
         target = self.db.global.CDs[playerName][spellID].target
+        -- unknown data source and reliability, treat is as remote
+        isRemote = true
     end
 
     if target and frame.target ~= target then
@@ -431,7 +433,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     frame.CD = self:getSpellCooldown(frame)
 
     if not isRemote and frame.CDLeft ~= 0 then
-        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target, frame.CDLeft), "RAID")
+        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
     end
 
     self:sortFrames(self:getSpellGroup(spellID))
