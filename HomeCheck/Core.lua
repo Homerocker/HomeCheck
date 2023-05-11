@@ -385,35 +385,37 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         self:setTarget(frame, target)
     end
 
-    if not frame.isRemote and isRemote then
-        if frame.CDLeft > 5 then
-            return
-        end
-        if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
-            return
-        end
-    end
-
-    if not frame.isRemote and not isRemote then
-        if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 2 then
-            return
-        end
-    end
-
-    if frame.isRemote and isRemote then
-        if frame.CDLeft > 5 then
-            if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
-                return
-            end
-        end
-    end
-
-    frame.CDLeft = CDLeft or frame.CDLeft
-
     if not CDLeft or CDLeft == 0 then
         if frame.initialized then
             return
         end
+    end
+
+    if CDLeft then
+        if not frame.isRemote and isRemote then
+            if frame.CDLeft > 5 then
+                return
+            end
+            if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
+                return
+            end
+        end
+
+        if not frame.isRemote and not isRemote then
+            if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 2 then
+                return
+            end
+        end
+
+        if frame.isRemote and isRemote then
+            if frame.CDLeft > 5 then
+                if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
+                    return
+                end
+            end
+        end
+
+        frame.CDLeft = CDLeft
     end
 
     if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
