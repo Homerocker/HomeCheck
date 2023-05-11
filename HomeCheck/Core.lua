@@ -71,10 +71,10 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 targetName = nil
             end
 
-            self:setCooldown(spellID, playerName, true, targetName, event)
+            self:setCooldown(spellID, playerName, true, targetName)
         elseif combatEvent == "SPELL_HEAL" and spellID == 48153 then
             -- Guardian Spirit proced
-            self:setCooldown(48153, playerName, nil, nil, event)
+            self:setCooldown(48153, playerName)
         elseif combatEvent == "UNIT_DIED" then
             if UnitInRaid(playerName) or UnitInParty(playerName) then
                 self.deadUnits[playerName] = true
@@ -274,7 +274,7 @@ function HomeCheck:OnCommReceived(...)
                 end
             end
 
-            self:setCooldown(spellID, playerName, CDLeft)
+            self:setCooldown(spellID, playerName, CDLeft, nil, true)
         end
         return
     elseif prefix == "HomeCheck" then
@@ -343,10 +343,15 @@ function HomeCheck:OnCommReceived(...)
         end
     end
 
-    self:setCooldown(spellID, playerName, CDLeft, target)
+    self:setCooldown(spellID, playerName, CDLeft, target, true)
 end
 
-function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
+---@param spellID number
+---@param playerName string
+---@param CDLeft number|boolean|nil
+---@param target string|nil
+---@param isRemote boolean|nil
+function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)
@@ -356,7 +361,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
             return
         end
 
-        self:setCooldown(47788, playerName, self:getCDLeft(playerName, 47788) + 110, nil, source)
+        self:setCooldown(47788, playerName, self:getCDLeft(playerName, 47788) + 110, nil, remote)
         GSHealTimestamp[playerName] = time()
     end
 
@@ -377,37 +382,53 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, source)
     end
 
     if target and frame.target ~= target then
-        frame.target = target
-        self.db.global.CDs[frame.playerName][frame.spellID].target = target
-        frame.targetFontString:SetText(target)
-        local class = select(2, UnitClass(target))
-        if class then
-            local targetClassColor = RAID_CLASS_COLORS[class]
-            frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
-        end
+        self:setTarget(frame, target)
     end
 
-    if CDLeft then
-        if (CDLeft ~= 0 or frame.CDLeft == 0) and CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
+    if not frame.isRemote and isRemote then
+
+        if frame.CDLeft > 5 then
             return
         end
-        frame.CDLeft = CDLeft
-    elseif frame.initialized then
-        return
+        if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
+            return
+        end
     end
 
-    if frame.CDLeft == 0 and frame.initialized then
-        return
+    if not frame.isRemote and not isRemote then
+        if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 2 then
+            return
+        end
+    end
+
+    if frame.isRemote and isRemote then
+        if frame.CDLeft > 5 then
+            if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
+                return
+            end
+        end
+    end
+
+    frame.CDLeft = CDLeft or frame.CDLeft
+
+    if frame.CDLeft == 0 or not CDLeft then
+        if frame.initialized then
+            return
+        end
     end
 
     if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
         return
     elseif childSpells[spellID] then
-        target = target or self:getTarget(playerName, childSpells[spellID])
+        if not target then
+            self:setTarget(frame, self:getTarget(playerName, childSpells[spellID]))
+        end
         self:removeCooldownFrames(playerName, childSpells[spellID])
     end
 
-    if source == "COMBAT_LOG_EVENT_UNFILTERED" or source == "UNIT_SPELLCAST_SUCCEEDED" then
+    frame.isRemote = isRemote
+
+    if not isRemote then
         self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
     end
 
@@ -752,6 +773,17 @@ function HomeCheck:getTarget(playerName, spellID)
     end
 end
 
+function HomeCheck:setTarget(frame, target)
+    frame.target = target
+    self.db.global.CDs[frame.playerName][frame.spellID].target = target
+    frame.targetFontString:SetText(target)
+    local class = select(2, UnitClass(target))
+    if class then
+        local targetClassColor = RAID_CLASS_COLORS[class]
+        frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
+    end
+end
+
 function HomeCheck:updateRange(frame)
     if not frame.inRange then
         frame.inRange = self:UnitInRange(frame.playerName) and 1 or 0
@@ -976,7 +1008,7 @@ function HomeCheck:Rebirth(event, playerName, target)
     elseif event == "UNIT_SPELLCAST_FAILED" then
         self.RebirthTargets[playerName] = nil
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        self:setCooldown(48477, playerName, true, self.RebirthTargets[playerName], event)
+        self:setCooldown(48477, playerName, true, self.RebirthTargets[playerName])
         self.RebirthTargets[playerName] = nil
     end
 end
