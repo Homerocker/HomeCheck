@@ -278,7 +278,7 @@ function HomeCheck:OnCommReceived(...)
         end
         return
     elseif prefix == "HomeCheck" then
-        success, spellID, playerName, target = self:Deserialize(message)
+        success, spellID, playerName, target, CDLeft = self:Deserialize(message)
         if not success then
             return
         end
@@ -430,8 +430,8 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     frame.isRemote = isRemote
     frame.CD = self:getSpellCooldown(frame)
 
-    if not isRemote then
-        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
+    if not isRemote and frame.CDLeft ~= 0 then
+        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target, frame.CDLeft), "RAID")
     end
 
     self:sortFrames(self:getSpellGroup(spellID))
