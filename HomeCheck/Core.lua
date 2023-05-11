@@ -386,7 +386,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     end
 
     if not frame.isRemote and isRemote then
-
         if frame.CDLeft > 5 then
             return
         end
@@ -411,7 +410,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
 
     frame.CDLeft = CDLeft or frame.CDLeft
 
-    if frame.CDLeft == 0 or not CDLeft then
+    if not CDLeft or CDLeft == 0 then
         if frame.initialized then
             return
         end
@@ -952,7 +951,7 @@ function HomeCheck:UnitInRange(unit)
 end
 
 function HomeCheck:updateCooldownBarProgress(frame)
-    local pct = min(frame.CDLeft / self:getSpellCooldown(frame.spellID, frame.playerName), 1)
+    local pct = min(frame.CDLeft / frame.CD, 1)
     if self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].invertColors then
         if pct ~= 0 then
             if not frame.bar.texture:IsShown() then
