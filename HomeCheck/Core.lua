@@ -364,7 +364,15 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         end
     end
 
-    if not spellID or not self.spells[spellID] or not self:isSpellEnabled(spellID) then
+    if not spellID or not self.spells[spellID] then
+        return
+    end
+
+    if not isRemote and CDLeft then
+        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
+    end
+
+    if not self:isSpellEnabled(spellID) then
         return
     end
 
@@ -432,10 +440,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     frame.CDLeft = CDLeft or frame.CDLeft
     frame.isRemote = isRemote
     frame.CD = self:getSpellCooldown(frame)
-
-    if not isRemote and frame.CDLeft ~= 0 then
-        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
-    end
 
     self:sortFrames(self:getSpellGroup(spellID))
 
