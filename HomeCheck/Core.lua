@@ -557,7 +557,7 @@ function HomeCheck:repositionFrames(groupIndex)
         return
     end
     for j = 1, #self.groups[groupIndex].CooldownFrames do
-        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -(self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].iconSize + self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].padding) * (j - 1))
+        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -20 - (self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].iconSize + self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].padding) * (j - 1))
     end
 end
 
@@ -769,6 +769,9 @@ function HomeCheck:getGroup(i)
     frame:ClearAllPoints()
     frame:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
     frame:SetSize(20, 20)
+    local icon = select(3, GetSpellInfo(47585))
+    frame.texture = frame:CreateTexture(nil, "OVERLAY")
+    frame.texture:SetTexture(icon)
     frame:SetScript("OnDragStart", function(s)
         s:StartMoving()
     end)
