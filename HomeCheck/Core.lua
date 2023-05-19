@@ -536,9 +536,11 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
 
     self:applyGroupSettings(frame)
 
+    frame:EnableMouse(true)
+
     frame:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" and IsShiftKeyDown() then
-            local message = frame.playerName.." "..(GetSpellLink(frame.spellID)).." "..date("!%M:%S", frame.CDLeft)
+            local message = frame.playerName .. " " .. (GetSpellLink(frame.spellID)) .. " " .. (frame.CDLeft == 0 and "READY" or date("!%M:%S", frame.CDLeft))
             ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", message, playerInRaid and "RAID" or "PARTY")
         end
     end)
