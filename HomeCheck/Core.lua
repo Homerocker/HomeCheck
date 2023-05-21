@@ -499,9 +499,9 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
 
     local frame = CreateFrame("Frame", nil, group)
 
-    frame:EnableMouse(true)
+    --frame:EnableMouse(true)
     frame:SetMovable(true)
-    frame:RegisterForDrag("LeftButton")
+    --frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnMouseUp", function(self)
         if self.isMoving then
             self.isMoving = false
@@ -546,8 +546,6 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
     frame.timerFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 
     self:applyGroupSettings(frame)
-
-    frame:EnableMouse(true)
 
     frame:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" and IsShiftKeyDown() then
