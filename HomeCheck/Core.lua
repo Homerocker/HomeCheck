@@ -479,6 +479,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         end
     elseif not self:getSpellAlwaysShow(spellID) then
         self:removeCooldownFrames(playerName, spellID, true)
+        self:repositionFrames(self:getSpellGroup(spellID))
         return
     else
         frame.timerFontString:SetText("R")
