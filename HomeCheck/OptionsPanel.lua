@@ -7,10 +7,9 @@ function HomeCheck:OptionsPanel()
         type = "group",
         childGroups = "tab",
         args = {
-            --[[
-            enable = {
-                name = "Enable",
-                desc = "Enables / disables the addon",
+            linking = {
+                name = "Enable linking",
+                desc = "Enables ability to link remaining cooldown duration to raid/party chat.",
                 type = "toggle",
                 set = function(info, val)
                     HomeCheck.enabled = val
@@ -19,7 +18,6 @@ function HomeCheck:OptionsPanel()
                     return HomeCheck.enabled
                 end
             },
-            ]]--
             frames = {
                 name = L["Frames"],
                 type = "group",

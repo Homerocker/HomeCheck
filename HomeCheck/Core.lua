@@ -500,6 +500,17 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
 
     local frame = CreateFrame("Frame", nil, group)
 
+    --frame:EnableMouse(true)
+    frame:SetMovable(true)
+    --frame:RegisterForDrag("LeftButton")
+    frame:SetScript("OnMouseUp", function(self)
+        if self.isMoving then
+            self.isMoving = false
+            self:StopMovingOrSizing()
+            HomeCheck:saveFramePosition(HomeCheck:getSpellGroup(spellID))
+        end
+    end)
+
     frame.playerName = playerName
     frame.spellID = spellID
     frame.CDLeft = 0
@@ -537,12 +548,13 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
 
     self:applyGroupSettings(frame)
 
-    frame:EnableMouse(true)
-
     frame:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" and IsShiftKeyDown() then
             local message = frame.playerName .. " " .. (GetSpellLink(frame.spellID)) .. " " .. (frame.CDLeft == 0 and "READY" or date("!%M:%S", frame.CDLeft))
             ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", message, playerInRaid and "RAID" or "PARTY")
+        elseif IsControlKeyDown() then
+            self.isMoving = true
+            self:StartMoving()
         end
     end)
 
@@ -558,7 +570,11 @@ function HomeCheck:repositionFrames(groupIndex)
         return
     end
     for j = 1, #self.groups[groupIndex].CooldownFrames do
-        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -20 - (self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].iconSize + self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].padding) * (j - 1))
+        if j==1 then
+            self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT")
+        else
+            self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", self.groups[groupIndex].CooldownFrames[j-1], "BOTTOMLEFT")
+        end
     end
 end
 
@@ -763,23 +779,10 @@ function HomeCheck:getGroup(i)
     end
     local frame = CreateFrame("Frame", nil, UIParent)
     frame:SetFrameStrata("MEDIUM")
-    frame:SetMovable(true)
-    frame:EnableMouse(true)
     frame:SetClampedToScreen(true)
-    frame:RegisterForDrag("LeftButton")
     frame:ClearAllPoints()
     frame:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
     frame:SetSize(20, 20)
-    local icon = select(3, GetSpellInfo(47585))
-    frame.texture = frame:CreateTexture(nil, "OVERLAY")
-    frame.texture:SetTexture(icon)
-    frame:SetScript("OnDragStart", function(s)
-        s:StartMoving()
-    end)
-    frame:SetScript("OnDragStop", function(s)
-        s:StopMovingOrSizing()
-        self:saveFramePosition(i)
-    end)
     frame.CooldownFrames = {}
 
     table.insert(self.groups, frame)
