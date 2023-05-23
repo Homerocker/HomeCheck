@@ -41,5 +41,5 @@ L["Ungroup"] = true
 L["Ignore priority and move out of range spells to the bottom of the list"] = true
 L["Target alignment"] = true
 L["Priority"] = true
-L["Link to chat"] = true
+L["Link to chat (SHIFT-Click)"] = true
 L["Enables ability to link remaining cooldown duration to raid/party chat. Disables click-through."] = true

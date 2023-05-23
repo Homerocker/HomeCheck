@@ -8,7 +8,7 @@ function HomeCheck:OptionsPanel()
         childGroups = "tab",
         args = {
             linking = {
-                name = L["Link to chat"],
+                name = L["Link to chat (SHIFT-Click)"],
                 desc = L["Enables ability to link remaining cooldown duration to raid/party chat. Disables click-through."],
                 type = "toggle",
                 set = function(info, val)
