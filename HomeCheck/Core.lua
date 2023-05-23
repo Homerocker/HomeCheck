@@ -570,10 +570,10 @@ function HomeCheck:repositionFrames(groupIndex)
         return
     end
     for j = 1, #self.groups[groupIndex].CooldownFrames do
-        if j==1 then
+        if j == 1 then
             self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT")
         else
-            self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", self.groups[groupIndex].CooldownFrames[j-1], "BOTTOMLEFT")
+            self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", self.groups[groupIndex].CooldownFrames[j - 1], "BOTTOMLEFT")
         end
     end
 end
@@ -777,12 +777,18 @@ function HomeCheck:getGroup(i)
     if self.groups[i] then
         return self.groups[i]
     end
-    local frame = CreateFrame("Frame", nil, UIParent)
+    local frame = CreateFrame("Frame")
     frame:SetFrameStrata("MEDIUM")
     frame:SetClampedToScreen(true)
     frame:ClearAllPoints()
-    frame:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
-    frame:SetSize(20, 20)
+
+    frame.anchor = CreateFrame("Frame")
+    frame.anchor:SetSize(20, 20)
+    frame.anchor:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
+    frame.anchor:SetFrameStrata("HIGH")
+
+    frame:SetAllPoints(frame.anchor)
+
     frame.CooldownFrames = {}
 
     table.insert(self.groups, frame)
