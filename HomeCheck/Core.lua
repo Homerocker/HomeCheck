@@ -559,11 +559,7 @@ function HomeCheck:repositionFrames(groupIndex)
         return
     end
     for j = 1, #self.groups[groupIndex].CooldownFrames do
-        if j == 1 then
-            self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT")
-        else
-            self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", self.groups[groupIndex].CooldownFrames[j - 1], "BOTTOMLEFT")
-        end
+        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -(self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].iconSize + self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].padding) * (j - 1))
     end
 end
 
