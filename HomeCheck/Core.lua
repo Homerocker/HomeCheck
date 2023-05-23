@@ -357,7 +357,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         self:Readiness(playerName)
     elseif spellID == 48153 then
         -- Guardian Spirit heal
-        --self:GSProc(playerName)
         if not GSHealTimestamp[playerName] or time() - GSHealTimestamp[playerName] > 100 then
             self:setCooldown(47788, playerName, self:getCDLeft(playerName, 47788) + 110, target, isRemote)
             GSHealTimestamp[playerName] = time()
@@ -373,6 +372,10 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     end
 
     if not self:isSpellEnabled(spellID) then
+        return
+    end
+
+    if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
         return
     end
 
@@ -425,9 +428,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         end
     end
 
-    if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
-        return
-    elseif childSpells[spellID] then
+    if childSpells[spellID] then
         if not frame.target then
             target = self:getTarget(playerName, childSpells[spellID])
             if target then
