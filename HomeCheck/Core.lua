@@ -500,17 +500,6 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
 
     local frame = CreateFrame("Frame", nil, group)
 
-    --frame:EnableMouse(true)
-    frame:SetMovable(true)
-    --frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnMouseUp", function(self)
-        if self.isMoving then
-            self.isMoving = false
-            self:StopMovingOrSizing()
-            HomeCheck:saveFramePosition(HomeCheck:getSpellGroup(spellID))
-        end
-    end)
-
     frame.playerName = playerName
     frame.spellID = spellID
     frame.CDLeft = 0
@@ -552,11 +541,9 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
         if button == "LeftButton" and IsShiftKeyDown() then
             local message = frame.playerName .. " " .. (GetSpellLink(frame.spellID)) .. " " .. (frame.CDLeft == 0 and "READY" or date("!%M:%S", frame.CDLeft))
             ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", message, playerInRaid and "RAID" or "PARTY")
-        elseif IsControlKeyDown() then
-            self.isMoving = true
-            self:StartMoving()
         end
     end)
+    frame:EnableMouse(true)
 
     table.insert(group.CooldownFrames, frame)
     return frame
@@ -683,7 +670,7 @@ function HomeCheck:UnitHasAbility(playerName, spellID)
 end
 
 function HomeCheck:saveFramePosition(groupIndex)
-    local point, relativeTo, relativePoint, xOfs, yOfs = self.groups[groupIndex]:GetPoint(0)
+    local point, relativeTo, relativePoint, xOfs, yOfs = self.groups[groupIndex].anchor:GetPoint(0)
     self.db.profile[groupIndex].pos = {
         point = point,
         relativeTo = relativeTo and relativeTo:GetName(),
@@ -786,6 +773,13 @@ function HomeCheck:getGroup(i)
     frame.anchor:SetSize(20, 20)
     frame.anchor:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
     frame.anchor:SetFrameStrata("HIGH")
+    frame.anchor:EnableMouse(true)
+    frame.anchor:SetMovable(true)
+    frame.anchor:RegisterForDrag("LeftButton")
+    frame.anchor:SetScript("OnDragStop", function(s)
+        --s:StopMovingOrSizing()
+        self:saveFramePosition(i)
+    end)
 
     frame:SetAllPoints(frame.anchor)
 
