@@ -1,7 +1,7 @@
-if GetLocale() ~= "ruRU" then
+local L = LibStub("AceLocale-3.0"):NewLocale("HomeCheck", "ruRU")
+if not L then
     return
 end
-local L = LibStub("AceLocale-3.0"):NewLocale("HomeCheck", "ruRU")
 
 L["Frame width"] = "Ширина панели"
 L["Font size"] = "Размер шрифта"
