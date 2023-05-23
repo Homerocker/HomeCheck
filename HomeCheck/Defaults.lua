@@ -14,7 +14,8 @@ HomeCheck.defaults = {
             FRCD3S = true,
             HomeCheck = true,
             FRCD3 = true
-        }
+        },
+        link = true
     },
     profile = {
         ['*'] = {
