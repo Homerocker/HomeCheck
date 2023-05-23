@@ -537,13 +537,15 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
 
     self:applyGroupSettings(frame)
 
-    frame:SetScript("OnMouseDown", function(self, button)
-        if button == "LeftButton" and IsShiftKeyDown() then
-            local message = frame.playerName .. " " .. (GetSpellLink(frame.spellID)) .. " " .. (frame.CDLeft == 0 and "READY" or date("!%M:%S", frame.CDLeft))
-            ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", message, playerInRaid and "RAID" or "PARTY")
-        end
-    end)
-    frame:EnableMouse(true)
+    if self.db.global.link then
+        frame:SetScript("OnMouseDown", function(self, button)
+            if button == "LeftButton" and IsShiftKeyDown() then
+                local message = frame.playerName .. " " .. (GetSpellLink(frame.spellID)) .. " " .. (frame.CDLeft == 0 and "READY" or date("!%M:%S", frame.CDLeft))
+                ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", message, playerInRaid and "RAID" or "PARTY")
+            end
+        end)
+        frame:EnableMouse(true)
+    end
 
     table.insert(group.CooldownFrames, frame)
     return frame
