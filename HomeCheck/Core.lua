@@ -352,6 +352,13 @@ end
 ---@param target string|nil
 ---@param isRemote boolean|nil
 function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
+    if type(spellID) == "string" then
+        print("spellID is string")
+        print(tostring(spellID) .. ":" .. tostring(isRemote))
+    end
+    if spellID == 34477 or spellID == 35079 or spellID == 57934 or spellID == 59628 then
+        print(tostring(spellID) .. ":" .. tostring(playerName) .. ":" .. tostring(CDLeft) .. ":" .. tostring(target) .. ":" .. tostring(isRemote))
+    end
     if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)
