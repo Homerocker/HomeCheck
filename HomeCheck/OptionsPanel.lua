@@ -7,19 +7,22 @@ function HomeCheck:OptionsPanel()
         type = "group",
         childGroups = "tab",
         args = {
-            --[[
-            enable = {
-                name = "Enable",
-                desc = "Enables / disables the addon",
+            linking = {
+                name = L["Link to chat (SHIFT-Click)"],
+                desc = L["Enables ability to link remaining cooldown duration to raid/party chat. Disables click-through."],
                 type = "toggle",
                 set = function(info, val)
-                    HomeCheck.enabled = val
+                    self.db.global.link = val
+                    for i = 1, #self.groups do
+                        for j = 1, #self.groups[i].CooldownFrames do
+                            self.groups[i].CooldownFrames[j]:EnableMouse(val)
+                        end
+                    end
                 end,
                 get = function(info)
-                    return HomeCheck.enabled
+                    return self.db.global.link
                 end
             },
-            ]]--
             frames = {
                 name = L["Frames"],
                 type = "group",

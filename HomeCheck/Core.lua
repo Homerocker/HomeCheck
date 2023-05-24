@@ -357,7 +357,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         self:Readiness(playerName)
     elseif spellID == 48153 then
         -- Guardian Spirit heal
-        --self:GSProc(playerName)
         if not GSHealTimestamp[playerName] or time() - GSHealTimestamp[playerName] > 100 then
             self:setCooldown(47788, playerName, self:getCDLeft(playerName, 47788) + 110, target, isRemote)
             GSHealTimestamp[playerName] = time()
@@ -373,6 +372,10 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     end
 
     if not self:isSpellEnabled(spellID) then
+        return
+    end
+
+    if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
         return
     end
 
@@ -425,14 +428,10 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         end
     end
 
-    if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
-        return
-    elseif childSpells[spellID] then
-        if not frame.target then
-            target = self:getTarget(playerName, childSpells[spellID])
-            if target then
-                self:setTarget(frame, target)
-            end
+    if childSpells[spellID] then
+        target = self:getTarget(playerName, childSpells[spellID])
+        if target then
+            self:setTarget(frame, target)
         end
         self:removeCooldownFrames(playerName, childSpells[spellID])
     end
@@ -536,6 +535,16 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
     frame.timerFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 
     self:applyGroupSettings(frame)
+
+    if self.db.global.link then
+        frame:SetScript("OnMouseDown", function(self, button)
+            if button == "LeftButton" and IsShiftKeyDown() then
+                local message = frame.playerName .. " " .. (GetSpellLink(frame.spellID)) .. " " .. (frame.CDLeft == 0 and "READY" or date("!%M:%S", frame.CDLeft))
+                ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", message, playerInRaid and "RAID" or "PARTY")
+            end
+        end)
+        frame:EnableMouse(true)
+    end
 
     table.insert(group.CooldownFrames, frame)
     return frame
@@ -658,7 +667,7 @@ function HomeCheck:UnitHasAbility(playerName, spellID)
 end
 
 function HomeCheck:saveFramePosition(groupIndex)
-    local point, relativeTo, relativePoint, xOfs, yOfs = self.groups[groupIndex]:GetPoint(0)
+    local point, relativeTo, relativePoint, xOfs, yOfs = self.groups[groupIndex].anchor:GetPoint(0)
     self.db.profile[groupIndex].pos = {
         point = point,
         relativeTo = relativeTo and relativeTo:GetName(),
@@ -752,22 +761,28 @@ function HomeCheck:getGroup(i)
     if self.groups[i] then
         return self.groups[i]
     end
-    local frame = CreateFrame("Frame", nil, UIParent)
+    local frame = CreateFrame("Frame")
     frame:SetFrameStrata("MEDIUM")
-    frame:SetMovable(true)
-    frame:EnableMouse(true)
     frame:SetClampedToScreen(true)
-    frame:RegisterForDrag("LeftButton")
     frame:ClearAllPoints()
-    frame:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
-    frame:SetSize(20, 20)
-    frame:SetScript("OnDragStart", function(s)
+
+    frame.anchor = CreateFrame("Frame")
+    frame.anchor:SetSize(20, 20)
+    frame.anchor:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
+    frame.anchor:SetFrameStrata("HIGH")
+    frame.anchor:EnableMouse(true)
+    frame.anchor:SetMovable(true)
+    frame.anchor:RegisterForDrag("LeftButton")
+    frame.anchor:SetScript("OnDragStart", function(s)
         s:StartMoving()
     end)
-    frame:SetScript("OnDragStop", function(s)
+    frame.anchor:SetScript("OnDragStop", function(s)
         s:StopMovingOrSizing()
         self:saveFramePosition(i)
     end)
+
+    frame:SetAllPoints(frame.anchor)
+
     frame.CooldownFrames = {}
 
     table.insert(self.groups, frame)
