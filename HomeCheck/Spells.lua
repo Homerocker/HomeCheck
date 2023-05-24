@@ -11,7 +11,8 @@ HomeCheck.spells = {
         cd = 120,
         class = "PALADIN",
         talentTab = 2,
-        talentIndex = 6
+        talentIndex = 6,
+        notarget = true
     },
     -- GS
     [47788] = {
@@ -35,7 +36,8 @@ HomeCheck.spells = {
         cd = 60,
         class = "DRUID",
         talentTab = 1,
-        talentIndex = 28
+        talentIndex = 28,
+        notarget = true
     },
     -- Rebirth
     [48477] = {
@@ -51,23 +53,27 @@ HomeCheck.spells = {
     [34477] = {
         cd = 60,
         class = "HUNTER",
-        parent = 35079
+        parent = 35079,
+        noself = true
     },
     -- Misdirection
     [35079] = {
         cd = 30,
-        class = "HUNTER"
+        class = "HUNTER",
+        noself = true
     },
     -- Tricks of the Trade initial cast
     [57934] = {
         cd = 60,
         class = "ROGUE",
-        parent = 59628
+        parent = 59628,
+        noself = true
     },
     -- Tricks of the Trade
     [59628] = {
         cd = 30,
-        class = "ROGUE"
+        class = "ROGUE",
+        noself = true
     },
     -- Divine Shield
     [642] = {
@@ -107,7 +113,8 @@ HomeCheck.spells = {
         cd = 120,
         class = "PALADIN",
         talentTab = 1,
-        talentIndex = 6
+        talentIndex = 6,
+        notarget = true
     },
     -- Fear Ward
     [6346] = {
@@ -117,12 +124,14 @@ HomeCheck.spells = {
     -- Hymn of Hope
     [64901] = {
         cd = 360,
-        class = "PRIEST"
+        class = "PRIEST",
+        notarget = true
     },
     -- Divine Hymn
     [64843] = {
         cd = 480,
-        class = "PRIEST"
+        class = "PRIEST",
+        notarget = true
     },
     -- Eyes of Twilight (normal)
     [75490] = {
@@ -185,7 +194,8 @@ HomeCheck.spells = {
     -- Holy Wrath
     [48817] = {
         cd = 30,
-        class = "PALADIN"
+        class = "PALADIN",
+        notarget = true
     },
     -- Hand of Salvation
     [1038] = {
@@ -243,7 +253,8 @@ HomeCheck.spells = {
     -- Tranquility
     [48447] = {
         cd = 480,
-        class = "DRUID"
+        class = "DRUID",
+        notarget = true
     },
     -- Frenzied Regeneration
     [22842] = {
@@ -301,6 +312,7 @@ HomeCheck.spells = {
         cd = 180,
         class = "HUNTER",
         talentTab = 2,
-        talentIndex = 14
+        talentIndex = 14,
+        notarget = true
     }
 }

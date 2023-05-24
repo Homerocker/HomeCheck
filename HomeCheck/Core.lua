@@ -400,9 +400,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         isRemote = true
     end
 
-    if target and frame.target ~= target then
         self:setTarget(frame, target)
-    end
 
     if CDLeft then
         if not frame.isRemote and isRemote then
@@ -436,10 +434,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     end
 
     if childSpells[spellID] then
-        target = self:getTarget(playerName, childSpells[spellID])
-        if target then
-            self:setTarget(frame, target)
-        end
+        self:setTarget(frame, self:getTarget(playerName, childSpells[spellID]))
         self:removeCooldownFrames(playerName, childSpells[spellID])
     end
 
@@ -818,6 +813,15 @@ function HomeCheck:getTarget(playerName, spellID)
 end
 
 function HomeCheck:setTarget(frame, target)
+    if not target or target == frame.target then
+        return
+    end
+    if self.spells[frame.spellID].notarget then
+        return
+    end
+    if self.spells[frame.spellID].noself and target == frame.playerName then
+        return
+    end
     frame.target = target
     self.db.global.CDs[frame.playerName][frame.spellID].target = target
     frame.targetFontString:SetText(target)
