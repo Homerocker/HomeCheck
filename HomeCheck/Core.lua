@@ -444,8 +444,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     frame.isRemote = isRemote
     frame.CD = self:getSpellCooldown(frame)
 
-    self:sortFrames(self:getSpellGroup(spellID))
-
     self:updateCooldownBarProgress(frame)
 
     if frame.CDLeft > 0 then
@@ -482,11 +480,12 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         end
     elseif not self:getSpellAlwaysShow(spellID) then
         self:removeCooldownFrames(playerName, spellID, true)
-        self:repositionFrames(self:getSpellGroup(spellID))
         return
     else
         frame.timerFontString:SetText("R")
     end
+
+    self:sortFrames(self:getSpellGroup(spellID))
 
     self:setTimerColor(frame)
 
