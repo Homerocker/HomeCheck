@@ -646,11 +646,7 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
         if not spellConfig.parent then
             if not spellConfig.class or spellConfig.class == class then
                 if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID) then
-                    if self.db.profile.spells[spellID].alwaysShow then
-                        self:setCooldown(spellID, playerName)
-                    else
-                        self:removeCooldownFrames(playerName, spellID, true)
-                    end
+                    self:setCooldown(spellID, playerName)
                 else
                     self:removeCooldownFrames(playerName, spellID)
                 end
