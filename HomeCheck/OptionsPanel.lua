@@ -602,5 +602,5 @@ function HomeCheck:OptionsPanel()
         func = ReloadUI
     }
     AceConfig:RegisterOptionsTable("HomeCheck", myOptionsTable, { "homecheck" })
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HomeCheck", "HomeCheck")
+    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HomeCheck", "HomeCheck " .. GetAddOnMetadata("HomeCheck", "Version"))
 end

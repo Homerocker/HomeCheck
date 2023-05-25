@@ -400,7 +400,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         isRemote = true
     end
 
-    self:setTarget(frame, target)
+    target = self:setTarget(frame, target)
 
     if CDLeft then
         if not frame.isRemote and isRemote then
@@ -831,6 +831,7 @@ function HomeCheck:setTarget(frame, target)
         local targetClassColor = RAID_CLASS_COLORS[class]
         frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
     end
+    return target
 end
 
 function HomeCheck:updateRange(frame)
