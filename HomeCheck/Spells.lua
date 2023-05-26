@@ -182,7 +182,8 @@ HomeCheck.spells = {
     -- Army of the Dead
     [42650] = {
         cd = 600,
-        class = "DEATHKNIGHT"
+        class = "DEATHKNIGHT",
+        notarget = true
     },
     -- Mark of Blood
     [49005] = {
