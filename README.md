@@ -10,7 +10,7 @@
     - BLT
     - FatCooldowns
     - more addons can be added by request
-- Grey out players out of range (>80 yards) to improve visual perception
+- Grey out players out of range (>80 yards) to improve visual perception (very useful on Halion to filter out players from other realm)
 - Hide cooldowns when player leaves raid or goes offline
 - Restore cooldowns after relog or UI reload
 - Adjust frame size, fonts, textures and more
@@ -18,7 +18,8 @@
 - Correct Misdirection and Tricks of Trade cooldown duration (can be more than 30 sec)
 - Track Guardian Spirit proc
 - Track Readiness
-- Correctly display double Rebirth
+- Display double Rebirth on same target
+- Link cooldown duration in raid chat
 - etc.
 
 # Settings
