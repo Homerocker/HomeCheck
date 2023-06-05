@@ -545,16 +545,14 @@ function HomeCheck:OptionsPanel()
                             if val then
                                 self:updateRaidCooldowns()
                             else
-                                for i = 1, #self.groups do
-                                    local playerNames = {}
-                                    for j = 1, #self.groups[i].CooldownFrames do
-                                        if self.groups[i].CooldownFrames[j].spellID == spellID and self.groups[i].CooldownFrames[j].CDLeft <= 0 then
-                                            table.insert(playerNames, self.groups[i].CooldownFrames[j].playerName)
-                                        end
+                                local playerNames = {}
+                                for j = 1, #self.groups[self.db.profile.spells[spellID].group].CooldownFrames do
+                                    if self.groups[self.db.profile.spells[spellID].group].CooldownFrames[j].spellID == spellID and self.groups[self.db.profile.spells[spellID].group].CooldownFrames[j].CDLeft <= 0 then
+                                        table.insert(playerNames, self.groups[self.db.profile.spells[spellID].group].CooldownFrames[j].playerName)
                                     end
-                                    for _, playerName in ipairs(playerNames) do
-                                        self:removeCooldownFrames(playerName, spellID)
-                                    end
+                                end
+                                for _, playerName in ipairs(playerNames) do
+                                    self:removeCooldownFrames(playerName, spellID)
                                 end
                             end
                         end,
