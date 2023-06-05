@@ -542,7 +542,21 @@ function HomeCheck:OptionsPanel()
                         set = function(_, val)
                             self.db.profile.spells[spellID].alwaysShow = val
                             -- TODO is scan neccessary?
-                            self:updateRaidCooldowns()
+                            if val then
+                                self:updateRaidCooldowns()
+                            else
+                                for i = 1, #self.groups do
+                                    local playerNames = {}
+                                    for j = 1, #self.groups[i].CooldownFrames do
+                                        if self.groups[i].CooldownFrames[j].spellID == spellID and self.groups[i].CooldownFrames[j].CDLeft <= 0 then
+                                            table.insert(playerNames, self.groups[i].CooldownFrames[j].playerName)
+                                        end
+                                    end
+                                    for _, playerName in ipairs(playerNames) do
+                                        self:removeCooldownFrames(playerName, spellID)
+                                    end
+                                end
+                            end
                         end,
                         get = function(_)
                             return self.db.profile.spells[spellID].alwaysShow

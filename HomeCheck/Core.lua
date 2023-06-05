@@ -437,8 +437,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     frame.isRemote = isRemote
     frame.CD = self:getSpellCooldown(frame)
 
-    self:updateCooldownBarProgress(frame)
-
     if frame.CDLeft > 0 then
         self.db.global.CDs[playerName][spellID].timestamp = time() + frame.CDLeft
 
@@ -478,6 +476,8 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     else
         frame.timerFontString:SetText("R")
     end
+
+    self:updateCooldownBarProgress(frame)
 
     self:sortFrames(self:getSpellGroup(spellID))
 
