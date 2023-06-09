@@ -155,7 +155,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
 
         for playerName, spells in pairs(self.db.global.CDs) do
             for spellID, cd in pairs(spells) do
-                if cd.timestamp < time() then
+                if not cd.timestamp or cd.timestamp < time() then
                     table.wipe(self.db.global.CDs[playerName][spellID])
                 end
             end
@@ -462,7 +462,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
                         frame.timerFontString:SetText("R")
                         self:setTimerColor(frame)
                     end
-                    self.db.global.CDs[playerName][spellID] = nil
+                    table.wipe(self.db.global.CDs[playerName][spellID])
                 elseif frame.CDLeft == floor(frame.CDLeft) then
                     frame.timerFontString:SetText(date("!%M:%S", frame.CDLeft):gsub('^0+:?0?', ''))
                     self:setTimerColor(frame)
