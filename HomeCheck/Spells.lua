@@ -315,5 +315,15 @@ HomeCheck.spells = {
         talentTab = 2,
         talentIndex = 14,
         notarget = true
+    },
+    -- Dismantle
+    [51722] = {
+        cd = 60,
+        class = "ROGUE"
+    },
+    -- Disarm
+    [676] = {
+        cd = 60,
+        class = "WARRIOR"
     }
 }
