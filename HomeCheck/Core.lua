@@ -375,8 +375,16 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         return
     end
 
-    if self.spells[spellID].parent and self:getCDLeft(playerName, self.spells[spellID].parent) ~= 0 then
-        return
+    if self.spells[spellID].parent then
+        local frame = self:getCooldownFrame(playerName, self.spells[spellID].parent)
+        if frame then
+            if frame.CDLeft ~= 0 then
+                self:setTarget(frame, target)
+                return
+            else
+                self:removeCooldownFrames(playerName, self.spells[spellID].parent)
+            end
+        end
     end
 
     local frame = self:createCooldownFrame(playerName, spellID)
@@ -486,15 +494,24 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     frame.initialized = true
 end
 
-function HomeCheck:createCooldownFrame(playerName, spellID)
+function HomeCheck:getCooldownFrame(playerName, spellID)
     local group = self:getGroup(self:getSpellGroup(spellID))
     for i = 1, #group.CooldownFrames do
         if group.CooldownFrames[i].playerName == playerName and group.CooldownFrames[i].spellID == spellID then
             return group.CooldownFrames[i]
         end
     end
+end
 
-    local frame = CreateFrame("Frame", nil, group)
+function HomeCheck:createCooldownFrame(playerName, spellID)
+    local frame = self:getCooldownFrame(playerName, spellID)
+
+    if frame then
+        return frame
+    end
+
+    local group = self:getGroup(self:getSpellGroup(spellID))
+    frame = CreateFrame("Frame", nil, group)
 
     frame.playerName = playerName
     frame.spellID = spellID
@@ -804,10 +821,7 @@ function HomeCheck:getTarget(playerName, spellID)
 end
 
 function HomeCheck:setTarget(frame, target)
-    if not target or target == frame.target then
-        return
-    end
-    if self.spells[frame.spellID].notarget then
+    if not target or target == frame.target or self.spells[frame.spellID].notarget then
         return
     end
     if self.spells[frame.spellID].noself and target == frame.playerName then
