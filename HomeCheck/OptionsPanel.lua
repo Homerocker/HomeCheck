@@ -554,6 +554,7 @@ function HomeCheck:OptionsPanel()
                                 for _, playerName in ipairs(playerNames) do
                                     self:removeCooldownFrames(playerName, spellID)
                                 end
+                                self:repositionFrames()
                             end
                         end,
                         get = function(_)
