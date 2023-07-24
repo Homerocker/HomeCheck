@@ -325,5 +325,10 @@ HomeCheck.spells = {
     [676] = {
         cd = 60,
         class = "WARRIOR"
+    },
+    -- Soulstone Resurrection buff
+    [47883] = {
+        cd = 900,
+        class = "WARLOCK"
     }
 }
