@@ -953,6 +953,9 @@ function HomeCheck:getSpellCooldown(frame)
         if frame.CDLeft > self.spells[frame.spellID].cd then
             CDmodifier = 110
         end
+    elseif frame.spellID == 42650 then
+        -- Army of the Dead
+        CDmodifier = -120 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 3, 13)) or 0)
     end
 
     return self.spells[frame.spellID].cd + CDmodifier
