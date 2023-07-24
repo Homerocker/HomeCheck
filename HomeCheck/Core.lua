@@ -771,7 +771,7 @@ function HomeCheck:getGroup(i)
     if self.groups[i] then
         return self.groups[i]
     end
-    local frame = CreateFrame("Frame")
+    local frame = CreateFrame("Frame", nil, UIParent)
     frame:SetFrameStrata("MEDIUM")
     frame:SetClampedToScreen(true)
     frame:ClearAllPoints()
