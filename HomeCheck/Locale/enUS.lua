@@ -43,3 +43,4 @@ L["Target alignment"] = true
 L["Priority"] = true
 L["Link to chat (SHIFT-Click)"] = true
 L["Enables ability to link remaining cooldown duration to raid/party chat. Disables click-through."] = true
+L["Reset frame position"] = true

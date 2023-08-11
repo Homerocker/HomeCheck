@@ -488,7 +488,8 @@ function HomeCheck:OptionsPanel()
                 end,
                 get = function()
                     return self.db.profile[i].inherit or 0
-                end
+                end,
+                order = 1
             }
             myOptionsTable.args.frames.args["frame" .. i].args.inheritSettings.values[0] = "disabled"
             for j = 1, #self.groups do
@@ -497,6 +498,23 @@ function HomeCheck:OptionsPanel()
                 end
             end
         end
+        myOptionsTable.args.frames.args["frame" .. i].args.resetpos = {
+            name = L["Reset frame position"],
+            type = "execute",
+            func = function()
+                self.groups[i].anchor:ClearAllPoints()
+                self.groups[i].anchor:SetPoint("CENTER", "UIParent", "CENTER", 0, 0)
+                self.db.profile[i].pos = {
+                    point = "CENTER",
+                    relativeTo = "UIParent",
+                    relativePoint = "CENTER",
+                    xOfs = 0,
+                    yOfs = 0
+                }
+            end,
+            confirm = true,
+            order = 2
+        }
     end
     for spellID, spellConfig in pairs(self.spells) do
         if not spellConfig.parent then

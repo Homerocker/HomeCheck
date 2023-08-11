@@ -773,10 +773,10 @@ function HomeCheck:getGroup(i)
     end
     local frame = CreateFrame("Frame", nil, UIParent)
     frame:SetFrameStrata("MEDIUM")
-    frame:SetClampedToScreen(true)
     frame:ClearAllPoints()
 
     frame.anchor = CreateFrame("Frame")
+    frame.anchor:SetClampedToScreen(true)
     frame.anchor:SetSize(20, 20)
     frame.anchor:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
     frame.anchor:SetFrameStrata("HIGH")
