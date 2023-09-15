@@ -39,7 +39,7 @@ local childSpells = {}
 
 local groups = 10
 
-local abs, date, floor, GetTime, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = abs, date, floor, GetTime, min, pairs, select, {
+local date, floor, GetTime, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, GetTime, min, pairs, select, {
     find = string.find,
     gmatch = string.gmatch
 }, strsplit, {
