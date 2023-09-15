@@ -216,6 +216,10 @@ end)
 function HomeCheck:OnCommReceived(...)
     local prefix, message, _, sender = ...
 
+    if not self.db.global.comms[prefix] then
+        return
+    end
+
     if sender == (UnitName("player")) then
         return
     end
@@ -755,14 +759,6 @@ function HomeCheck:cooldownSorter(frame1, frame2)
     elseif self.db.profile.spells[frame1.spellID].priority == self.db.profile.spells[frame2.spellID].priority and frame1.spellID < frame2.spellID then
         -- attempt to group spells by ID
         return true
-    end
-end
-
-function HomeCheck:groupSpells()
-    for i = 1, #self.groups do
-        for j = 1, #self.groups[i].CooldownFrames do
-
-        end
     end
 end
 
