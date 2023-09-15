@@ -39,7 +39,7 @@ local childSpells = {}
 
 local groups = 10
 
-local date, floor, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, min, pairs, select, {
+local abs, date, floor, GetTime, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = abs, date, floor, GetTime, min, pairs, select, {
     find = string.find,
     gmatch = string.gmatch
 }, strsplit, {
@@ -447,16 +447,15 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
 
     if frame.CDLeft > 0 then
         self.db.global.CDs[playerName][spellID].timestamp = time() + frame.CDLeft
+        frame.CDReady = GetTime() + frame.CDLeft
 
         frame.timerFontString:SetText(date("!%M:%S", frame.CDLeft):gsub('^0+:?0?', ''))
 
         if not frame.CDtimer then
             local tick = 0.1
             frame.CDtimer = self:ScheduleRepeatingTimer(function(frame)
-                if frame.CDLeft > 0 then
-                    frame.CDLeft = frame.CDLeft - tick
-                    frame.CDLeft = tonumber((("%%.%df"):format(1)):format(frame.CDLeft))
-                end
+                frame.CDLeft = frame.CDReady - GetTime()
+                frame.CDLeft = tonumber((("%%.%df"):format(1)):format(frame.CDLeft))
 
                 self:updateCooldownBarProgress(frame)
 
