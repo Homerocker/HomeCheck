@@ -19,7 +19,6 @@ L["Target font"] = true
 L["Timer font"] = true
 L["Enabled"] = true
 L["Comms"] = true
-L["Reload UI"] = true
 L["Frames"] = true
 L["Size and position"] = true
 L["Timer position"] = true
