@@ -474,7 +474,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
                         self:setTimerColor(frame)
                     end
                     table.wipe(self.db.global.CDs[playerName][spellID])
-                elseif frame.CDLeft == floor(frame.CDLeft) then
+                elseif frame.timerFontString:GetText() ~= floor(frame.CDLeft) then
                     frame.timerFontString:SetText(date("!%M:%S", frame.CDLeft):gsub('^0+:?0?', ''))
                     self:setTimerColor(frame)
                 end
