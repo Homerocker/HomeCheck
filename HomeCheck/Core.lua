@@ -282,7 +282,7 @@ function HomeCheck:OnCommReceived(...)
         end
         return
     elseif prefix == "HomeCheck" then
-        success, spellID, playerName, target = self:Deserialize(message)
+        success, spellID, playerName, target, CDLeft = self:Deserialize(message)
         if not success then
             return
         end
@@ -372,7 +372,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     end
 
     if not isRemote and CDLeft then
-        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
+        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target, CDLeft), "RAID")
     end
 
     if not self:isSpellEnabled(spellID) then
@@ -698,17 +698,12 @@ function HomeCheck:Readiness(hunterName)
 
     self:SendCommMessage("HomeCheck", self:Serialize(23989, hunterName), "RAID")
 
-    local refreshSpellIDs = {}
     for i = 1, #self.groups do
         for j = 1, #self.groups[i].CooldownFrames do
             if self.groups[i].CooldownFrames[j].playerName == hunterName and self.groups[i].CooldownFrames[j].spellID ~= 34477 then
-                table.insert(refreshSpellIDs, self.groups[i].CooldownFrames[j].spellID)
+                self.groups[i].CooldownFrames[j].CDLeft = 0
             end
         end
-    end
-
-    for _, spellID in ipairs(refreshSpellIDs) do
-        self:setCooldown(spellID, hunterName, 0)
     end
 
     ReadinessTimestamp[hunterName] = time()
