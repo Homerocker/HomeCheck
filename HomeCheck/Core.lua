@@ -216,6 +216,10 @@ end)
 function HomeCheck:OnCommReceived(...)
     local prefix, message, _, sender = ...
 
+    if not self.db.global.comms[prefix] then
+        return
+    end
+
     if sender == (UnitName("player")) then
         return
     end
@@ -757,14 +761,6 @@ function HomeCheck:cooldownSorter(frame1, frame2)
     end
 end
 
-function HomeCheck:groupSpells()
-    for i = 1, #self.groups do
-        for j = 1, #self.groups[i].CooldownFrames do
-
-        end
-    end
-end
-
 function HomeCheck:getGroup(i)
     i = i or 1
     if self.groups[i] then
@@ -945,7 +941,8 @@ function HomeCheck:getSpellCooldown(frame)
     elseif frame.spellID == 12292 then
         -- Death Wish
         CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.11 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 2, 18)) or 0)
-    elseif frame.spellID == 10060 then
+    elseif frame.spellID == 10060 or frame.spellID == 33206 then
+        -- Power Infusion and Pain Suppression
         CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.1 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 1, 23)) or 0)
     elseif frame.spellID == 47788 then
         -- Guardian spirit

@@ -42,7 +42,7 @@ function HomeCheck:OptionsPanel()
                 args = {
                     desc = {
                         type = "header",
-                        name = L["Only change this if you have specific issues. Otherwise should be enabled. Requires UI reload."],
+                        name = L["Only change this if you have specific issues. Otherwise should be enabled."],
                         order = 4
                     }
                 }
@@ -617,9 +617,11 @@ function HomeCheck:OptionsPanel()
     for prefix, addonName in pairs(self.comms) do
         myOptionsTable.args.comms.args[prefix] = {
             name = addonName,
-            --desc = "Enables / disables the addon",
             type = "toggle",
             set = function(_, val)
+                if val and not self.db.global.comms[prefix] then
+                    self:RegisterComm(prefix)
+                end
                 self.db.global.comms[prefix] = val
             end,
             get = function(_)
@@ -627,11 +629,6 @@ function HomeCheck:OptionsPanel()
             end
         }
     end
-    myOptionsTable.args.comms.args["reloadUI"] = {
-        name = L["Reload UI"],
-        type = "execute",
-        func = ReloadUI
-    }
     AceConfig:RegisterOptionsTable("HomeCheck", myOptionsTable, { "homecheck" })
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("HomeCheck", "HomeCheck " .. GetAddOnMetadata("HomeCheck", "Version"))
 end
