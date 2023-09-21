@@ -696,19 +696,12 @@ function HomeCheck:Readiness(hunterName)
         return
     end
 
-    self:SendCommMessage("HomeCheck", self:Serialize(23989, hunterName), "RAID")
-
-    local refreshSpellIDs = {}
     for i = 1, #self.groups do
         for j = 1, #self.groups[i].CooldownFrames do
             if self.groups[i].CooldownFrames[j].playerName == hunterName and self.groups[i].CooldownFrames[j].spellID ~= 34477 then
-                table.insert(refreshSpellIDs, self.groups[i].CooldownFrames[j].spellID)
+                self.groups[i].CooldownFrames[j].CDLeft = 0
             end
         end
-    end
-
-    for _, spellID in ipairs(refreshSpellIDs) do
-        self:setCooldown(spellID, hunterName, 0)
     end
 
     ReadinessTimestamp[hunterName] = time()
