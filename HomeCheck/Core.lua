@@ -72,7 +72,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             self:setCooldown(spellID, playerName, true, targetName)
         elseif combatEvent == "SPELL_HEAL" and spellID == 48153 then
             -- Guardian Spirit proced
-            self:setCooldown(48153, playerName)
+            self:setCooldown(spellID, playerName, true, targetName)
         elseif combatEvent == "UNIT_DIED" then
             if UnitInRaid(playerName) or UnitInParty(playerName) then
                 self.deadUnits[playerName] = true
@@ -357,9 +357,6 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)
-    elseif spellID == 48153 then
-        -- Guardian Spirit heal
-        self:GSProc(playerName, target, isRemote)
     end
 
     if not spellID or not self.spells[spellID] then
@@ -396,7 +393,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         -- restoring CD info from SV
         CDLeft = self.db.global.CDs[playerName][spellID].timestamp - time()
         target = self.db.global.CDs[playerName][spellID].target
-        -- unknown data source and reliability, treat is as remote
+        -- unknown data source and reliability, treat it as remote
         isRemote = true
     end
 
@@ -702,23 +699,6 @@ function HomeCheck:Readiness(hunterName)
     ReadinessTimestamp[hunterName] = time()
 end
 
-function HomeCheck:GSProc(playerName, target, isRemote)
-    local frame = self:getCooldownFrame(playerName, 47788)
-    if not frame or frame.CDLeft <= 0 then
-        -- cooldown not set or expired
-        self:setCooldown(47788, playerName, 110, target, isRemote)
-        return
-    end
-
-    if frame.CD == 180 then
-        -- GS proc already processed
-        return
-    end
-
-    frame.CD = 180
-    self:setCooldown(47788, playerName, frame.CD, target, isRemote)
-end
-
 function HomeCheck:sortFrames(groupIndex)
     if not groupIndex then
         for i = 1, #self.groups do
@@ -953,7 +933,7 @@ function HomeCheck:getSpellCooldown(frame)
     elseif frame.spellID == 47788 then
         -- Guardian spirit
         if frame.CDLeft > self.spells[frame.spellID].cd then
-            CDmodifier = 110
+            return 180
         end
     elseif frame.spellID == 42650 then
         -- Army of the Dead

@@ -14,12 +14,18 @@ HomeCheck.spells = {
         talentIndex = 6,
         notarget = true
     },
+    -- GS proc
+    [48153] = {
+        cd = 180,
+        class = "PRIEST",
+        talentTab = 2,
+        talentIndex = 27
+    },
     -- GS
     [47788] = {
         cd = 70,
         class = "PRIEST",
-        talentTab = 2,
-        talentIndex = 27
+        parent = 48153
     },
     -- Hand of Sacrifice
     [6940] = {
