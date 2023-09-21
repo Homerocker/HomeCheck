@@ -716,7 +716,7 @@ function HomeCheck:GSProc(playerName, target, isRemote)
     end
 
     frame.CD = 180
-    frame.CDLeft = frame.CDLeft + 110
+    self:setCooldown(47788, playerName, frame.CD, target, isRemote)
 end
 
 function HomeCheck:sortFrames(groupIndex)
