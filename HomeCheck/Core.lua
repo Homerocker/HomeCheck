@@ -33,8 +33,6 @@ local updateRaidRosterScheduleTimer
 
 local ReadinessTimestamp = {}
 
-local GSHealTimestamp = {}
-
 local childSpells = {}
 
 local groups = 10
@@ -361,10 +359,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         self:Readiness(playerName)
     elseif spellID == 48153 then
         -- Guardian Spirit heal
-        if not GSHealTimestamp[playerName] or time() - GSHealTimestamp[playerName] > 100 then
-            self:setCooldown(47788, playerName, self:getCDLeft(playerName, 47788) + 110, target, isRemote)
-            GSHealTimestamp[playerName] = time()
-        end
+        self:GSProc(playerName, target, isRemote)
     end
 
     if not spellID or not self.spells[spellID] then
@@ -705,6 +700,23 @@ function HomeCheck:Readiness(hunterName)
     end
 
     ReadinessTimestamp[hunterName] = time()
+end
+
+function HomeCheck:GSProc(playerName, target, isRemote)
+    local frame = self:getCooldownFrame(playerName, 47788)
+    if not frame or frame.CDLeft <= 0 then
+        -- cooldown not set or expired
+        self:setCooldown(47788, playerName, 110, target, isRemote)
+        return
+    end
+
+    if frame.CD == 180 then
+        -- GS proc already processed
+        return
+    end
+
+    frame.CD = 180
+    frame.CDLeft = frame.CDLeft + 110
 end
 
 function HomeCheck:sortFrames(groupIndex)
