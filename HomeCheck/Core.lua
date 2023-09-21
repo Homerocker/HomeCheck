@@ -366,7 +366,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         return
     end
 
-    if not isRemote and CDLeft then
+    if not isRemote and CDLeft == true then
         self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
     end
 
