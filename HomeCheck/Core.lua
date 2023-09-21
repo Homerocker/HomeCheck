@@ -282,7 +282,7 @@ function HomeCheck:OnCommReceived(...)
         end
         return
     elseif prefix == "HomeCheck" then
-        success, spellID, playerName, target, CDLeft = self:Deserialize(message)
+        success, spellID, playerName, target = self:Deserialize(message)
         if not success then
             return
         end
@@ -372,7 +372,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     end
 
     if not isRemote and CDLeft then
-        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target, CDLeft), "RAID")
+        self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
     end
 
     if not self:isSpellEnabled(spellID) then
@@ -695,8 +695,6 @@ function HomeCheck:Readiness(hunterName)
     if ReadinessTimestamp[hunterName] and time() - ReadinessTimestamp[hunterName] < 100 then
         return
     end
-
-    self:SendCommMessage("HomeCheck", self:Serialize(23989, hunterName), "RAID")
 
     for i = 1, #self.groups do
         for j = 1, #self.groups[i].CooldownFrames do
