@@ -688,12 +688,17 @@ function HomeCheck:Readiness(hunterName)
         return
     end
 
+    local refreshSpellIDs = {}
     for i = 1, #self.groups do
         for j = 1, #self.groups[i].CooldownFrames do
             if self.groups[i].CooldownFrames[j].playerName == hunterName and self.groups[i].CooldownFrames[j].spellID ~= 34477 then
-                self.groups[i].CooldownFrames[j].CDLeft = 0
+                table.insert(refreshSpellIDs, self.groups[i].CooldownFrames[j].spellID)
             end
         end
+    end
+
+    for _, spellID in ipairs(refreshSpellIDs) do
+        self:setCooldown(spellID, hunterName, 0)
     end
 
     ReadinessTimestamp[hunterName] = time()
