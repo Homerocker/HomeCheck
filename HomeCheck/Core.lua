@@ -940,6 +940,9 @@ function HomeCheck:getSpellCooldown(frame)
         if frame.CDLeft > self.spells[frame.spellID].cd then
             return 180
         end
+        if self:UnitGlyphsLoaded(frame.playerName) and not self.LibGroupTalents:UnitHasGlyph(frame.playerName, 45755) then
+            return 180
+        end
     elseif frame.spellID == 42650 then
         -- Army of the Dead
         CDmodifier = -120 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 3, 13)) or 0)
@@ -1059,5 +1062,12 @@ function HomeCheck:Rebirth(event, playerName, target)
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         self:setCooldown(48477, playerName, true, self.RebirthTargets[playerName])
         self.RebirthTargets[playerName] = nil
+    end
+end
+
+function HomeCheck:UnitGlyphsLoaded(unit)
+    local a, b, c, d, e, f = self.LibGroupTalents:GetUnitGlyphs(unit)
+    if a + b + c + d + e + f ~= 0 then
+        return true
     end
 end
