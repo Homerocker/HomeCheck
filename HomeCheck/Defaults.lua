@@ -58,7 +58,7 @@ HomeCheck.defaults = {
                 priority = 195
             },
             -- GS
-            [47788] = {
+            [48153] = {
                 enable = true,
                 alwaysShow = true,
                 group = 1,

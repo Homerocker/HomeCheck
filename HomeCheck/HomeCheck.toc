@@ -28,3 +28,4 @@ Core.lua
 Spells.lua
 Defaults.lua
 OptionsPanel.lua
+UpgradeDB.lua
