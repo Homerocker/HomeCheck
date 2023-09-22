@@ -24,7 +24,12 @@ function HomeCheck:upgradeDB()
             local profiles = self.db:GetProfiles()
             for _, profile in ipairs(profiles) do
                 self.db:SetProfile(profile)
-                self.db.profile.spells[48153] = tablecopy(self.db.profile.spells[47788], self.db.profile.spells[48153])
+                for k, v in pairs(self.db.profile.spells[47788]) do
+                    if (self.defaults.profile.spells[48153][k] == nil or v ~= self.defaults.profile.spells[48153][k])
+                            and (self.defaults.profile.spells['**'][k] == nil or v ~= self.defaults.profile.spells['**'][k]) then
+                        self.db.profile.spells[48153][k] = v
+                    end
+                end
                 self.db.profile.spells[47788] = nil
             end
             self.db:SetProfile(currentProfile)
