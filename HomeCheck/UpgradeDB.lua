@@ -9,7 +9,7 @@ local function tablecopy(t, copyto)
     return copyto
 end
 
-function HomeCheck:UpgradeDB()
+function HomeCheck:upgradeDB()
     if self.db.global.db_ver ~= self.db_ver then
         if self.db.global.db_ver == 1 then
             for k, v in pairs(self.db.global) do
