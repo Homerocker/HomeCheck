@@ -703,25 +703,27 @@ end
 ---@return boolean true if frame1 should be below frame2
 function HomeCheck:cooldownSorter(frame1, frame2)
     local groupIndex = self:getSpellGroup(frame1.spellID)
+    local spellId1 = self.spells[frame1.spellID].parent or frame1.spellID
+    local spellId2 = self.spells[frame2.spellID].parent or frame2.spellID
     if frame1.inRange < frame2.inRange then
         if self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeUngroup then
             return true
-        elseif frame1.spellID == frame2.spellID and self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeDimout then
+        elseif spellId1 == spellId2 and self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeDimout then
             return true
         end
     elseif frame1.inRange > frame2.inRange then
-        if self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeUngroup or frame1.spellID == frame2.spellID then
+        if self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeUngroup or spellId1 == spellId2 then
             return
         end
     end
 
-    if self.db.profile.spells[frame1.spellID].priority < self.db.profile.spells[frame2.spellID].priority then
+    if self.db.profile.spells[spellId1].priority < self.db.profile.spells[spellId2].priority then
         return true
-    elseif frame1.spellID == frame2.spellID then
+    elseif spellId1 == spellId2 then
         if frame1.CDLeft > frame2.CDLeft then
             return true
         end
-    elseif self.db.profile.spells[frame1.spellID].priority == self.db.profile.spells[frame2.spellID].priority and frame1.spellID < frame2.spellID then
+    elseif self.db.profile.spells[spellId1].priority == self.db.profile.spells[spellId2].priority and spellId1 < spellId2 then
         -- attempt to group spells by ID
         return true
     end
