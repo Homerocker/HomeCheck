@@ -1042,7 +1042,7 @@ end
 
 function HomeCheck:UnitGlyphsLoaded(unit)
     local a, b, c, d, e, f = self.LibGroupTalents:GetUnitGlyphs(unit)
-    if a + b + c + d + e + f ~= 0 then
+    if a or b or c or d or e or f then
         return true
     end
 end
