@@ -416,10 +416,9 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     frame.CDReady = GetTime() + frame.CDLeft
     frame.isRemote = isRemote
     frame.CD = self:getSpellCooldown(frame)
+    self.db.global.CDs[playerName][spellID].timestamp = frame.CDLeft > 0 and (time() + frame.CDLeft) or nil
 
     if frame.CDLeft > 0 then
-        self.db.global.CDs[playerName][spellID].timestamp = time() + frame.CDLeft
-
         frame.timerFontString:SetText(date("!%M:%S", frame.CDLeft):gsub('^0+:?0?', ''))
 
         if not frame.CDtimer then
