@@ -867,14 +867,12 @@ function HomeCheck:getSpellCooldown(frame)
         end
     elseif frame.spellID == 871 then
         -- Shield Wall
-        -- TODO verify spell and glyph ID
         CDmodifier = -30 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 3, 13)) or 0)
         if self.LibGroupTalents:UnitHasGlyph(frame.playerName, 63329) then
             CDmodifier = CDmodifier - 120
         end
     elseif frame.spellID == 12975 then
         -- Last Stand
-        -- TODO verify spell and glyph IDs
         if self.LibGroupTalents:UnitHasGlyph(frame.playerName, 58376) then
             CDmodifier = CDmodifier - 60
         end
@@ -915,7 +913,7 @@ function HomeCheck:getSpellCooldown(frame)
         if frame.CDLeft > self.spells[frame.spellID].cd then
             return 180
         end
-        if self:UnitGlyphsLoaded(frame.playerName) and not self.LibGroupTalents:UnitHasGlyph(frame.playerName, 45755) then
+        if self:UnitGlyphsLoaded(frame.playerName) and not self.LibGroupTalents:UnitHasGlyph(frame.playerName, 63231) then
             return 180
         end
     elseif frame.spellID == 42650 then
