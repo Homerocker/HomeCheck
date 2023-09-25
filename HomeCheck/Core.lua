@@ -37,7 +37,7 @@ local childSpells = {}
 
 local groups = 10
 
-local date, floor, GetTime, min, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, GetTime, min, pairs, select, {
+local date, floor, GetTime, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, GetTime, pairs, select, {
     find = string.find,
     gmatch = string.gmatch
 }, strsplit, {
@@ -416,6 +416,9 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     frame.CDReady = GetTime() + frame.CDLeft
     frame.isRemote = isRemote
     frame.CD = self:getSpellCooldown(frame)
+    if frame.CD < frame.CDLeft then
+        frame.CD = frame.CDLeft
+    end
     self.db.global.CDs[playerName][spellID].timestamp = frame.CDLeft > 0 and (time() + frame.CDLeft) or nil
 
     if frame.CDLeft > 0 then
@@ -425,26 +428,25 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
             local tick = 0.1
             frame.CDtimer = self:ScheduleRepeatingTimer(function(frame)
                 frame.CDLeft = frame.CDReady - GetTime()
-                frame.CDLeft = tonumber((("%%.%df"):format(1)):format(frame.CDLeft))
-
-                self:updateCooldownBarProgress(frame)
 
                 if frame.CDLeft <= 0 then
                     self:CancelTimer(frame.CDtimer)
                     frame.CDtimer = nil
+                    table.wipe(self.db.global.CDs[playerName][spellID])
                     if not self:getSpellAlwaysShow(spellID) then
                         self:removeCooldownFrames(playerName, spellID)
                         self:repositionFrames(self:getSpellGroup(spellID))
+                        return
                     else
                         frame.timerFontString:SetText("R")
                         self:setTimerColor(frame)
                     end
-                    table.wipe(self.db.global.CDs[playerName][spellID])
                 elseif frame.timerText ~= floor(frame.CDLeft) then
                     frame.timerText = floor(frame.CDLeft)
                     frame.timerFontString:SetText(date("!%M:%S", frame.CDLeft):gsub('^0+:?0?', ''))
                     self:setTimerColor(frame)
                 end
+                self:updateCooldownBarProgress(frame)
             end, tick, frame)
         end
     elseif not self:getSpellAlwaysShow(spellID) then
@@ -978,7 +980,7 @@ function HomeCheck:UnitInRange(unit)
 end
 
 function HomeCheck:updateCooldownBarProgress(frame)
-    local pct = min(frame.CDLeft / frame.CD, 1)
+    local pct = frame.CDLeft / frame.CD
     if self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].invertColors then
         if pct ~= 0 then
             if not frame.bar.texture:IsShown() then
