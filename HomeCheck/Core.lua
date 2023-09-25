@@ -822,7 +822,7 @@ function HomeCheck:updateRange(frame)
     end
 end
 
----@param frame table
+---@param frame
 function HomeCheck:setBarColor(frame)
     if frame.inRange == 1 or not self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].rangeDimout then
         local playerClassColor = RAID_CLASS_COLORS[frame.class]
@@ -855,7 +855,7 @@ function HomeCheck:getSpellCooldown(frame)
     elseif frame.spellID == 48788 then
         -- Lay on Hands
         CDmodifier = -120 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 1, 8)) or 0)
-        if self.LibGroupTalents:UnitHasGlyph(frame.playerName, 57955) then
+        if self:UnitHasGlyph(frame.playerName, 57955) then
             CDmodifier = CDmodifier - 300
         end
     elseif frame.spellID == 20608 then
@@ -869,12 +869,12 @@ function HomeCheck:getSpellCooldown(frame)
     elseif frame.spellID == 871 then
         -- Shield Wall
         CDmodifier = -30 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 3, 13)) or 0)
-        if self.LibGroupTalents:UnitHasGlyph(frame.playerName, 63329) then
+        if self:UnitHasGlyph(frame.playerName, 63329) then
             CDmodifier = CDmodifier - 120
         end
     elseif frame.spellID == 12975 then
         -- Last Stand
-        if self.LibGroupTalents:UnitHasGlyph(frame.playerName, 58376) then
+        if self:UnitHasGlyph(frame.playerName, 58376) then
             CDmodifier = CDmodifier - 60
         end
     elseif frame.spellID == 48447 then
@@ -887,7 +887,7 @@ function HomeCheck:getSpellCooldown(frame)
         end
     elseif frame.spellID == 47585 then
         -- Dispersion
-        if self.LibGroupTalents:UnitHasGlyph(frame.playerName, 63229) then
+        if self:UnitHasGlyph(frame.playerName, 63229) then
             CDmodifier = CDmodifier - 45
         end
     elseif frame.spellID == 45438 then
@@ -914,7 +914,7 @@ function HomeCheck:getSpellCooldown(frame)
         if frame.CDLeft > self.spells[frame.spellID].cd then
             return 180
         end
-        if self:UnitGlyphsLoaded(frame.playerName) and not self.LibGroupTalents:UnitHasGlyph(frame.playerName, 63231) then
+        if not self:UnitHasGlyph(frame.playerName, 63231, true) then
             return 180
         end
     elseif frame.spellID == 42650 then
@@ -1039,9 +1039,16 @@ function HomeCheck:Rebirth(event, playerName, target)
     end
 end
 
-function HomeCheck:UnitGlyphsLoaded(unit)
-    local a, b, c, d, e, f = self.LibGroupTalents:GetUnitGlyphs(unit)
-    if a or b or c or d or e or f then
+function HomeCheck:UnitHasGlyph(unit, glyphID, default)
+    if self.LibGroupTalents:UnitHasGlyph(unit, glyphID) then
         return true
     end
+    if not default then
+        return false
+    end
+    local a, b, c, d, e, f = self.LibGroupTalents:GetUnitGlyphs(unit)
+    if a or b or c or d or e or f then
+        return false
+    end
+    return true
 end
