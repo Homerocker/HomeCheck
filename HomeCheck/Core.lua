@@ -438,6 +438,9 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
                         self:repositionFrames(self:getSpellGroup(spellID))
                         return
                     else
+                        if frame.CDLeft < 0 then
+                            frame.CDLeft = 0
+                        end
                         frame.timerFontString:SetText("R")
                         self:setTimerColor(frame)
                     end
