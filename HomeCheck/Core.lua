@@ -553,8 +553,8 @@ end
 
 function HomeCheck:loadProfile()
     for i = 1, #self.groups do
-        self.groups[i]:ClearAllPoints()
-        self.groups[i]:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
+        self.groups[i].anchor:ClearAllPoints()
+        self.groups[i].anchor:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
     end
     self:updateRaidCooldowns()
 end
