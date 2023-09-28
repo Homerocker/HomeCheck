@@ -316,7 +316,7 @@ function HomeCheck:OptionsPanel()
                                 for j = 1, #self.groups do
                                     if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
-                                            self.groups[j].CooldownFrames[k].inactiveBar.texture:SetVertexColor(r, g, b, a)
+                                            self.groups[j].CooldownFrames[k].bar.inactive:SetVertexColor(r, g, b, a)
                                         end
                                     end
                                 end
