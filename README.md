@@ -33,9 +33,6 @@
 - To move a frame drag its top-left corner  
   ![ScreenShot](https://advent-wow.ru/HomeCheck/Move.png)
 
-# Known issues
-- Switching profile breaks addon UI and requires /reload to work.
-
 # Donate
 
 https://www.donationalerts.com/r/homerocker or contact me in any other way

@@ -548,14 +548,19 @@ function HomeCheck:repositionFrames(groupIndex)
 end
 
 function HomeCheck:loadProfile()
-    self:updateRaidCooldowns()
     for i = 1, #self.groups do
         self.groups[i].anchor:ClearAllPoints()
         self.groups[i].anchor:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
         for j = 1, #self.groups[i].CooldownFrames do
-            self:applyGroupSettings(self.groups[i].CooldownFrames[j])
+            if i ~= self:getSpellGroup(self.groups[i].CooldownFrames[j].spellID) then
+                self:moveFrameToGroup(self.groups[i].CooldownFrames[j].spellID, i, self:getSpellGroup(self.groups[i].CooldownFrames[j].spellID))
+            else
+                self:applyGroupSettings(self.groups[i].CooldownFrames[j])
+            end
         end
     end
+    self:updateRaidCooldowns()
+    self:sortFrames()
 end
 
 function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, startGroup, startIndex)
@@ -958,21 +963,25 @@ function HomeCheck:applyGroupSettings(frame, groupIndex)
     self:setTimerPosition(frame)
 end
 
-function HomeCheck:setSpellGroupIndex(spellID, groupIndex, startIndex)
+function HomeCheck:setSpellGroupIndex(spellID, groupIndex)
     if self.db.profile.spells[spellID].group == groupIndex then
         return
     end
-    for i = startIndex or 1, #self.groups[self.db.profile.spells[spellID].group].CooldownFrames do
-        if spellID == self.groups[self.db.profile.spells[spellID].group].CooldownFrames[i].spellID then
-            local frame = table.remove(self.groups[self.db.profile.spells[spellID].group].CooldownFrames, i)
-            self:applyGroupSettings(frame, groupIndex)
-            table.insert(self.groups[groupIndex].CooldownFrames, frame)
-            return self:setSpellGroupIndex(spellID, groupIndex, i)
-        end
-    end
+    self:moveFrameToGroup(spellID, self.db.profile.spells[spellID].group, groupIndex)
     self:sortFrames(self.db.profile.spells[spellID].group)
     self:sortFrames(groupIndex)
     self.db.profile.spells[spellID].group = groupIndex
+end
+
+function HomeCheck:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, startIndex)
+    for i = startIndex or 1, #self.groups[sourceGroupIndex].CooldownFrames do
+        if spellID == self.groups[sourceGroupIndex].CooldownFrames[i].spellID then
+            local frame = table.remove(self.groups[sourceGroupIndex].CooldownFrames, i)
+            self:applyGroupSettings(frame, destGroupIndex)
+            table.insert(self.groups[destGroupIndex].CooldownFrames, frame)
+            return self:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, i)
+        end
+    end
 end
 
 function HomeCheck:UnitInRange(unit)
