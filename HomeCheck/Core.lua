@@ -492,27 +492,23 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
     frame.spellID = spellID
     frame.CDLeft = 0
     frame.class = select(2, UnitClass(playerName))
+    frame.CD = self:getSpellCooldown(frame)
 
-    frame.iconFrame = CreateFrame("Frame", nil, frame)
-    frame.iconFrame:SetPoint("LEFT")
-    local icon = select(3, GetSpellInfo(spellID))
-    if icon then
-        frame.iconFrame.texture = frame.iconFrame:CreateTexture(nil, "OVERLAY")
-        frame.iconFrame.texture:SetTexture(icon)
-        frame.iconFrame.texture:SetAllPoints()
-        frame.iconFrame.texture:SetPoint("CENTER")
-    end
+    frame.icon = frame:CreateTexture(nil, "OVERLAY")
+    frame.icon:SetPoint("LEFT")
+    frame.icon:SetTexture(select(3, GetSpellInfo(spellID)))
 
     frame.bar = CreateFrame("Frame", nil, frame)
-    frame.bar:SetPoint("LEFT", frame.iconFrame, "RIGHT")
-    frame.bar.texture = frame.bar:CreateTexture(nil, "ARTWORK")
-    frame.bar.texture:SetAllPoints()
-    self:updateRange(frame)
+    frame.bar:SetPoint("TOPLEFT", frame.icon, "TOPRIGHT")
+    frame.bar:SetPoint("BOTTOMRIGHT")
 
-    frame.inactiveBar = CreateFrame("Frame", nil, frame)
-    frame.inactiveBar.texture = frame.inactiveBar:CreateTexture(nil, "BACKGROUND")
-    frame.inactiveBar.texture:SetAllPoints()
-    frame.inactiveBar:SetPoint("BOTTOMRIGHT")
+    frame.bar.active = frame.bar:CreateTexture(nil, "ARTWORK")
+    frame.bar.active:SetPoint("LEFT")
+    frame.bar.inactive = frame.bar:CreateTexture(nil, "ARTWORK")
+    frame.bar.inactive:SetPoint("RIGHT")
+    frame.bar.inactive:SetPoint("LEFT", frame.bar.active, "RIGHT")
+
+    self:updateRange(frame)
 
     frame.playerNameFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.playerNameFontString:SetText(frame.playerName)
@@ -552,11 +548,14 @@ function HomeCheck:repositionFrames(groupIndex)
 end
 
 function HomeCheck:loadProfile()
-    for i = 1, #self.groups do
-        self.groups[i]:ClearAllPoints()
-        self.groups[i]:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
-    end
     self:updateRaidCooldowns()
+    for i = 1, #self.groups do
+        self.groups[i].anchor:ClearAllPoints()
+        self.groups[i].anchor:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
+        for j = 1, #self.groups[i].CooldownFrames do
+            self:applyGroupSettings(self.groups[i].CooldownFrames[j])
+        end
+    end
 end
 
 function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, startGroup, startIndex)
@@ -831,9 +830,9 @@ end
 function HomeCheck:setBarColor(frame)
     if frame.inRange == 1 or not self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].rangeDimout then
         local playerClassColor = RAID_CLASS_COLORS[frame.class]
-        frame.bar.texture:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self.db.profile[self:getSpellGroup(frame.spellID)].opacity)
+        frame.bar.active:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self.db.profile[self:getSpellGroup(frame.spellID)].opacity)
     else
-        frame.bar.texture:SetVertexColor(0.5, 0.5, 0.5, self.db.profile[self:getSpellGroup(frame.spellID)].opacity)
+        frame.bar.active:SetVertexColor(0.5, 0.5, 0.5, self.db.profile[self:getSpellGroup(frame.spellID)].opacity)
     end
 end
 
@@ -947,17 +946,15 @@ function HomeCheck:applyGroupSettings(frame, groupIndex)
     frame:SetParent(self:getGroup(groupIndex))
 
     groupIndex = self.db.profile[groupIndex].inherit or groupIndex
-    frame:SetSize(self.db.profile[groupIndex].frameWidth, self.db.profile[groupIndex].iconSize)
-    frame.iconFrame:SetSize(self.db.profile[groupIndex].iconSize, self.db.profile[groupIndex].iconSize)
+
+    self:setFrameHeight(frame, self.db.profile[groupIndex].iconSize)
+    frame:SetWidth(self.db.profile[groupIndex].frameWidth)
     frame.playerNameFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontPlayer), self.db.profile[groupIndex].fontSize)
     frame.targetFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontTarget), self.db.profile[groupIndex].fontSizeTarget)
     frame.targetFontString:SetJustifyH(self.db.profile[groupIndex].targetJustify == "l" and "LEFT" or "RIGHT")
-    frame.bar:SetSize(self.db.profile[groupIndex].frameWidth - self.db.profile[groupIndex].iconSize, self.db.profile[groupIndex].iconSize)
-    frame.bar.texture:SetTexture(self.LibSharedMedia:Fetch("statusbar", self.db.profile[groupIndex].statusbar))
-    frame.inactiveBar.texture:SetTexture(self.LibSharedMedia:Fetch("statusbar", self.db.profile[groupIndex].statusbar))
-    frame.inactiveBar.texture:SetVertexColor(unpack(self.db.profile[groupIndex].background))
+    self:setBarTexture(frame, self.LibSharedMedia:Fetch("statusbar", self.db.profile[groupIndex].statusbar))
+    frame.bar.inactive:SetVertexColor(unpack(self.db.profile[groupIndex].background))
     frame.timerFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontTimer), self.db.profile[groupIndex].fontSizeTimer)
-
     self:setTimerPosition(frame)
 end
 
@@ -986,25 +983,25 @@ function HomeCheck:updateCooldownBarProgress(frame)
     local pct = frame.CDLeft / frame.CD
     if self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].invertColors then
         if pct ~= 0 then
-            if not frame.bar.texture:IsShown() then
-                frame.bar.texture:Show()
-                frame.inactiveBar:SetPoint("TOPLEFT", frame.bar, "TOPRIGHT")
+            if not frame.bar.active:IsShown() then
+                frame.bar.active:Show()
+                frame.bar.inactive:SetPoint("LEFT", frame.bar.active, "RIGHT")
             end
-            frame.bar:SetWidth((self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].frameWidth - self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].iconSize) * pct)
-        elseif frame.bar.texture:IsShown() then
-            frame.bar.texture:Hide()
-            frame.inactiveBar:SetPoint("TOPLEFT", frame.iconFrame, "TOPRIGHT")
+            frame.bar.active:SetWidth((self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].frameWidth - self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].iconSize) * pct)
+        elseif frame.bar.active:IsShown() then
+            frame.bar.active:Hide()
+            frame.bar.inactive:SetPoint("LEFT", frame.icon, "RIGHT")
         end
     else
         if pct ~= 1 then
-            if not frame.bar.texture:IsShown() then
-                frame.bar.texture:Show()
-                frame.inactiveBar:SetPoint("TOPLEFT", frame.bar, "TOPRIGHT")
+            if not frame.bar.active:IsShown() then
+                frame.bar.active:Show()
+                frame.bar.inactive:SetPoint("LEFT", frame.bar.active, "RIGHT")
             end
-            frame.bar:SetWidth((self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].frameWidth - self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].iconSize) * (1 - pct))
-        elseif frame.bar.texture:IsShown() then
-            frame.bar.texture:Hide()
-            frame.inactiveBar:SetPoint("TOPLEFT", frame.iconFrame, "TOPRIGHT")
+            frame.bar.active:SetWidth((self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].frameWidth - self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].iconSize) * (1 - pct))
+        elseif frame.bar.active:IsShown() then
+            frame.bar.active:Hide()
+            frame.bar.inactive:SetPoint("LEFT", frame.icon, "RIGHT")
         end
     end
 end
@@ -1012,12 +1009,12 @@ end
 function HomeCheck:setTimerPosition(frame)
     frame.timerFontString:ClearAllPoints()
     if self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].timerPosition == "l" then
-        frame.timerFontString:SetPoint("LEFT", frame.iconFrame, "RIGHT", 1, 0)
+        frame.timerFontString:SetPoint("LEFT", frame.icon, "RIGHT", 1, 0)
         frame.playerNameFontString:SetPoint("LEFT", frame.timerFontString, "RIGHT", 2, 0)
         frame.targetFontString:SetPoint("RIGHT", frame, "RIGHT", -2, 0)
     else
         frame.timerFontString:SetPoint("RIGHT", frame, "RIGHT", -2, 0)
-        frame.playerNameFontString:SetPoint("LEFT", frame.iconFrame, "RIGHT", 1, 0)
+        frame.playerNameFontString:SetPoint("LEFT", frame.icon, "RIGHT", 1, 0)
         frame.targetFontString:SetPoint("RIGHT", frame.timerFontString, "LEFT", -1, 0)
     end
 end
@@ -1056,4 +1053,20 @@ function HomeCheck:UnitHasGlyph(unit, glyphID, default)
         return false
     end
     return true
+end
+
+function HomeCheck:setBarTexture(frame, texture)
+    frame.bar.active:SetTexture(texture)
+    frame.bar.inactive:SetTexture(texture)
+end
+
+function HomeCheck:setFrameHeight(frame, height)
+    if not height then
+        height = self.db.profile[self:getSpellGroup(frame.spellID)].iconSize
+    end
+    frame:SetHeight(height)
+    frame.icon:SetSize(height, height)
+    frame.bar.active:SetHeight(height)
+    frame.bar.inactive:SetHeight(height)
+    self:updateCooldownBarProgress(frame)
 end

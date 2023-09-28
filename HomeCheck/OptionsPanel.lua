@@ -174,10 +174,7 @@ function HomeCheck:OptionsPanel()
                                 for j = 1, #self.groups do
                                     if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
-                                            self.groups[j].CooldownFrames[k].iconFrame:SetSize(val, val)
-                                            self.groups[j].CooldownFrames[k]:SetHeight(val)
-                                            self.groups[j].CooldownFrames[k].bar:SetHeight(val)
-                                            self:updateCooldownBarProgress(self.groups[j].CooldownFrames[k])
+                                            self:setFrameHeight(self.groups[j].CooldownFrames[k], val)
                                         end
                                     end
                                     self:repositionFrames(j)
@@ -294,8 +291,8 @@ function HomeCheck:OptionsPanel()
                                 for j = 1, #self.groups do
                                     if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
-                                            local r, g, b = self.groups[j].CooldownFrames[k].bar.texture:GetVertexColor()
-                                            self.groups[j].CooldownFrames[k].bar.texture:SetVertexColor(r, g, b, self.db.profile[i].opacity)
+                                            local r, g, b = self.groups[j].CooldownFrames[k].bar.active:GetVertexColor()
+                                            self.groups[j].CooldownFrames[k].bar.active:SetVertexColor(r, g, b, self.db.profile[i].opacity)
                                         end
                                     end
                                 end
@@ -350,8 +347,7 @@ function HomeCheck:OptionsPanel()
                                 for j = 1, #self.groups do
                                     if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
-                                            self.groups[j].CooldownFrames[k].bar.texture:SetTexture(texture)
-                                            self.groups[j].CooldownFrames[k].inactiveBar.texture:SetTexture(texture)
+                                            self:setBarTexture(self.groups[j].CooldownFrames[k], texture)
                                         end
                                     end
                                 end
