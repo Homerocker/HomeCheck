@@ -639,20 +639,23 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
     end
 
     for spellID, spellConfig in pairs(self.spells) do
-        if not spellConfig.parent then
-            if not spellConfig.class or spellConfig.class == class then
-                if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID) then
+        if not spellConfig.class or spellConfig.class == class then
+            if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID) then
+                if not spellConfig.parent then
                     self:setCooldown(spellID, playerName)
-                else
-                    self:removeCooldownFrames(playerName, spellID)
                 end
+            else
+                self:removeCooldownFrames(playerName, spellID)
             end
         end
     end
 end
 
 function HomeCheck:UnitHasAbility(playerName, spellID)
-    return not self.spells[spellID].talentTab or not self.spells[spellID].talentIndex or self.LibGroupTalents:UnitHasTalent(playerName, (GetSpellInfo(spellID)))
+    if self.spells[spellID].parent then
+        spellID = self.spells[spellID].parent
+    end
+    return not self.spells[spellID].talentTab or not self.spells[spellID].talentIndex or tonumber(select(5, self.LibGroupTalents:GetTalentInfo(playerName, self.spells[spellID].talentTab, self.spells[spellID].talentIndex))) ~= 0
 end
 
 function HomeCheck:saveFramePosition(groupIndex)
