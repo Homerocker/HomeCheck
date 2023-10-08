@@ -15,7 +15,7 @@ function HomeCheck:OptionsPanel()
                     self.db.global.link = val
                     for i = 1, #self.groups do
                         for j = 1, #self.groups[i].CooldownFrames do
-                            self.groups[i].CooldownFrames[j]:EnableMouse(val)
+                            self:EnableMouse(self.groups[i].CooldownFrames[j], not val)
                         end
                     end
                 end,
