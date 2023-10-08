@@ -655,7 +655,7 @@ function HomeCheck:UnitHasAbility(playerName, spellID)
     if self.spells[spellID].parent then
         spellID = self.spells[spellID].parent
     end
-    return not self.spells[spellID].talentTab or not self.spells[spellID].talentIndex or tonumber(select(5, self.LibGroupTalents:GetTalentInfo(playerName, self.spells[spellID].talentTab, self.spells[spellID].talentIndex))) ~= 0
+    return not self.spells[spellID].talentTab or not self.spells[spellID].talentIndex or tonumber((select(5, self.LibGroupTalents:GetTalentInfo(playerName, self.spells[spellID].talentTab, self.spells[spellID].talentIndex)))) ~= 0
 end
 
 function HomeCheck:saveFramePosition(groupIndex)
