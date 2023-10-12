@@ -56,11 +56,10 @@ end
 HomeCheck:SetScript("OnEvent", function(self, event, ...)
     if event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local _, combatEvent, _, playerName, _, _, targetName, _, spellID, spellName = ...
+        if not UnitInRaid(playerName) and not UnitInParty(playerName) then
+            return
+        end
         if combatEvent == "SPELL_CAST_SUCCESS" or combatEvent == "SPELL_RESURRECT" or combatEvent == "SPELL_AURA_APPLIED" then
-            if not UnitInRaid(playerName) and not UnitInParty(playerName) then
-                return
-            end
-
             if not self.spells[spellID] then
                 spellID = self.localizedSpellNames[spellName]
             end
@@ -74,9 +73,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             -- Guardian Spirit proced
             self:setCooldown(spellID, playerName, true, targetName)
         elseif combatEvent == "UNIT_DIED" then
-            if UnitInRaid(playerName) or UnitInParty(playerName) then
-                self.deadUnits[playerName] = true
-            end
+            self.deadUnits[playerName] = true
         end
 
         -- UNIT_SPELLCAST events are used to detect double Rebirth only
