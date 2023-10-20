@@ -1,4 +1,7 @@
 local function tablecopy(t, copyto)
+    if type(t) ~= "table" then
+        return
+    end
     for k, v in pairs(t) do
         if type(v) == "table" then
             copyto[k] = tablecopy(v, copyto[k])
@@ -13,7 +16,7 @@ function HomeCheck:upgradeDB()
     if self.db.global.db_ver ~= self.db_ver then
         if self.db.global.db_ver == 1 then
             for k, v in pairs(self.db.global) do
-                if k ~= "db_ver" and k ~= "CDs" and k ~= "comms" then
+                if k ~= "db_ver" and k ~= "CDs" and k ~= "comms" and k ~= "link" then
                     self.db.profile[k], self.db.global[k] = tablecopy(v, self.db.profile[k]), nil
                 end
             end
