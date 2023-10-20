@@ -33,6 +33,12 @@
 - To move a frame drag its top-left corner  
   ![ScreenShot](https://advent-wow.ru/HomeCheck/Move.png)
 
+# Something does not work?
+
+- If you had previous version of addon installed try deleting settings file
+<code>\WTF\Account\\<ACCOUNT_NAME\>\SavedVariables\HomeCheck.lua</code>. All addon settings will be lost.
+- Report bug here or contact me directly.
+
 # Donate
 
 https://www.donationalerts.com/r/homerocker or contact me in any other way
