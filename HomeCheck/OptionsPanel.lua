@@ -471,7 +471,7 @@ function HomeCheck:OptionsPanel()
                 values = {},
                 set = function(info, val)
                     if val == 0 then
-                        val = nil
+                        val = false
                     end
                     self.db.profile[i].inherit = val
                     for j = 1, #self.groups[i].CooldownFrames do
