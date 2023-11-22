@@ -478,6 +478,7 @@ function HomeCheck:OptionsPanel()
                         self:applyGroupSettings(self.groups[i].CooldownFrames[j])
                     end
                     myOptionsTable.args.frames.args["frame" .. i].args.colors.disabled = val
+                    myOptionsTable.args.frames.args["frame" .. i].args.range.disabled = val
                     myOptionsTable.args.frames.args["frame" .. i].args.size.disabled = val
                     myOptionsTable.args.frames.args["frame" .. i].args.textures.disabled = val
                     LibStub("AceConfigRegistry-3.0"):NotifyChange("HomeCheck")
