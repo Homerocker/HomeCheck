@@ -121,6 +121,10 @@ HomeCheck.defaults = {
             [16190] = {
                 enable = true
             },
+            -- Bloodlust
+            [2825] = {
+                enable = true
+            },
             -- Army of the Dead
             [42650] = {
                 enable = true

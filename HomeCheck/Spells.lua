@@ -159,6 +159,11 @@ HomeCheck.spells = {
         cd = 300,
         class = "SHAMAN"
     },
+    -- Bloodlust
+    [2825] = {
+        cd = 300,
+        class = "SHAMAN"
+    },
     -- Vampiric Blood
     [55233] = {
         cd = 60,
