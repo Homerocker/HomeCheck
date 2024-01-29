@@ -33,6 +33,12 @@
 - To move a frame drag its top-left corner  
   ![ScreenShot](https://advent-wow.ru/HomeCheck/Move.png)
 
+# Known issues
+
+- MD target can be empty in some cases, most likely caused by communication from other cooldown addons (requires further investigation).
+- In rare cases, Rebirth cast may trigger incorrect Rebirth cooldown for other druid who did not finish Rebirth cast or cast failed (requires further investigation).
+- Guardian Spirit heal will not update GS cooldown if GS cast was not detected beforehand (very rare case in specific situations).
+
 # Something does not work?
 
 - If you had previous version of addon installed try deleting settings file
