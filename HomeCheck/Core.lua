@@ -12,7 +12,7 @@ HomeCheck.groups = {}
 HomeCheck.localizedSpellNames = {}
 HomeCheck.deadUnits = {}
 HomeCheck.RebirthTargets = {}
-HomeCheck.db_ver = 3
+HomeCheck.db_ver = 4
 
 HomeCheck.comms = {
     oRA = "oRA",
@@ -71,7 +71,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             self:setCooldown(spellID, playerName, true, targetName)
         elseif combatEvent == "SPELL_HEAL" and spellID == 48153 then
             -- Guardian Spirit proced
-            self:setCooldown(spellID, playerName, true, targetName)
+            self:GSProc(targetName)
         elseif combatEvent == "UNIT_DIED" then
             self.deadUnits[playerName] = true
         end
@@ -701,6 +701,18 @@ function HomeCheck:Readiness(hunterName)
     end
 
     ReadinessTimestamp[hunterName] = time()
+end
+
+function HomeCheck:GSProc(targetName)
+    local spellGroup = self:getSpellGroup(47788)
+    for i = #self.groups[spellGroup].CooldownFrames, 1, -1 do
+        if self.groups[spellGroup].CooldownFrames[i].spellID == 47788
+                and self.groups[spellGroup].CooldownFrames[i].target == targetName
+                and self.groups[spellGroup].CooldownFrames[i].CDLeft > 0 then
+            self:setCooldown(47788, self.groups[spellGroup].CooldownFrames[i].playerName, 180)
+            break
+        end
+    end
 end
 
 function HomeCheck:sortFrames(groupIndex)
