@@ -49,11 +49,13 @@ local date, floor, GetTime, pairs, select, string, strsplit, table, time, tonumb
 HomeCheck:RegisterEvent("ADDON_LOADED")
 
 function HomeCheck:LibGroupTalents_Update(...)
-    local unit = UnitName((select(3, ...)))
-    self:ScheduleTimer(function()
-        self:refreshPlayerCooldowns(unit)
-        self:repositionFrames()
-    end, 2)
+    self:refreshPlayerCooldowns((UnitName((select(3, ...)))))
+    self:repositionFrames()
+end
+
+function HomeCheck:LibGroupTalents_RoleChange(...)
+    self:refreshPlayerCooldowns((UnitName((select(3, ...)))))
+    self:repositionFrames()
 end
 
 HomeCheck:SetScript("OnEvent", function(self, event, ...)
@@ -162,6 +164,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
 
         self.LibGroupTalents.RegisterCallback(self, "LibGroupTalents_Update")
+        self.LibGroupTalents.RegisterCallback(self, "LibGroupTalents_RoleChange")
 
         for k, _ in pairs(self.comms) do
             if self.db.global.comms[k] then
