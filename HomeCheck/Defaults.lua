@@ -140,6 +140,42 @@ HomeCheck.defaults = {
             -- PI
             [10060] = {
                 enable = true
+            },
+            -- Divine Protection
+            [498] = {
+                tanksonly = true
+            },
+            -- Vampiric Blood
+            [55233] = {
+                tanksonly = true
+            },
+            -- Icebound Fortitude
+            [48792] = {
+                tanksonly = true
+            },
+            -- Shield Wall
+            [871] = {
+                tanksonly = true
+            },
+            -- Last Stand
+            [12975] = {
+                tanksonly = true
+            },
+            -- Enraged Regeneration
+            [55694] = {
+                tanksonly = true
+            },
+            -- Barkskin
+            [22812] = {
+                tanksonly = true
+            },
+            -- Survival Instincts
+            [61336] = {
+                tanksonly = true
+            },
+            -- Frenzied Regeneration
+            [22842] = {
+                tanksonly = true
             }
         }
     }

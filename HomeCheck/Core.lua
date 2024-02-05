@@ -49,8 +49,11 @@ local date, floor, GetTime, pairs, select, string, strsplit, table, time, tonumb
 HomeCheck:RegisterEvent("ADDON_LOADED")
 
 function HomeCheck:LibGroupTalents_Update(...)
-    self:refreshPlayerCooldowns((UnitName((select(3, ...)))))
-    self:repositionFrames()
+    local unit = UnitName((select(3, ...)))
+    self:ScheduleTimer(function()
+        self:refreshPlayerCooldowns(unit)
+        self:repositionFrames()
+    end, 2)
 end
 
 HomeCheck:SetScript("OnEvent", function(self, event, ...)
@@ -660,7 +663,8 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
 
     for spellID, spellConfig in pairs(self.spells) do
         if not spellConfig.class or spellConfig.class == class then
-            if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID) then
+            if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID)
+                    and (not self:isSpellTanksOnly(spellID) or self.LibGroupTalents:GetUnitRole(playerName) == "tank") then
                 if not spellConfig.parent then
                     self:setCooldown(spellID, playerName)
                 end
@@ -1078,6 +1082,10 @@ end
 
 function HomeCheck:isSpellEnabled(spellID)
     return self.spells[spellID].parent and self.db.profile.spells[self.spells[spellID].parent].enable or self.db.profile.spells[spellID].enable
+end
+
+function HomeCheck:isSpellTanksOnly(spellID)
+    return self.spells[spellID].parent and self.db.profile.spells[self.spells[spellID].parent].tanksonly or self.db.profile.spells[spellID].tanksonly
 end
 
 function HomeCheck:Rebirth(event, playerName, target)

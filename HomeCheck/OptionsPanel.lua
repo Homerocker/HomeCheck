@@ -582,7 +582,7 @@ function HomeCheck:OptionsPanel()
                         min = 1,
                         max = #self.groups,
                         step = 1,
-                        order = 3,
+                        order = 4,
                         disabled = not self.db.profile.spells[spellID].enable,
                         get = function()
                             return self.db.profile.spells[spellID].group
@@ -597,7 +597,7 @@ function HomeCheck:OptionsPanel()
                         min = 1,
                         max = 200,
                         step = 1,
-                        order = 4,
+                        order = 5,
                         disabled = not self.db.profile.spells[spellID].enable,
                         get = function()
                             return self.db.profile.spells[spellID].priority
@@ -609,6 +609,21 @@ function HomeCheck:OptionsPanel()
                     }
                 }
             }
+            if self.spells[spellID].tanksonly then
+                myOptionsTable.args.spells.args[tostring(spellID)].args.tanksonly = {
+                    name = L["Tanks only"],
+                    type = "toggle",
+                    desc = L["Show cooldown for tanks only"],
+                    order = 3,
+                    set = function(_, val)
+                        self.db.profile.spells[spellID].tanksonly = val
+                        self:updateRaidCooldowns()
+                    end,
+                    get = function(_)
+                        return self.db.profile.spells[spellID].tanksonly
+                    end
+                }
+            end
         end
     end
     for prefix, addonName in pairs(self.comms) do

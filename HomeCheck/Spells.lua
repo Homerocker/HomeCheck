@@ -78,7 +78,8 @@ HomeCheck.spells = {
     -- Divine Shield
     [642] = {
         cd = 300,
-        class = "PALADIN"
+        class = "PALADIN",
+        tanksonly = true
     },
     -- HoP
     [10278] = {
@@ -88,7 +89,8 @@ HomeCheck.spells = {
     -- Divine Protection
     [498] = {
         cd = 180,
-        class = "PALADIN"
+        class = "PALADIN",
+        tanksonly = true
     },
     -- Lay on Hands
     [48788] = {
@@ -163,17 +165,20 @@ HomeCheck.spells = {
         cd = 60,
         class = "DEATHKNIGHT",
         talentTab = 1,
-        talentIndex = 23
+        talentIndex = 23,
+        tanksonly = true
     },
     -- Icebound Fortitude
     [48792] = {
         cd = 120,
-        class = "DEATHKNIGHT"
+        class = "DEATHKNIGHT",
+        tanksonly = true
     },
     -- Anti-Magic Shell
     [48707] = {
         cd = 45,
-        class = "DEATHKNIGHT"
+        class = "DEATHKNIGHT",
+        tanksonly = true
     },
     -- Blood Armor (4T10)
     [70654] = {
@@ -218,36 +223,42 @@ HomeCheck.spells = {
     -- Stoneform
     [20594] = {
         cd = 120,
-        race = "Dwarf"
+        race = "Dwarf",
+        tanksonly = true
     },
     -- Shield Wall
     [871] = {
         cd = 300,
-        class = "WARRIOR"
+        class = "WARRIOR",
+        tanksonly = true
     },
     -- Last Stand
     [12975] = {
         cd = 180,
         class = "WARRIOR",
         talentTab = 3,
-        talentIndex = 6
+        talentIndex = 6,
+        tanksonly = true
     },
     -- Enraged Regeneration
     [55694] = {
         cd = 180,
-        class = "WARRIOR"
+        class = "WARRIOR",
+        tanksonly = true
     },
     -- Barkskin
     [22812] = {
         cd = 60,
-        class = "DRUID"
+        class = "DRUID",
+        tanksonly = true
     },
     -- Survival Instincts
     [61336] = {
         cd = 180,
         class = "DRUID",
         talentTab = 2,
-        talentIndex = 7
+        talentIndex = 7,
+        tanksonly = true
     },
     -- Typhoon
     [61384] = {
@@ -265,7 +276,8 @@ HomeCheck.spells = {
     -- Frenzied Regeneration
     [22842] = {
         cd = 180,
-        class = "DRUID"
+        class = "DRUID",
+        tanksonly = true
     },
     -- Dispersion
     [47585] = {
