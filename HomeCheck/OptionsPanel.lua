@@ -11,7 +11,7 @@ function HomeCheck:OptionsPanel()
                 name = L["Link to chat (SHIFT-Click)"],
                 desc = L["Enables ability to link remaining cooldown duration to raid/party chat. Disables click-through."],
                 type = "toggle",
-                set = function(info, val)
+                set = function(_, val)
                     self.db.global.link = val
                     for i = 1, #self.groups do
                         for j = 1, #self.groups[i].CooldownFrames do
@@ -19,7 +19,7 @@ function HomeCheck:OptionsPanel()
                         end
                     end
                 end,
-                get = function(info)
+                get = function()
                     return self.db.global.link
                 end
             },
@@ -469,7 +469,7 @@ function HomeCheck:OptionsPanel()
                 type = "select",
                 desc = L["Copy settings from other frame"],
                 values = {},
-                set = function(info, val)
+                set = function(_, val)
                     if val == 0 then
                         val = false
                     end

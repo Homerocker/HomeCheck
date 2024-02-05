@@ -245,7 +245,7 @@ function HomeCheck:OnCommReceived(...)
             end
 
             if not self.spells[spellID] then
-                local spellName = GetSpellInfo(spellID)
+                spellName = GetSpellInfo(spellID)
                 if spellName then
                     spellID = self.localizedSpellNames[spellName]
                 end
@@ -537,7 +537,7 @@ function HomeCheck:EnableMouse(frame, disable)
         frame:SetScript("OnMouseDown", nil)
         frame:EnableMouse(false)
     else
-        frame:SetScript("OnMouseDown", function(self, button)
+        frame:SetScript("OnMouseDown", function(_, button)
             if button == "LeftButton" and IsShiftKeyDown() then
                 local message = frame.playerName .. " " .. (GetSpellLink(frame.spellID))
                 if frame.CDLeft == 0 then
