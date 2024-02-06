@@ -668,7 +668,8 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
         if not spellConfig.class or spellConfig.class == class then
             if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID)
                     and (not self:isSpellTanksOnly(spellID) or self.LibGroupTalents:GetUnitRole(playerName) == "tank")
-            and (not self.db.global.selfignore or playerName ~= UnitName("player")) then
+            and (not self.db.global.selfignore or playerName ~= UnitName("player"))
+            and (not self.db.global.hidesolo or playerInRaid) then
                 if not spellConfig.parent then
                     self:setCooldown(spellID, playerName)
                 end

@@ -47,3 +47,5 @@ L["Tanks only"] = true
 L["Show cooldown for tanks only"] = true
 L["Ignore myself"] = true
 L["Do not show your own cooldowns."] = true
+L["Hide when not in raid"] = true
+L["Do not show cooldowns when not in raid or party."] = true

@@ -16,7 +16,8 @@ HomeCheck.defaults = {
             FRCD3 = true
         },
         link = true,
-        selfignore = false
+        selfignore = false,
+        hidesolo = false
     },
     profile = {
         ['*'] = {

@@ -35,6 +35,18 @@ function HomeCheck:OptionsPanel()
                     return self.db.global.selfignore
                 end
             },
+            hidesolo = {
+                name = L["Hide when not in raid"],
+                desc = L["Do not show cooldowns when not in raid or party."],
+                type = "toggle",
+                set = function(_, val)
+                    self.db.global.hidesolo = val
+                    self:updateRaidCooldowns()
+                end,
+                get = function()
+                    return self.db.global.hidesolo
+                end
+            },
             frames = {
                 name = L["Frames"],
                 type = "group",
