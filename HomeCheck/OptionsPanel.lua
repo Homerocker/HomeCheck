@@ -23,6 +23,18 @@ function HomeCheck:OptionsPanel()
                     return self.db.global.link
                 end
             },
+            selfignore = {
+                name = L["Ignore myself"],
+                desc = L["Do not show your own cooldowns."],
+                type = "toggle",
+                set = function(_, val)
+                    self.db.global.selfignore = val
+                    self:updateRaidCooldowns()
+                end,
+                get = function()
+                    return self.db.global.selfignore
+                end
+            },
             frames = {
                 name = L["Frames"],
                 type = "group",

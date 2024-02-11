@@ -45,3 +45,5 @@ L["Enables ability to link remaining cooldown duration to raid/party chat. Disab
 L["Reset frame position"] = "Сбросить позицию"
 L["Tanks only"] = "Только танки"
 L["Show cooldown for tanks only"] = "Показывать кулдауны только танков"
+L["Ignore myself"] = "Игнорировать себя"
+L["Do not show your own cooldowns."] = "Не показывать свои кулдауны."
