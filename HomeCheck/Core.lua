@@ -54,8 +54,7 @@ function HomeCheck:LibGroupTalents_Update(...)
 end
 
 function HomeCheck:LibGroupTalents_RoleChange(...)
-    self:refreshPlayerCooldowns((UnitName((select(3, ...)))))
-    self:repositionFrames()
+    self:LibGroupTalents_Update(...)
 end
 
 HomeCheck:SetScript("OnEvent", function(self, event, ...)
