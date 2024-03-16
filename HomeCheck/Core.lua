@@ -428,7 +428,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
 
         if not frame.CDtimer then
             local tick = 0.1
-            frame.CDtimer = self:ScheduleRepeatingTimer(function(frame)
+            frame.CDtimer = self:ScheduleRepeatingTimer(function()
                 frame.CDLeft = frame.CDReady - GetTime()
 
                 if frame.CDLeft <= 0 then
@@ -452,7 +452,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
                     self:setTimerColor(frame)
                 end
                 self:updateCooldownBarProgress(frame)
-            end, tick, frame)
+            end, tick)
         end
     elseif not self:getSpellAlwaysShow(spellID) then
         self:removeCooldownFrames(playerName, spellID, true)
