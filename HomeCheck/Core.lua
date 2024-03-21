@@ -528,8 +528,8 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
     end
 
     table.insert(group.CooldownFrames, frame)
-    if not group.anchor:IsMouseEnabled() then
-        group.anchor:EnableMouse(true)
+    if not group:IsShown() then
+        group:Show()
     end
     return frame
 end
@@ -597,8 +597,8 @@ function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, star
                     self:CancelTimer(self.groups[i].CooldownFrames[j].CDtimer)
                 end
                 table.remove(self.groups[i].CooldownFrames, j)
-                if #self.groups[i].CooldownFrames == 0 and self.groups[i].anchor:IsMouseEnabled() then
-                    self.groups[i].anchor:EnableMouse(false)
+                if #self.groups[i].CooldownFrames == 0 and self.groups[i]:IsShown() then
+                    self.groups[i]:Hide()
                 end
                 if spellID then
                     break
@@ -790,7 +790,7 @@ function HomeCheck:getGroup(i)
     frame:SetFrameStrata("MEDIUM")
     frame:ClearAllPoints()
 
-    frame.anchor = CreateFrame("Frame")
+    frame.anchor = CreateFrame("Frame", nil, frame)
     frame.anchor:SetClampedToScreen(true)
     frame.anchor:SetSize(20, 20)
     frame.anchor:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
@@ -804,6 +804,7 @@ function HomeCheck:getGroup(i)
         s:StopMovingOrSizing()
         self:saveFramePosition(i)
     end)
+    frame.anchor:EnableMouse(true)
 
     frame:SetAllPoints(frame.anchor)
 
@@ -1020,13 +1021,13 @@ function HomeCheck:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, s
     for i = startIndex or 1, #self.groups[sourceGroupIndex].CooldownFrames do
         if spellID == self.groups[sourceGroupIndex].CooldownFrames[i].spellID then
             local frame = table.remove(self.groups[sourceGroupIndex].CooldownFrames, i)
-            if #self.groups[sourceGroupIndex].CooldownFrames == 0 and self.groups[sourceGroupIndex].anchor:IsMouseEnabled() then
-                self.groups[sourceGroupIndex].anchor:EnableMouse(false)
+            if #self.groups[sourceGroupIndex].CooldownFrames == 0 and self.groups[sourceGroupIndex]:IsShown() then
+                self.groups[sourceGroupIndex]:Hide()
             end
             self:applyGroupSettings(frame, destGroupIndex)
             table.insert(self.groups[destGroupIndex].CooldownFrames, frame)
-            if not self.groups[destGroupIndex].anchor:IsMouseEnabled() then
-                self.groups[destGroupIndex].anchor:EnableMouse(true)
+            if not self.groups[destGroupIndex]:IsShown() then
+                self.groups[destGroupIndex]:Show()
             end
             return self:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, i)
         end
