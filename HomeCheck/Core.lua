@@ -667,8 +667,8 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
         if not spellConfig.class or spellConfig.class == class then
             if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID)
                     and (not self:isSpellTanksOnly(spellID) or self.LibGroupTalents:GetUnitRole(playerName) == "tank")
-            and (not self.db.global.selfignore or playerName ~= UnitName("player"))
-            and (not self.db.global.hidesolo or playerInRaid) then
+                    and (not self.db.global.selfignore or playerName ~= UnitName("player"))
+                    and (not self.db.global.hidesolo or playerInRaid) then
                 if not spellConfig.parent then
                     self:setCooldown(spellID, playerName)
                 end
@@ -764,7 +764,7 @@ function HomeCheck:cooldownSorter(frame1, frame2)
             return true
         end
     elseif frame1.inRange > frame2.inRange then
-        if self:getIProp(groupIndex,"rangeUngroup") or spellId1 == spellId2 then
+        if self:getIProp(groupIndex, "rangeUngroup") or spellId1 == spellId2 then
             return
         end
     end
@@ -1002,6 +1002,7 @@ function HomeCheck:applyGroupSettings(frame, groupIndex)
     frame.targetFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontTarget), self.db.profile[groupIndex].fontSizeTarget)
     frame.targetFontString:SetJustifyH(self.db.profile[groupIndex].targetJustify == "l" and "LEFT" or "RIGHT")
     self:setBarTexture(frame, self.LibSharedMedia:Fetch("statusbar", self.db.profile[groupIndex].statusbar))
+    self:setBarColor(frame)
     frame.bar.inactive:SetVertexColor(unpack(self.db.profile[groupIndex].background))
     frame.timerFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontTimer), self.db.profile[groupIndex].fontSizeTimer)
     self:setTimerPosition(frame)
