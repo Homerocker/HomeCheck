@@ -565,7 +565,7 @@ function HomeCheck:repositionFrames(groupIndex)
         return
     end
     for j = 1, #self.groups[groupIndex].CooldownFrames do
-        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -(self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].iconSize + self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].padding) * (j - 1))
+        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -(self:getIProp(groupIndex, "iconSize") + self:getIProp(groupIndex, "padding")) * (j - 1))
     end
 end
 
@@ -758,13 +758,13 @@ function HomeCheck:cooldownSorter(frame1, frame2)
     local spellId1 = self.spells[frame1.spellID].parent or frame1.spellID
     local spellId2 = self.spells[frame2.spellID].parent or frame2.spellID
     if frame1.inRange < frame2.inRange then
-        if self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeUngroup then
+        if self:getIProp(groupIndex, "rangeUngroup") then
             return true
-        elseif spellId1 == spellId2 and self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeDimout then
+        elseif spellId1 == spellId2 and self:getIProp(groupIndex, "rangeDimout") then
             return true
         end
     elseif frame1.inRange > frame2.inRange then
-        if self.db.profile[self.db.profile[groupIndex].inherit or groupIndex].rangeUngroup or spellId1 == spellId2 then
+        if self:getIProp(groupIndex,"rangeUngroup") or spellId1 == spellId2 then
             return
         end
     end
@@ -861,14 +861,14 @@ function HomeCheck:updateRange(frame)
     elseif frame.inRange == 1 then
         if not self:UnitInRange(frame.playerName) then
             frame.inRange = 0
-            if self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].rangeDimout then
+            if self:getIPropBySpellId(frame.spellID, "rangeDimout") then
                 self:setBarColor(frame)
             end
             self:sortFrames()
         end
     elseif self:UnitInRange(frame.playerName) then
         frame.inRange = 1
-        if self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].rangeDimout then
+        if self:getIPropBySpellId(frame.spellID, "rangeDimout") then
             self:setBarColor(frame)
         end
         self:sortFrames()
@@ -877,11 +877,11 @@ end
 
 ---@param frame
 function HomeCheck:setBarColor(frame)
-    if frame.inRange == 1 or not self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].rangeDimout then
+    if frame.inRange == 1 or not self:getIPropBySpellId(frame.spellID, "rangeDimout") then
         local playerClassColor = RAID_CLASS_COLORS[frame.class]
-        frame.bar.active:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self.db.profile[self:getSpellGroup(frame.spellID)].opacity)
+        frame.bar.active:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self:getIPropBySpellId(frame.spellID, "opacity"))
     else
-        frame.bar.active:SetVertexColor(0.5, 0.5, 0.5, self.db.profile[self:getSpellGroup(frame.spellID)].opacity)
+        frame.bar.active:SetVertexColor(0.5, 0.5, 0.5, self:getIPropBySpellId(frame.spellID, "opacity"))
     end
 end
 
@@ -1040,13 +1040,13 @@ end
 
 function HomeCheck:updateCooldownBarProgress(frame)
     local pct = frame.CDLeft / frame.CD
-    if self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].invertColors then
+    if self:getIPropBySpellId(frame.spellID, "invertColors") then
         if pct ~= 0 then
             if not frame.bar.active:IsShown() then
                 frame.bar.active:Show()
                 frame.bar.inactive:SetPoint("LEFT", frame.bar.active, "RIGHT")
             end
-            frame.bar.active:SetWidth((self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].frameWidth - self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].iconSize) * pct)
+            frame.bar.active:SetWidth((self:getIPropBySpellId(frame.spellID, "frameWidth") - self:getIPropBySpellId(frame.spellID, "iconSize")) * pct)
         elseif frame.bar.active:IsShown() then
             frame.bar.active:Hide()
             frame.bar.inactive:SetPoint("LEFT", frame.icon, "RIGHT")
@@ -1057,7 +1057,7 @@ function HomeCheck:updateCooldownBarProgress(frame)
                 frame.bar.active:Show()
                 frame.bar.inactive:SetPoint("LEFT", frame.bar.active, "RIGHT")
             end
-            frame.bar.active:SetWidth((self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].frameWidth - self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].iconSize) * (1 - pct))
+            frame.bar.active:SetWidth((self:getIPropBySpellId(frame.spellID, "frameWidth") - self:getIPropBySpellId(frame.spellID, "iconSize")) * (1 - pct))
         elseif frame.bar.active:IsShown() then
             frame.bar.active:Hide()
             frame.bar.inactive:SetPoint("LEFT", frame.icon, "RIGHT")
@@ -1067,7 +1067,7 @@ end
 
 function HomeCheck:setTimerPosition(frame)
     frame.timerFontString:ClearAllPoints()
-    if self.db.profile[self.db.profile[self:getSpellGroup(frame.spellID)].inherit or self:getSpellGroup(frame.spellID)].timerPosition == "l" then
+    if self:getIPropBySpellId(frame.spellID, "timerPosition") == "l" then
         frame.timerFontString:SetPoint("LEFT", frame.icon, "RIGHT", 1, 0)
         frame.playerNameFontString:SetPoint("LEFT", frame.timerFontString, "RIGHT", 2, 0)
         frame.targetFontString:SetPoint("RIGHT", frame, "RIGHT", -2, 0)
@@ -1125,11 +1125,22 @@ end
 
 function HomeCheck:setFrameHeight(frame, height)
     if not height then
-        height = self.db.profile[self:getSpellGroup(frame.spellID)].iconSize
+        height = self:getIPropBySpellId(frame.spellID, "iconSize")
     end
     frame:SetHeight(height)
     frame.icon:SetSize(height, height)
     frame.bar.active:SetHeight(height)
     frame.bar.inactive:SetHeight(height)
     self:updateCooldownBarProgress(frame)
+end
+
+---getIProp
+---@param frameId number frame group number
+---@param propertyName string property name to get
+function HomeCheck:getIProp(frameId, propertyName)
+    return self.db.profile[self.db.profile[frameId].inherit or frameId][propertyName]
+end
+
+function HomeCheck:getIPropBySpellId(spellId, propertyName)
+    return self:getIProp(self:getSpellGroup(spellId), propertyName)
 end
