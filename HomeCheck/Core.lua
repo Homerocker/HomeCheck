@@ -652,7 +652,9 @@ function HomeCheck:updateRaidCooldowns()
     else
         self:refreshPlayerCooldowns((UnitName("player")))
         for i = 1, GetNumPartyMembers() do
-            self:refreshPlayerCooldowns((UnitName("party" .. i)))
+            if UnitIsConnected("party" .. i) then
+                self:refreshPlayerCooldowns((UnitName("party" .. i)))
+            end
         end
     end
     self:repositionFrames()
