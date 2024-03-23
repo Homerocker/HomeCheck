@@ -994,18 +994,17 @@ function HomeCheck:applyGroupSettings(frame, groupIndex)
 
     frame:SetParent(self:getGroup(groupIndex))
 
-    groupIndex = self.db.profile[groupIndex].inherit or groupIndex
-
-    self:setFrameHeight(frame, self.db.profile[groupIndex].iconSize)
-    frame:SetWidth(self.db.profile[groupIndex].frameWidth)
-    frame.playerNameFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontPlayer), self.db.profile[groupIndex].fontSize)
-    frame.targetFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontTarget), self.db.profile[groupIndex].fontSizeTarget)
-    frame.targetFontString:SetJustifyH(self.db.profile[groupIndex].targetJustify == "l" and "LEFT" or "RIGHT")
-    self:setBarTexture(frame, self.LibSharedMedia:Fetch("statusbar", self.db.profile[groupIndex].statusbar))
+    self:setFrameHeight(frame, self:getIProp(groupIndex, "iconSize"))
+    frame:SetWidth(self:getIProp(groupIndex, "frameWidth"))
+    frame.playerNameFontString:SetFont(self.LibSharedMedia:Fetch("font", self:getIProp(groupIndex, "fontPlayer")), self:getIProp(groupIndex, "fontSize"))
+    frame.targetFontString:SetFont(self.LibSharedMedia:Fetch("font", self:getIProp(groupIndex, "fontTarget")), self:getIProp(groupIndex, "fontSizeTarget"))
+    frame.targetFontString:SetJustifyH(self:getIProp(groupIndex, "targetJustify") == "l" and "LEFT" or "RIGHT")
+    self:setBarTexture(frame, self.LibSharedMedia:Fetch("statusbar", self:getIProp(groupIndex, "statusbar")))
     self:setBarColor(frame)
-    frame.bar.inactive:SetVertexColor(unpack(self.db.profile[groupIndex].background))
-    frame.timerFontString:SetFont(self.LibSharedMedia:Fetch("font", self.db.profile[groupIndex].fontTimer), self.db.profile[groupIndex].fontSizeTimer)
+    frame.bar.inactive:SetVertexColor(unpack(self:getIProp(groupIndex, "background")))
+    frame.timerFontString:SetFont(self.LibSharedMedia:Fetch("font", self:getIProp(groupIndex, "fontTimer")), self:getIProp(groupIndex, "fontSizeTimer"))
     self:setTimerPosition(frame)
+    self:repositionFrames(groupIndex)
 end
 
 function HomeCheck:setSpellGroupIndex(spellID, groupIndex)
