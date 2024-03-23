@@ -1006,7 +1006,6 @@ function HomeCheck:applyGroupSettings(frame, groupIndex)
     frame.bar.inactive:SetVertexColor(unpack(self:getIProp(groupIndex, "background")))
     frame.timerFontString:SetFont(self.LibSharedMedia:Fetch("font", self:getIProp(groupIndex, "fontTimer")), self:getIProp(groupIndex, "fontSizeTimer"))
     self:setTimerPosition(frame)
-    self:repositionFrames(groupIndex)
 end
 
 function HomeCheck:setSpellGroupIndex(spellID, groupIndex)

@@ -501,6 +501,7 @@ function HomeCheck:OptionsPanel()
                     for j = 1, #self.groups[i].CooldownFrames do
                         self:applyGroupSettings(self.groups[i].CooldownFrames[j])
                     end
+                    self:repositionFrames(i)
                     myOptionsTable.args.frames.args["frame" .. i].args.colors.disabled = val
                     myOptionsTable.args.frames.args["frame" .. i].args.range.disabled = val
                     myOptionsTable.args.frames.args["frame" .. i].args.size.disabled = val
