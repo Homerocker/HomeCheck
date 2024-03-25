@@ -331,10 +331,6 @@ end
 ---@param target string|nil
 ---@param isRemote boolean|nil
 function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
-    if self.db.global.selfignore and playerName == UnitName("player") then
-        return
-    end
-
     if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)
@@ -346,6 +342,10 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
 
     if not isRemote and CDLeft == true then
         self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
+    end
+
+    if self.db.global.selfignore and playerName == UnitName("player") then
+        return
     end
 
     if not self:isSpellEnabled(spellID) then
