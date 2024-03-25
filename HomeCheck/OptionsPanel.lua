@@ -41,7 +41,7 @@ function HomeCheck:OptionsPanel()
                 type = "toggle",
                 set = function(_, val)
                     self.db.global.hidesolo = val
-                    self:updateRaidCooldowns()
+                    self:updateFramesVisibility()
                 end,
                 get = function()
                     return self.db.global.hidesolo

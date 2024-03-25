@@ -94,7 +94,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         if playerInRaid ~= UnitInRaid("player") then
             -- current player joined/left raid
             if playerInRaid then
-                -- player WAS in raid
+                -- player was in raid (left raid)
                 self:RegisterEvent("PARTY_MEMBERS_CHANGED")
             else
                 self:UnregisterEvent("PARTY_MEMBERS_CHANGED")
@@ -331,6 +331,10 @@ end
 ---@param target string|nil
 ---@param isRemote boolean|nil
 function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
+    if self.db.global.selfignore and playerName == UnitName("player") then
+        return
+    end
+
     if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)
@@ -528,9 +532,7 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
     end
 
     table.insert(group.CooldownFrames, frame)
-    if not group:IsShown() then
-        group:Show()
-    end
+    self:updateFramesVisibility(self:getSpellGroup(spellID))
     return frame
 end
 
@@ -597,9 +599,7 @@ function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, star
                     self:CancelTimer(self.groups[i].CooldownFrames[j].CDtimer)
                 end
                 table.remove(self.groups[i].CooldownFrames, j)
-                if #self.groups[i].CooldownFrames == 0 and self.groups[i]:IsShown() then
-                    self.groups[i]:Hide()
-                end
+                self:updateFramesVisibility(i)
                 if spellID then
                     break
                 end
@@ -669,8 +669,7 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
         if not spellConfig.class or spellConfig.class == class then
             if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID)
                     and (not self:isSpellTanksOnly(spellID) or self.LibGroupTalents:GetUnitRole(playerName) == "tank")
-                    and (not self.db.global.selfignore or playerName ~= UnitName("player"))
-                    and (not self.db.global.hidesolo or playerInRaid) then
+                    and (not self.db.global.selfignore or playerName ~= UnitName("player")) then
                 if not spellConfig.parent then
                     self:setCooldown(spellID, playerName)
                 end
@@ -1022,14 +1021,10 @@ function HomeCheck:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, s
     for i = startIndex or 1, #self.groups[sourceGroupIndex].CooldownFrames do
         if spellID == self.groups[sourceGroupIndex].CooldownFrames[i].spellID then
             local frame = table.remove(self.groups[sourceGroupIndex].CooldownFrames, i)
-            if #self.groups[sourceGroupIndex].CooldownFrames == 0 and self.groups[sourceGroupIndex]:IsShown() then
-                self.groups[sourceGroupIndex]:Hide()
-            end
+            self:updateFramesVisibility(sourceGroupIndex)
             self:applyGroupSettings(frame, destGroupIndex)
             table.insert(self.groups[destGroupIndex].CooldownFrames, frame)
-            if not self.groups[destGroupIndex]:IsShown() then
-                self.groups[destGroupIndex]:Show()
-            end
+            self:updateFramesVisibility(destGroupIndex)
             return self:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, i)
         end
     end
@@ -1144,4 +1139,24 @@ end
 
 function HomeCheck:getIPropBySpellId(spellId, propertyName)
     return self:getIProp(self:getSpellGroup(spellId), propertyName)
+end
+
+function HomeCheck:updateFramesVisibility(groupIndex)
+    if groupIndex then
+        if self.groups[groupIndex]:IsShown() then
+            if #self.groups[groupIndex].CooldownFrames == 0
+                    or (self.db.global.hidesolo and not playerInRaid and GetNumPartyMembers() == 0) then
+                self.groups[groupIndex]:Hide()
+            end
+        elseif #self.groups[groupIndex].CooldownFrames ~= 0
+                and (not self.db.global.hidesolo or playerInRaid or GetNumPartyMembers() ~= 0) then
+            self.groups[groupIndex]:Show()
+        end
+
+        return
+    end
+
+    for i = 1, #self.groups do
+        self:updateFramesVisibility(i)
+    end
 end
