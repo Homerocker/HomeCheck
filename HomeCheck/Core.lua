@@ -811,6 +811,8 @@ function HomeCheck:getGroup(i)
 
     frame.CooldownFrames = {}
 
+    frame:Hide()
+
     table.insert(self.groups, frame)
     return frame
 end
