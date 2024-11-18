@@ -542,7 +542,7 @@ function HomeCheck:EnableMouse(frame, disable)
         frame:EnableMouse(false)
     else
         frame:SetScript("OnMouseDown", function(_, button)
-            if button == "LeftButton" and IsShiftKeyDown() then
+            if button == "LeftButton" and (IsShiftKeyDown() or IsControlKeyDown()) then
                 local message = frame.playerName .. " " .. (GetSpellLink(frame.spellID))
                 if frame.CDLeft == 0 then
                     message = message .. " READY"
@@ -552,7 +552,11 @@ function HomeCheck:EnableMouse(frame, disable)
                     end
                     message = message .. " " .. date("!%M:%S", frame.CDLeft)
                 end
-                ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", message, playerInRaid and "RAID" or "PARTY")
+                if IsShiftKeyDown() then
+                    ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", message, playerInRaid and "RAID" or "PARTY")
+                elseif IsControlKeyDown() then
+                    ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", message, "WHISPER", nil, frame.playerName)
+                end
             end
         end)
         frame:EnableMouse(true)
