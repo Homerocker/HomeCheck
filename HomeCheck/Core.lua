@@ -70,6 +70,12 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
 
             if combatEvent == "SPELL_AURA_APPLIED" then
                 targetName = nil
+                if spellID == 64843 or spellID == 64901 or spellID == 48447 then
+                    -- workaround for Divine Hymn, Hymn of Hope and Tranquility ticks incorrectly updating timers
+                    if self:getCDLeft(playerName, spellID) > 10 then
+                        return
+                    end
+                end
             end
 
             self:setCooldown(spellID, playerName, true, targetName)
@@ -381,24 +387,26 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
     target = self:setTarget(frame, target)
 
     if CDLeft then
-        if not frame.isRemote and isRemote then
-            if frame.CDLeft > 5 then
-                return
+        if frame.isRemote then
+            if isRemote then
+                if frame.CDLeft > 5 then
+                    if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
+                        return
+                    end
+                end
+            else
+                frame.isRemote = false
             end
-            if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
-                return
-            end
-        end
-
-        if not frame.isRemote and not isRemote then
-            if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 2 then
-                return
-            end
-        end
-
-        if frame.isRemote and isRemote then
-            if frame.CDLeft > 5 then
+        else
+            if isRemote then
+                if frame.CDLeft > 5 then
+                    return
+                end
                 if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 5 then
+                    return
+                end
+            else
+                if CDLeft >= frame.CDLeft and CDLeft - frame.CDLeft < 2 then
                     return
                 end
             end
