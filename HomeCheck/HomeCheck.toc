@@ -2,7 +2,7 @@
 ## Title: HomeCheck
 ## Notes: Tracks specific cooldowns of players in a raid/party
 ## Notes-ruRU: Отслеживает кулдауны игроков в группе/рейде
-## Version: 1.0.28
+## Version: 1.0.29
 ## OptionalDeps: LibStub, CallbackHandler-1.0, ChatThrottleLib, Ace3, LibSharedMedia-3.0, LibTalentQuery-1.0, LibGroupTalents-1.0, LibRangeCheck-2.0
 ## SavedVariables: HomeCheck_DB
 ## Author: Homerocker
