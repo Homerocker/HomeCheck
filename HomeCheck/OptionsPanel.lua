@@ -104,6 +104,10 @@ function HomeCheck:OptionsPanel()
                                             self.groups[j].CooldownFrames[k]:SetWidth(val)
                                             self:updateCooldownBarProgress(self.groups[j].CooldownFrames[k])
                                         end
+                                        -- Update title bar width
+                                        if self.groups[j].titleBar then
+                                            self.groups[j].titleBar:SetWidth(val)
+                                        end
                                     end
                                 end
                             end
@@ -481,6 +485,135 @@ function HomeCheck:OptionsPanel()
                             set = function(_, val)
                                 self.db.profile[i].rangeUngroup = val
                                 self:sortFrames(i)
+                            end
+                        }
+                    }
+                },
+                titlebar = {
+                    name = L["Title Bar"],
+                    type = "group",
+                    disabled = self.db.profile[i].inherit and i ~= 1,
+                    args = {
+                        showTitleBar = {
+                            name = L["Show title bar"],
+                            type = "toggle",
+                            order = 1,
+                            get = function()
+                                return self.db.profile[i].showTitleBar
+                            end,
+                            set = function(_, val)
+                                self.db.profile[i].showTitleBar = val
+                                for j = 1, #self.groups do
+                                    if j == i or self.db.profile[j].inherit == i then
+                                        if self.groups[j].titleBar then
+                                            if val then
+                                                self.groups[j].titleBar:Show()
+                                                -- Re-enable dragging when showing title bar
+                                                self.groups[j].titleBar:EnableMouse(true)
+                                                self.groups[j].titleBar:RegisterForDrag("LeftButton")
+                                            else
+                                                self.groups[j].titleBar:Hide()
+                                                -- Disable dragging when hiding title bar
+                                                self.groups[j].titleBar:EnableMouse(false)
+                                                self.groups[j].titleBar:RegisterForDrag()
+                                            end
+                                        end
+                                        self:repositionFrames(j)
+                                    end
+                                end
+                            end
+                        },
+                        titleText = {
+                            name = L["Title text"],
+                            type = "input",
+                            order = 2,
+                            disabled = not self.db.profile[i].showTitleBar,
+                            get = function()
+                                return self.db.profile[i].titleText
+                            end,
+                            set = function(_, val)
+                                self.db.profile[i].titleText = val
+                                for j = 1, #self.groups do
+                                    if j == i or self.db.profile[j].inherit == i then
+                                        if self.groups[j].titleBar and self.groups[j].titleBar.text then
+                                            local text = val ~= "" and val or ("Group " .. j)
+                                            self.groups[j].titleBar.text:SetText(text)
+                                        end
+                                    end
+                                end
+                            end
+                        },
+                        titleBarHeight = {
+                            name = L["Title bar height"],
+                            type = "range",
+                            min = 12,
+                            max = 30,
+                            step = 1,
+                            order = 3,
+                            disabled = not self.db.profile[i].showTitleBar,
+                            get = function()
+                                return self.db.profile[i].titleBarHeight
+                            end,
+                            set = function(_, val)
+                                self.db.profile[i].titleBarHeight = val
+                                for j = 1, #self.groups do
+                                    if j == i or self.db.profile[j].inherit == i then
+                                        if self.groups[j].titleBar then
+                                            self.groups[j].titleBar:SetHeight(val)
+                                        end
+                                        self:repositionFrames(j)
+                                    end
+                                end
+                            end
+                        },
+                        titleFontSize = {
+                            name = L["Title font size"],
+                            type = "range",
+                            min = 6,
+                            max = 20,
+                            step = 1,
+                            order = 4,
+                            disabled = not self.db.profile[i].showTitleBar,
+                            get = function()
+                                return self.db.profile[i].titleFontSize
+                            end,
+                            set = function(_, val)
+                                self.db.profile[i].titleFontSize = val
+                                for j = 1, #self.groups do
+                                    if j == i or self.db.profile[j].inherit == i then
+                                        if self.groups[j].titleBar and self.groups[j].titleBar.text then
+                                            local font = self.groups[j].titleBar.text:GetFont()
+                                            self.groups[j].titleBar.text:SetFont(font, val)
+                                        end
+                                    end
+                                end
+                            end
+                        },
+                        titleBackgroundColor = {
+                            name = L["Title background color"],
+                            type = "color",
+                            hasAlpha = true,
+                            order = 5,
+                            disabled = not self.db.profile[i].showTitleBar,
+                            get = function()
+                                return unpack(self.db.profile[i].titleBackgroundColor)
+                            end,
+                            set = function(_, r, g, b, a)
+                                self.db.profile[i].titleBackgroundColor = { r, g, b, a }
+                                for j = 1, #self.groups do
+                                    if j == i or self.db.profile[j].inherit == i then
+                                        if self.groups[j].titleBar and self.groups[j].titleBar.bg then
+                                            self.groups[j].titleBar.bg:SetVertexColor(r, g, b, a)
+                                            -- Update the hover handlers to use new color
+                                            self.groups[j].titleBar:SetScript("OnEnter", function(s)
+                                                s.bg:SetVertexColor(r * 1.2, g * 1.2, b * 1.2, a)
+                                            end)
+                                            self.groups[j].titleBar:SetScript("OnLeave", function(s)
+                                                s.bg:SetVertexColor(r, g, b, a)
+                                            end)
+                                        end
+                                    end
+                                end
                             end
                         }
                     }

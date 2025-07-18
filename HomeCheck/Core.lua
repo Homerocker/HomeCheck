@@ -578,8 +578,12 @@ function HomeCheck:repositionFrames(groupIndex)
         end
         return
     end
+    local titleBarHeight = 0
+    if self:getIProp(groupIndex, "showTitleBar") and self.groups[groupIndex].titleBar and self.groups[groupIndex].titleBar:IsShown() then
+        titleBarHeight = self:getIProp(groupIndex, "titleBarHeight")
+    end
     for j = 1, #self.groups[groupIndex].CooldownFrames do
-        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -(self:getIProp(groupIndex, "iconSize") + self:getIProp(groupIndex, "padding")) * (j - 1))
+        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -titleBarHeight - (self:getIProp(groupIndex, "iconSize") + self:getIProp(groupIndex, "padding")) * (j - 1))
     end
 end
 
@@ -820,6 +824,59 @@ function HomeCheck:getGroup(i)
     frame.anchor:EnableMouse(true)
 
     frame:SetAllPoints(frame.anchor)
+
+    -- Create title bar
+    frame.titleBar = CreateFrame("Frame", nil, frame)
+    frame.titleBar:SetHeight(self:getIProp(i, "titleBarHeight"))
+    frame.titleBar:SetWidth(self:getIProp(i, "frameWidth"))
+    frame.titleBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    
+    -- Enable dragging on title bar
+    frame.titleBar:EnableMouse(true)
+    frame.titleBar:RegisterForDrag("LeftButton")
+    frame.titleBar:SetScript("OnDragStart", function(s)
+        frame.anchor:StartMoving()
+    end)
+    frame.titleBar:SetScript("OnDragStop", function(s)
+        frame.anchor:StopMovingOrSizing()
+        self:saveFramePosition(i)
+    end)
+    
+    -- Visual feedback when hovering over title bar
+    frame.titleBar:SetScript("OnEnter", function(s)
+        local bgColor = self:getIProp(i, "titleBackgroundColor")
+        s.bg:SetVertexColor(bgColor[1] * 1.2, bgColor[2] * 1.2, bgColor[3] * 1.2, bgColor[4])
+    end)
+    frame.titleBar:SetScript("OnLeave", function(s)
+        local bgColor = self:getIProp(i, "titleBackgroundColor")
+        s.bg:SetVertexColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+    end)
+    
+    -- Title background (optional)
+    frame.titleBar.bg = frame.titleBar:CreateTexture(nil, "BACKGROUND")
+    frame.titleBar.bg:SetAllPoints(frame.titleBar)
+    frame.titleBar.bg:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+    local bgColor = self:getIProp(i, "titleBackgroundColor")
+    frame.titleBar.bg:SetVertexColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+    
+    -- Title text
+    frame.titleBar.text = frame.titleBar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.titleBar.text:SetPoint("LEFT", frame.titleBar, "LEFT", 2, 0)
+    frame.titleBar.text:SetPoint("RIGHT", frame.titleBar, "RIGHT", -2, 0)
+    frame.titleBar.text:SetJustifyH("LEFT")
+    local titleText = self:getIProp(i, "titleText")
+    local displayText = titleText ~= "" and titleText or ("Group " .. i)
+    frame.titleBar.text:SetText(displayText)
+    frame.titleBar.text:SetTextColor(1, 1, 1, 1)
+    local font = frame.titleBar.text:GetFont()
+    frame.titleBar.text:SetFont(font, self:getIProp(i, "titleFontSize"))
+    
+    -- Show/hide title bar based on settings
+    if self:getIProp(i, "showTitleBar") then
+        frame.titleBar:Show()
+    else
+        frame.titleBar:Hide()
+    end
 
     frame.CooldownFrames = {}
 
