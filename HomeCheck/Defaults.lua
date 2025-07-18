@@ -17,7 +17,8 @@ HomeCheck.defaults = {
         },
         link = true,
         selfignore = false,
-        hidesolo = false
+        hidesolo = false,
+        testMode = false
     },
     profile = {
         ['*'] = {
@@ -45,7 +46,13 @@ HomeCheck.defaults = {
             inherit = 1,
             rangeDimout = true,
             rangeUngroup = true,
-            invertColors = false
+            invertColors = false,
+            -- Title bar settings (per-group, not inherited)
+            showTitleBar = true,
+            titleText = "",
+            titleBarHeight = 18,
+            titleFontSize = 9,
+            titleBackgroundColor = { 0.1, 0.1, 0.1, 0.8 }
         },
         spells = {
             ["**"] = {

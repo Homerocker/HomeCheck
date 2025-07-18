@@ -151,6 +151,12 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             self:getGroup(i)
         end
 
+        -- Initialize test mode if it was enabled
+        if self.db.global.testMode then
+            self.db.global.testMode = false -- Reset first
+            self:enableTestMode()
+        end
+
         self.db.RegisterCallback(self, "OnProfileChanged", "loadProfile")
         self.db.RegisterCallback(self, "OnProfileCopied", "loadProfile")
         self.db.RegisterCallback(self, "OnProfileReset", "loadProfile")
@@ -578,8 +584,12 @@ function HomeCheck:repositionFrames(groupIndex)
         end
         return
     end
+    local titleBarHeight = 0
+    if self:getIProp(groupIndex, "showTitleBar") and self.groups[groupIndex].titleBar and self.groups[groupIndex].titleBar:IsShown() then
+        titleBarHeight = self:getIProp(groupIndex, "titleBarHeight")
+    end
     for j = 1, #self.groups[groupIndex].CooldownFrames do
-        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -(self:getIProp(groupIndex, "iconSize") + self:getIProp(groupIndex, "padding")) * (j - 1))
+        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -titleBarHeight - (self:getIProp(groupIndex, "iconSize") + self:getIProp(groupIndex, "padding")) * (j - 1))
     end
 end
 
@@ -820,6 +830,59 @@ function HomeCheck:getGroup(i)
     frame.anchor:EnableMouse(true)
 
     frame:SetAllPoints(frame.anchor)
+
+    -- Create title bar
+    frame.titleBar = CreateFrame("Frame", nil, frame)
+    frame.titleBar:SetHeight(self:getIProp(i, "titleBarHeight"))
+    frame.titleBar:SetWidth(self:getIProp(i, "frameWidth"))
+    frame.titleBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    
+    -- Enable dragging on title bar
+    frame.titleBar:EnableMouse(true)
+    frame.titleBar:RegisterForDrag("LeftButton")
+    frame.titleBar:SetScript("OnDragStart", function(s)
+        frame.anchor:StartMoving()
+    end)
+    frame.titleBar:SetScript("OnDragStop", function(s)
+        frame.anchor:StopMovingOrSizing()
+        self:saveFramePosition(i)
+    end)
+    
+    -- Visual feedback when hovering over title bar
+    frame.titleBar:SetScript("OnEnter", function(s)
+        local bgColor = self:getIProp(i, "titleBackgroundColor")
+        s.bg:SetVertexColor(bgColor[1] * 1.2, bgColor[2] * 1.2, bgColor[3] * 1.2, bgColor[4])
+    end)
+    frame.titleBar:SetScript("OnLeave", function(s)
+        local bgColor = self:getIProp(i, "titleBackgroundColor")
+        s.bg:SetVertexColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+    end)
+    
+    -- Title background (optional)
+    frame.titleBar.bg = frame.titleBar:CreateTexture(nil, "BACKGROUND")
+    frame.titleBar.bg:SetAllPoints(frame.titleBar)
+    frame.titleBar.bg:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+    local bgColor = self:getIProp(i, "titleBackgroundColor")
+    frame.titleBar.bg:SetVertexColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+    
+    -- Title text
+    frame.titleBar.text = frame.titleBar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.titleBar.text:SetPoint("LEFT", frame.titleBar, "LEFT", 2, 0)
+    frame.titleBar.text:SetPoint("RIGHT", frame.titleBar, "RIGHT", -2, 0)
+    frame.titleBar.text:SetJustifyH("LEFT")
+    local titleText = self:getIProp(i, "titleText")
+    local displayText = titleText ~= "" and titleText or ("Group " .. i)
+    frame.titleBar.text:SetText(displayText)
+    frame.titleBar.text:SetTextColor(1, 1, 1, 1)
+    local font = frame.titleBar.text:GetFont()
+    frame.titleBar.text:SetFont(font, self:getIProp(i, "titleFontSize"))
+    
+    -- Show/hide title bar based on settings
+    if self:getIProp(i, "showTitleBar") then
+        frame.titleBar:Show()
+    else
+        frame.titleBar:Hide()
+    end
 
     frame.CooldownFrames = {}
 
@@ -1148,7 +1211,20 @@ end
 ---@param frameId number frame group number
 ---@param propertyName string property name to get
 function HomeCheck:getIProp(frameId, propertyName)
-    return self.db.profile[self.db.profile[frameId].inherit or frameId][propertyName]
+    -- Title bar properties are never inherited - always use the specific group's settings
+    local titleBarProperties = {
+        showTitleBar = true,
+        titleText = true,
+        titleBarHeight = true,
+        titleFontSize = true,
+        titleBackgroundColor = true
+    }
+    
+    if titleBarProperties[propertyName] then
+        return self.db.profile[frameId][propertyName]
+    else
+        return self.db.profile[self.db.profile[frameId].inherit or frameId][propertyName]
+    end
 end
 
 function HomeCheck:getIPropBySpellId(spellId, propertyName)
@@ -1172,5 +1248,92 @@ function HomeCheck:updateFramesVisibility(groupIndex)
 
     for i = 1, #self.groups do
         self:updateFramesVisibility(i)
+    end
+end
+
+-- Test Mode functionality
+HomeCheck.testSpells = {
+    [1] = {33206, 64205, 47788}, -- Group 1: Pain Suppression, Divine Sacrifice, Guardian Spirit
+    [2] = {6940, 1044, 10278},   -- Group 2: Hand of Sacrifice, Hand of Freedom, Hand of Protection  
+    [3] = {48477, 29166, 18562}, -- Group 3: Rebirth, Innervate, Swiftmend
+    [4] = {871, 12975, 55694},   -- Group 4: Shield Wall, Last Stand, Enraged Regeneration
+    [5] = {45438, 66, 12051},    -- Group 5: Ice Block, Invisibility, Evocation
+    [6] = {47585, 10060, 64843}, -- Group 6: Dispersion, Power Infusion, Divine Hymn
+    [7] = {48447, 740, 33891},   -- Group 7: Tranquility, Tranquility (old), Tree of Life
+    [8] = {42650, 49016, 51271}, -- Group 8: Army of the Dead, Unholy Frenzy, Pillar of Frost
+    [9] = {23989, 19263, 34477}, -- Group 9: Readiness, Deterrence, Misdirection
+    [10] = {498, 642, 48788}     -- Group 10: Divine Shield, Divine Protection, Lay on Hands
+}
+
+function HomeCheck:enableTestMode()
+    if self.db.global.testMode then
+        return -- Already in test mode
+    end
+    
+    self.db.global.testMode = true
+    local playerName = UnitName("player")
+    
+    for groupIndex = 1, 10 do
+        local spells = self.testSpells[groupIndex]
+        if spells then
+            for i, spellID in ipairs(spells) do
+                if self.spells[spellID] then
+                    -- Create test cooldown with varying times
+                    local testCDLeft = (i - 1) * 30 + 10 -- 10s, 40s, 70s
+                    local testPlayerName = playerName .. i
+                    
+                    -- Enable the spell if it's not already enabled
+                    if not self.db.profile.spells[spellID] then
+                        self.db.profile.spells[spellID] = {
+                            enable = true,
+                            alwaysShow = false,
+                            group = groupIndex,
+                            priority = 100,
+                            tanksonly = false
+                        }
+                    else
+                        local originalGroup = self.db.profile.spells[spellID].group
+                        if originalGroup ~= groupIndex then
+                            self.db.profile.spells[spellID].group = groupIndex
+                        end
+                        self.db.profile.spells[spellID].enable = true
+                    end
+                    
+                    self:setCooldown(spellID, testPlayerName, testCDLeft, nil, false)
+                end
+            end
+        end
+    end
+    
+    self:repositionFrames()
+end
+
+function HomeCheck:disableTestMode()
+    if not self.db.global.testMode then
+        return -- Not in test mode
+    end
+    
+    self.db.global.testMode = false
+    local playerName = UnitName("player")
+    
+    -- Remove all test frames
+    for groupIndex = 1, 10 do
+        local spells = self.testSpells[groupIndex]
+        if spells then
+            for i, spellID in ipairs(spells) do
+                local testPlayerName = playerName .. i
+                self:removeCooldownFrames(testPlayerName, spellID)
+            end
+        end
+    end
+    
+    self:repositionFrames()
+end
+
+function HomeCheck:toggleTestMode()
+    if self.db.global.testMode then
+        self:disableTestMode()
+    else
+        self:enableTestMode()
     end
 end
