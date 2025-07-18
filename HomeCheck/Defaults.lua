@@ -17,7 +17,8 @@ HomeCheck.defaults = {
         },
         link = true,
         selfignore = false,
-        hidesolo = false
+        hidesolo = false,
+        testMode = false
     },
     profile = {
         ['*'] = {
@@ -46,7 +47,7 @@ HomeCheck.defaults = {
             rangeDimout = true,
             rangeUngroup = true,
             invertColors = false,
-            -- Title bar settings
+            -- Title bar settings (per-group, not inherited)
             showTitleBar = true,
             titleText = "",
             titleBarHeight = 18,

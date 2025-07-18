@@ -47,6 +47,17 @@ function HomeCheck:OptionsPanel()
                     return self.db.global.hidesolo
                 end
             },
+            testMode = {
+                name = L["Test Mode"],
+                desc = L["Enable test mode to display sample abilities in each group for layout testing."],
+                type = "toggle",
+                set = function(_, val)
+                    self:toggleTestMode()
+                end,
+                get = function()
+                    return self.db.global.testMode
+                end
+            },
             frames = {
                 name = L["Frames"],
                 type = "group",
@@ -492,7 +503,6 @@ function HomeCheck:OptionsPanel()
                 titlebar = {
                     name = L["Title Bar"],
                     type = "group",
-                    disabled = self.db.profile[i].inherit and i ~= 1,
                     args = {
                         showTitleBar = {
                             name = L["Show title bar"],
@@ -503,24 +513,21 @@ function HomeCheck:OptionsPanel()
                             end,
                             set = function(_, val)
                                 self.db.profile[i].showTitleBar = val
-                                for j = 1, #self.groups do
-                                    if j == i or self.db.profile[j].inherit == i then
-                                        if self.groups[j].titleBar then
-                                            if val then
-                                                self.groups[j].titleBar:Show()
-                                                -- Re-enable dragging when showing title bar
-                                                self.groups[j].titleBar:EnableMouse(true)
-                                                self.groups[j].titleBar:RegisterForDrag("LeftButton")
-                                            else
-                                                self.groups[j].titleBar:Hide()
-                                                -- Disable dragging when hiding title bar
-                                                self.groups[j].titleBar:EnableMouse(false)
-                                                self.groups[j].titleBar:RegisterForDrag()
-                                            end
-                                        end
-                                        self:repositionFrames(j)
+                                -- Only update the specific group, not inherited ones
+                                if self.groups[i] and self.groups[i].titleBar then
+                                    if val then
+                                        self.groups[i].titleBar:Show()
+                                        -- Re-enable dragging when showing title bar
+                                        self.groups[i].titleBar:EnableMouse(true)
+                                        self.groups[i].titleBar:RegisterForDrag("LeftButton")
+                                    else
+                                        self.groups[i].titleBar:Hide()
+                                        -- Disable dragging when hiding title bar
+                                        self.groups[i].titleBar:EnableMouse(false)
+                                        self.groups[i].titleBar:RegisterForDrag()
                                     end
                                 end
+                                self:repositionFrames(i)
                             end
                         },
                         titleText = {
@@ -533,13 +540,10 @@ function HomeCheck:OptionsPanel()
                             end,
                             set = function(_, val)
                                 self.db.profile[i].titleText = val
-                                for j = 1, #self.groups do
-                                    if j == i or self.db.profile[j].inherit == i then
-                                        if self.groups[j].titleBar and self.groups[j].titleBar.text then
-                                            local text = val ~= "" and val or ("Group " .. j)
-                                            self.groups[j].titleBar.text:SetText(text)
-                                        end
-                                    end
+                                -- Only update the specific group, not inherited ones
+                                if self.groups[i] and self.groups[i].titleBar and self.groups[i].titleBar.text then
+                                    local text = val ~= "" and val or ("Group " .. i)
+                                    self.groups[i].titleBar.text:SetText(text)
                                 end
                             end
                         },
@@ -556,14 +560,11 @@ function HomeCheck:OptionsPanel()
                             end,
                             set = function(_, val)
                                 self.db.profile[i].titleBarHeight = val
-                                for j = 1, #self.groups do
-                                    if j == i or self.db.profile[j].inherit == i then
-                                        if self.groups[j].titleBar then
-                                            self.groups[j].titleBar:SetHeight(val)
-                                        end
-                                        self:repositionFrames(j)
-                                    end
+                                -- Only update the specific group, not inherited ones
+                                if self.groups[i] and self.groups[i].titleBar then
+                                    self.groups[i].titleBar:SetHeight(val)
                                 end
+                                self:repositionFrames(i)
                             end
                         },
                         titleFontSize = {
@@ -579,13 +580,10 @@ function HomeCheck:OptionsPanel()
                             end,
                             set = function(_, val)
                                 self.db.profile[i].titleFontSize = val
-                                for j = 1, #self.groups do
-                                    if j == i or self.db.profile[j].inherit == i then
-                                        if self.groups[j].titleBar and self.groups[j].titleBar.text then
-                                            local font = self.groups[j].titleBar.text:GetFont()
-                                            self.groups[j].titleBar.text:SetFont(font, val)
-                                        end
-                                    end
+                                -- Only update the specific group, not inherited ones
+                                if self.groups[i] and self.groups[i].titleBar and self.groups[i].titleBar.text then
+                                    local font = self.groups[i].titleBar.text:GetFont()
+                                    self.groups[i].titleBar.text:SetFont(font, val)
                                 end
                             end
                         },
@@ -600,19 +598,16 @@ function HomeCheck:OptionsPanel()
                             end,
                             set = function(_, r, g, b, a)
                                 self.db.profile[i].titleBackgroundColor = { r, g, b, a }
-                                for j = 1, #self.groups do
-                                    if j == i or self.db.profile[j].inherit == i then
-                                        if self.groups[j].titleBar and self.groups[j].titleBar.bg then
-                                            self.groups[j].titleBar.bg:SetVertexColor(r, g, b, a)
-                                            -- Update the hover handlers to use new color
-                                            self.groups[j].titleBar:SetScript("OnEnter", function(s)
-                                                s.bg:SetVertexColor(r * 1.2, g * 1.2, b * 1.2, a)
-                                            end)
-                                            self.groups[j].titleBar:SetScript("OnLeave", function(s)
-                                                s.bg:SetVertexColor(r, g, b, a)
-                                            end)
-                                        end
-                                    end
+                                -- Only update the specific group, not inherited ones
+                                if self.groups[i] and self.groups[i].titleBar and self.groups[i].titleBar.bg then
+                                    self.groups[i].titleBar.bg:SetVertexColor(r, g, b, a)
+                                    -- Update the hover handlers to use new color
+                                    self.groups[i].titleBar:SetScript("OnEnter", function(s)
+                                        s.bg:SetVertexColor(r * 1.2, g * 1.2, b * 1.2, a)
+                                    end)
+                                    self.groups[i].titleBar:SetScript("OnLeave", function(s)
+                                        s.bg:SetVertexColor(r, g, b, a)
+                                    end)
                                 end
                             end
                         }
