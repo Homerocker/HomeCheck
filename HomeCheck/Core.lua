@@ -342,7 +342,7 @@ end
 ---@param CDLeft number|boolean|nil
 ---@param target string|nil
 ---@param isRemote boolean|nil
-function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
+function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, testMode)
     if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)
@@ -376,7 +376,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         end
     end
 
-    local frame = self:createCooldownFrame(playerName, spellID)
+    local frame = self:createCooldownFrame(playerName, spellID, testMode)
 
     if CDLeft == true then
         CDLeft = self:getSpellCooldown(frame)
@@ -419,10 +419,8 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote)
         end
 
         frame.CDLeft = CDLeft
-    else
-        if frame.initialized then
-            return
-        end
+    elseif frame.initialized then
+        return
     end
 
     if childSpells[spellID] then
@@ -498,7 +496,7 @@ function HomeCheck:getCooldownFrame(playerName, spellID)
     end
 end
 
-function HomeCheck:createCooldownFrame(playerName, spellID)
+function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
     local frame = self:getCooldownFrame(playerName, spellID)
 
     if frame then
@@ -511,8 +509,9 @@ function HomeCheck:createCooldownFrame(playerName, spellID)
     frame.playerName = playerName
     frame.spellID = spellID
     frame.CDLeft = 0
-    frame.class = select(2, UnitClass(playerName))
+    frame.class = testMode and self.spells[spellID].class or select(2, UnitClass(playerName))
     frame.CD = self:getSpellCooldown(frame)
+    frame.testMode = testMode
 
     frame.icon = frame:CreateTexture(nil, "OVERLAY")
     frame.icon:SetPoint("LEFT")
@@ -836,7 +835,7 @@ function HomeCheck:getGroup(i)
     frame.titleBar:SetHeight(self:getIProp(i, "titleBarHeight"))
     frame.titleBar:SetWidth(self:getIProp(i, "frameWidth"))
     frame.titleBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-    
+
     -- Enable dragging on title bar
     frame.titleBar:EnableMouse(true)
     frame.titleBar:RegisterForDrag("LeftButton")
@@ -847,7 +846,7 @@ function HomeCheck:getGroup(i)
         frame.anchor:StopMovingOrSizing()
         self:saveFramePosition(i)
     end)
-    
+
     -- Visual feedback when hovering over title bar
     frame.titleBar:SetScript("OnEnter", function(s)
         local bgColor = self:getIProp(i, "titleBackgroundColor")
@@ -857,14 +856,14 @@ function HomeCheck:getGroup(i)
         local bgColor = self:getIProp(i, "titleBackgroundColor")
         s.bg:SetVertexColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
     end)
-    
+
     -- Title background (optional)
     frame.titleBar.bg = frame.titleBar:CreateTexture(nil, "BACKGROUND")
     frame.titleBar.bg:SetAllPoints(frame.titleBar)
     frame.titleBar.bg:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
     local bgColor = self:getIProp(i, "titleBackgroundColor")
     frame.titleBar.bg:SetVertexColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
-    
+
     -- Title text
     frame.titleBar.text = frame.titleBar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.titleBar.text:SetPoint("LEFT", frame.titleBar, "LEFT", 2, 0)
@@ -876,7 +875,7 @@ function HomeCheck:getGroup(i)
     frame.titleBar.text:SetTextColor(1, 1, 1, 1)
     local font = frame.titleBar.text:GetFont()
     frame.titleBar.text:SetFont(font, self:getIProp(i, "titleFontSize"))
-    
+
     -- Show/hide title bar based on settings
     if self:getIProp(i, "showTitleBar") then
         frame.titleBar:Show()
@@ -933,23 +932,30 @@ end
 
 function HomeCheck:updateRange(frame)
     if not frame.inRange then
-        frame.inRange = self:UnitInRange(frame.playerName) and 1 or 0
+        if frame.testMode then
+            frame.inRange = (random(1, 100) <= 80) and 1 or 0
+        else
+            frame.inRange = self:UnitInRange(frame.playerName) and 1 or 0
+        end
+
         self:setBarColor(frame)
         self:sortFrames()
-    elseif frame.inRange == 1 then
-        if not self:UnitInRange(frame.playerName) then
-            frame.inRange = 0
+    elseif not frame.testMode then
+        if frame.inRange == 1 then
+            if not self:UnitInRange(frame.playerName) then
+                frame.inRange = 0
+                if self:getIPropBySpellId(frame.spellID, "rangeDimout") then
+                    self:setBarColor(frame)
+                end
+                self:sortFrames()
+            end
+        elseif self:UnitInRange(frame.playerName) then
+            frame.inRange = 1
             if self:getIPropBySpellId(frame.spellID, "rangeDimout") then
                 self:setBarColor(frame)
             end
             self:sortFrames()
         end
-    elseif self:UnitInRange(frame.playerName) then
-        frame.inRange = 1
-        if self:getIPropBySpellId(frame.spellID, "rangeDimout") then
-            self:setBarColor(frame)
-        end
-        self:sortFrames()
     end
 end
 
@@ -1219,7 +1225,7 @@ function HomeCheck:getIProp(frameId, propertyName)
         titleFontSize = true,
         titleBackgroundColor = true
     }
-    
+
     if titleBarProperties[propertyName] then
         return self.db.profile[frameId][propertyName]
     else
@@ -1253,16 +1259,16 @@ end
 
 -- Test Mode functionality
 HomeCheck.testSpells = {
-    [1] = {33206, 64205, 47788}, -- Group 1: Pain Suppression, Divine Sacrifice, Guardian Spirit
-    [2] = {6940, 1044, 10278},   -- Group 2: Hand of Sacrifice, Hand of Freedom, Hand of Protection  
-    [3] = {48477, 29166, 61384}, -- Group 3: Rebirth, Innervate, Typhoon
-    [4] = {871, 12975, 55694},   -- Group 4: Shield Wall, Last Stand, Enraged Regeneration
-    [5] = {45438, 66, 12051},    -- Group 5: Ice Block, Invisibility, Evocation
-    [6] = {47585, 10060, 64843}, -- Group 6: Dispersion, Power Infusion, Divine Hymn
-    [7] = {48447, 22842, 22812},   -- Group 7: Tranquility, Frenzied Regeneration, Barkskin
-    [8] = {42650, 49016, 49005}, -- Group 8: Army of the Dead, Hysteria, Mark of Blood
-    [9] = {23989, 34477},        -- Group 9: Readiness, Misdirection
-    [10] = {498, 642, 48788}     -- Group 10: Divine Shield, Divine Protection, Lay on Hands
+    [1] = { 33206, 64205, 47788 }, -- Group 1: Pain Suppression, Divine Sacrifice, Guardian Spirit
+    [2] = { 6940, 1044, 10278 }, -- Group 2: Hand of Sacrifice, Hand of Freedom, Hand of Protection
+    [3] = { 48477, 29166, 61384 }, -- Group 3: Rebirth, Innervate, Typhoon
+    [4] = { 871, 12975, 55694 }, -- Group 4: Shield Wall, Last Stand, Enraged Regeneration
+    [5] = { 45438, 66, 12051 }, -- Group 5: Ice Block, Invisibility, Evocation
+    [6] = { 47585, 10060, 64843 }, -- Group 6: Dispersion, Power Infusion, Divine Hymn
+    [7] = { 48447, 22842, 22812 }, -- Group 7: Tranquility, Frenzied Regeneration, Barkskin
+    [8] = { 42650, 49016, 49005 }, -- Group 8: Army of the Dead, Hysteria, Mark of Blood
+    [9] = { 23989, 34477 }, -- Group 9: Readiness, Misdirection
+    [10] = { 498, 642, 48788 }     -- Group 10: Divine Shield, Divine Protection, Lay on Hands
 }
 
 function HomeCheck:setTestMode(enable)
@@ -1279,6 +1285,9 @@ function HomeCheck:setTestMode(enable)
             if spells then
                 for i, spellID in ipairs(spells) do
                     if self.spells[spellID] then
+                        -- Create test cooldown with varying times
+                        local testCDLeft = (i - 1) * 30 + 10 -- 10s, 40s, 70s
+
                         -- Enable the spell if it's not already enabled
                         if not self.db.profile.spells[spellID] then
                             self.db.profile.spells[spellID] = {
@@ -1296,7 +1305,7 @@ function HomeCheck:setTestMode(enable)
                             self.db.profile.spells[spellID].enable = true
                         end
 
-                        self:setCooldown(spellID, playerName .. i, true)
+                        self:setCooldown(spellID, playerName .. i, testCDLeft, nil, nil, true)
                     end
                 end
             end
