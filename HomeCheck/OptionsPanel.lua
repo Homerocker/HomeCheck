@@ -52,7 +52,7 @@ function HomeCheck:OptionsPanel()
                 desc = L["Enable test mode to display sample abilities in each group for layout testing."],
                 type = "toggle",
                 set = function(_, val)
-                    self:toggleTestMode()
+                    self:setTestMode(val)
                 end,
                 get = function()
                     return self.db.global.testMode

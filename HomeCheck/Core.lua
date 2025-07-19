@@ -154,7 +154,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         -- Initialize test mode if it was enabled
         if self.db.global.testMode then
             self.db.global.testMode = false -- Reset first
-            self:enableTestMode()
+            self:setTestMode(true)
         end
 
         self.db.RegisterCallback(self, "OnProfileChanged", "loadProfile")
@@ -1265,75 +1265,65 @@ HomeCheck.testSpells = {
     [10] = {498, 642, 48788}     -- Group 10: Divine Shield, Divine Protection, Lay on Hands
 }
 
-function HomeCheck:enableTestMode()
-    if self.db.global.testMode then
-        return -- Already in test mode
-    end
-    
-    self.db.global.testMode = true
-    local playerName = UnitName("player")
-    
-    for groupIndex = 1, 10 do
-        local spells = self.testSpells[groupIndex]
-        if spells then
-            for i, spellID in ipairs(spells) do
-                if self.spells[spellID] then
-                    -- Create test cooldown with varying times
-                    local testCDLeft = (i - 1) * 30 + 10 -- 10s, 40s, 70s
-                    local testPlayerName = playerName .. i
-                    
-                    -- Enable the spell if it's not already enabled
-                    if not self.db.profile.spells[spellID] then
-                        self.db.profile.spells[spellID] = {
-                            enable = true,
-                            alwaysShow = false,
-                            group = groupIndex,
-                            priority = 100,
-                            tanksonly = false
-                        }
-                    else
-                        local originalGroup = self.db.profile.spells[spellID].group
-                        if originalGroup ~= groupIndex then
-                            self.db.profile.spells[spellID].group = groupIndex
+function HomeCheck:setTestMode(enable)
+    if enable then
+        if self.db.global.testMode then
+            return -- Already in test mode
+        end
+
+        self.db.global.testMode = true
+        local playerName = UnitName("player")
+
+        for groupIndex = 1, groups do
+            local spells = self.testSpells[groupIndex]
+            if spells then
+                for i, spellID in ipairs(spells) do
+                    if self.spells[spellID] then
+                        -- Create test cooldown with varying times
+                        local testCDLeft = (i - 1) * 30 + 10 -- 10s, 40s, 70s
+                        local testPlayerName = playerName .. i
+
+                        -- Enable the spell if it's not already enabled
+                        if not self.db.profile.spells[spellID] then
+                            self.db.profile.spells[spellID] = {
+                                enable = true,
+                                alwaysShow = false,
+                                group = groupIndex,
+                                priority = 100,
+                                tanksonly = false
+                            }
+                        else
+                            local originalGroup = self.db.profile.spells[spellID].group
+                            if originalGroup ~= groupIndex then
+                                self.db.profile.spells[spellID].group = groupIndex
+                            end
+                            self.db.profile.spells[spellID].enable = true
                         end
-                        self.db.profile.spells[spellID].enable = true
+
+                        self:setCooldown(spellID, testPlayerName, testCDLeft, nil, false)
                     end
-                    
-                    self:setCooldown(spellID, testPlayerName, testCDLeft, nil, false)
+                end
+            end
+        end
+    else
+        if not self.db.global.testMode then
+            return -- Not in test mode
+        end
+
+        self.db.global.testMode = false
+        local playerName = UnitName("player")
+
+        -- Remove all test frames
+        for groupIndex = 1, groups do
+            local spells = self.testSpells[groupIndex]
+            if spells then
+                for i, spellID in ipairs(spells) do
+                    local testPlayerName = playerName .. i
+                    self:removeCooldownFrames(testPlayerName, spellID)
                 end
             end
         end
     end
-    
-    self:repositionFrames()
-end
 
-function HomeCheck:disableTestMode()
-    if not self.db.global.testMode then
-        return -- Not in test mode
-    end
-    
-    self.db.global.testMode = false
-    local playerName = UnitName("player")
-    
-    -- Remove all test frames
-    for groupIndex = 1, 10 do
-        local spells = self.testSpells[groupIndex]
-        if spells then
-            for i, spellID in ipairs(spells) do
-                local testPlayerName = playerName .. i
-                self:removeCooldownFrames(testPlayerName, spellID)
-            end
-        end
-    end
-    
     self:repositionFrames()
-end
-
-function HomeCheck:toggleTestMode()
-    if self.db.global.testMode then
-        self:disableTestMode()
-    else
-        self:enableTestMode()
-    end
 end
