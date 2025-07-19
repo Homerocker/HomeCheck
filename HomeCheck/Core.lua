@@ -1279,10 +1279,6 @@ function HomeCheck:setTestMode(enable)
             if spells then
                 for i, spellID in ipairs(spells) do
                     if self.spells[spellID] then
-                        -- Create test cooldown with varying times
-                        local testCDLeft = (i - 1) * 30 + 10 -- 10s, 40s, 70s
-                        local testPlayerName = playerName .. i
-
                         -- Enable the spell if it's not already enabled
                         if not self.db.profile.spells[spellID] then
                             self.db.profile.spells[spellID] = {
@@ -1300,7 +1296,7 @@ function HomeCheck:setTestMode(enable)
                             self.db.profile.spells[spellID].enable = true
                         end
 
-                        self:setCooldown(spellID, testPlayerName, testCDLeft, nil, false)
+                        self:setCooldown(spellID, playerName .. i, true)
                     end
                 end
             end
@@ -1318,8 +1314,7 @@ function HomeCheck:setTestMode(enable)
             local spells = self.testSpells[groupIndex]
             if spells then
                 for i, spellID in ipairs(spells) do
-                    local testPlayerName = playerName .. i
-                    self:removeCooldownFrames(testPlayerName, spellID)
+                    self:removeCooldownFrames(playerName .. i, spellID)
                 end
             end
         end
