@@ -1255,13 +1255,13 @@ end
 HomeCheck.testSpells = {
     [1] = {33206, 64205, 47788}, -- Group 1: Pain Suppression, Divine Sacrifice, Guardian Spirit
     [2] = {6940, 1044, 10278},   -- Group 2: Hand of Sacrifice, Hand of Freedom, Hand of Protection  
-    [3] = {48477, 29166, 18562}, -- Group 3: Rebirth, Innervate, Swiftmend
+    [3] = {48477, 29166, 61384}, -- Group 3: Rebirth, Innervate, Typhoon
     [4] = {871, 12975, 55694},   -- Group 4: Shield Wall, Last Stand, Enraged Regeneration
     [5] = {45438, 66, 12051},    -- Group 5: Ice Block, Invisibility, Evocation
     [6] = {47585, 10060, 64843}, -- Group 6: Dispersion, Power Infusion, Divine Hymn
-    [7] = {48447, 740, 33891},   -- Group 7: Tranquility, Tranquility (old), Tree of Life
-    [8] = {42650, 49016, 51271}, -- Group 8: Army of the Dead, Unholy Frenzy, Pillar of Frost
-    [9] = {23989, 19263, 34477}, -- Group 9: Readiness, Deterrence, Misdirection
+    [7] = {48447, 22842, 22812},   -- Group 7: Tranquility, Frenzied Regeneration, Barkskin
+    [8] = {42650, 49016, 49005}, -- Group 8: Army of the Dead, Hysteria, Mark of Blood
+    [9] = {23989, 34477},        -- Group 9: Readiness, Misdirection
     [10] = {498, 642, 48788}     -- Group 10: Divine Shield, Divine Protection, Lay on Hands
 }
 
