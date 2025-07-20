@@ -509,7 +509,10 @@ function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
     frame.playerName = playerName
     frame.spellID = spellID
     frame.CDLeft = 0
-    frame.class = testMode and self.spells[spellID].class or select(2, UnitClass(playerName))
+    frame.class = self.spells[spellID].class
+    if not frame.class then
+        frame.class = testMode and select(2, UnitClass("player")) or select(2, UnitClass(playerName))
+    end
     frame.CD = self:getSpellCooldown(frame)
     frame.testMode = testMode
 
@@ -608,13 +611,19 @@ function HomeCheck:loadProfile()
     self:sortFrames()
 end
 
-function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, startGroup, startIndex)
+function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, startGroup, startIndex, testMode)
     if spellID then
         startGroup = self:getSpellGroup(spellID)
     end
     for i = startGroup or 1, #self.groups do
         for j = startIndex or 1, #self.groups[i].CooldownFrames do
-            if self.groups[i].CooldownFrames[j].playerName == playerName and (not spellID or self.groups[i].CooldownFrames[j].spellID == spellID) and (not onlyWhenReady or self.groups[i].CooldownFrames[j].CDLeft <= 0) then
+            if (
+                    self.groups[i].CooldownFrames[j].playerName == playerName
+                            and (not spellID or self.groups[i].CooldownFrames[j].spellID == spellID)
+                            and (not onlyWhenReady or self.groups[i].CooldownFrames[j].CDLeft <= 0)
+            ) or (
+                    testMode and self.groups[i].CooldownFrames[j].testMode
+            ) then
                 self.groups[i].CooldownFrames[j]:Hide()
                 if self.groups[i].CooldownFrames[j].CDtimer then
                     self:CancelTimer(self.groups[i].CooldownFrames[j].CDtimer)
@@ -624,8 +633,13 @@ function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, star
                 if spellID then
                     break
                 end
-                return self:removeCooldownFrames(playerName, spellID, onlyWhenReady, i, j)
+                return self:removeCooldownFrames(playerName, spellID, onlyWhenReady, i, j, testMode)
             end
+        end
+
+        if startIndex then
+            -- reset start frame index when we proceed to next frames group
+            startIndex = nil
         end
     end
 end
@@ -1258,18 +1272,6 @@ function HomeCheck:updateFramesVisibility(groupIndex)
 end
 
 -- Test Mode functionality
-HomeCheck.testSpells = {
-    [1] = { 33206, 64205, 47788 }, -- Group 1: Pain Suppression, Divine Sacrifice, Guardian Spirit
-    [2] = { 6940, 1044, 10278 }, -- Group 2: Hand of Sacrifice, Hand of Freedom, Hand of Protection
-    [3] = { 48477, 29166, 61384 }, -- Group 3: Rebirth, Innervate, Typhoon
-    [4] = { 871, 12975, 55694 }, -- Group 4: Shield Wall, Last Stand, Enraged Regeneration
-    [5] = { 45438, 66, 12051 }, -- Group 5: Ice Block, Invisibility, Evocation
-    [6] = { 47585, 10060, 64843 }, -- Group 6: Dispersion, Power Infusion, Divine Hymn
-    [7] = { 48447, 22842, 22812 }, -- Group 7: Tranquility, Frenzied Regeneration, Barkskin
-    [8] = { 42650, 49016, 49005 }, -- Group 8: Army of the Dead, Hysteria, Mark of Blood
-    [9] = { 23989, 34477 }, -- Group 9: Readiness, Misdirection
-    [10] = { 498, 642, 48788 }     -- Group 10: Divine Shield, Divine Protection, Lay on Hands
-}
 
 function HomeCheck:setTestMode(enable)
     if enable then
@@ -1278,36 +1280,12 @@ function HomeCheck:setTestMode(enable)
         end
 
         self.db.global.testMode = true
-        local playerName = UnitName("player")
 
-        for groupIndex = 1, groups do
-            local spells = self.testSpells[groupIndex]
-            if spells then
-                for i, spellID in ipairs(spells) do
-                    if self.spells[spellID] then
-                        -- Create test cooldown with varying times
-                        local testCDLeft = (i - 1) * 30 + 10 -- 10s, 40s, 70s
-
-                        -- Enable the spell if it's not already enabled
-                        if not self.db.profile.spells[spellID] then
-                            self.db.profile.spells[spellID] = {
-                                enable = true,
-                                alwaysShow = false,
-                                group = groupIndex,
-                                priority = 100,
-                                tanksonly = false
-                            }
-                        else
-                            local originalGroup = self.db.profile.spells[spellID].group
-                            if originalGroup ~= groupIndex then
-                                self.db.profile.spells[spellID].group = groupIndex
-                            end
-                            self.db.profile.spells[spellID].enable = true
-                        end
-
-                        self:setCooldown(spellID, playerName .. i, testCDLeft, nil, nil, true)
-                    end
-                end
+        for spellId, spell in pairs(self.db.profile.spells) do
+            if self.spells[spellId] then
+                -- Create test cooldown with varying times
+                local testCDLeft = random(1, 5) * 10
+                self:setCooldown(spellId, "Test frame", testCDLeft, nil, nil, true)
             end
         end
     else
@@ -1316,17 +1294,9 @@ function HomeCheck:setTestMode(enable)
         end
 
         self.db.global.testMode = false
-        local playerName = UnitName("player")
 
         -- Remove all test frames
-        for groupIndex = 1, groups do
-            local spells = self.testSpells[groupIndex]
-            if spells then
-                for i, spellID in ipairs(spells) do
-                    self:removeCooldownFrames(playerName .. i, spellID)
-                end
-            end
-        end
+        self:removeCooldownFrames(nil, nil, nil, nil, nil, true)
     end
 
     self:repositionFrames()
