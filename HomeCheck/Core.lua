@@ -10,8 +10,7 @@ LibStub("AceSerializer-3.0"):Embed(HomeCheck)
 
 HomeCheck.groups = {}
 HomeCheck.localizedSpellNames = {}
-HomeCheck.deadUnits = {}
-HomeCheck.RebirthTargets = {}
+HomeCheck.units = {}
 HomeCheck.db_ver = 4
 
 HomeCheck.comms = {
@@ -89,7 +88,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             -- Guardian Spirit proced
             self:GSProc(targetName)
         elseif combatEvent == "UNIT_DIED" then
-            self.deadUnits[playerName] = true
+            self:getUnit(playerName).dead = true
         end
 
         -- UNIT_SPELLCAST events are used to detect double Rebirth only
@@ -189,16 +188,22 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         end
 
         self:ScheduleRepeatingTimer(function()
-            for playerName, _ in pairs(self.deadUnits) do
-                if not UnitIsDeadOrGhost(playerName) or (not UnitInRaid(playerName) and not UnitInParty(playerName)) then
-                    self.deadUnits[playerName] = nil
+            for playerName, _ in pairs(self.units) do
+                if not UnitInRaid(playerName) and not UnitInParty(playerName) then
+                    self.units[playerName] = nil
+                else
+                    if self:getUnit(playerName).dead and not UnitIsDeadOrGhost(playerName) then
+                        self:getUnit(playerName).dead = nil
+                    end
+
+                    self:getUnit(playerName).range = self:UnitInRange(playerName) and 1 or 0
                 end
             end
 
             for i = 1, #self.groups do
                 for j = 1, #self.groups[i].CooldownFrames do
                     self:setTimerColor(self.groups[i].CooldownFrames[j])
-                    self:updateRange(self.groups[i].CooldownFrames[j])
+                    self:setBarColor(self.groups[i].CooldownFrames[j])
                 end
             end
 
@@ -540,7 +545,7 @@ function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
     frame.bar.inactive:SetPoint("RIGHT")
     frame.bar.inactive:SetPoint("LEFT", frame.bar.active, "RIGHT")
 
-    self:updateRange(frame)
+    self:getUnit(playerName).range = self:UnitInRange(playerName) and 1 or 0
 
     frame.playerNameFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.playerNameFontString:SetText(frame.playerName)
@@ -689,8 +694,8 @@ function HomeCheck:updateRaidCooldowns()
         for i = 1, 40 do
             local playerName, _, _, _, _, class, _, online, isDead = GetRaidRosterInfo(i)
             if playerName and online then
-                if self.deadUnits[playerName] ~= isDead then
-                    self.deadUnits[playerName] = isDead
+                if self:getUnit(playerName).dead ~= isDead then
+                    self:getUnit(playerName).dead = isDead
                 end
                 self:refreshPlayerCooldowns(playerName, class)
             end
@@ -698,16 +703,16 @@ function HomeCheck:updateRaidCooldowns()
     else
         local isDead = UnitIsDeadOrGhost("player")
         local playerName = (UnitName("player"))
-        if self.deadUnits[playerName] ~= isDead then
-            self.deadUnits[playerName] = isDead
+        if self:getUnit(playerName).dead ~= isDead then
+            self:getUnit(playerName).dead = isDead
         end
         self:refreshPlayerCooldowns((UnitName("player")))
         for i = 1, GetNumPartyMembers() do
             if UnitIsConnected("party" .. i) then
                 playerName = (UnitName("party" .. i))
                 isDead = UnitIsDeadOrGhost("party" .. i)
-                if self.deadUnits[playerName] ~= isDead then
-                    self.deadUnits[playerName] = isDead
+                if self:getUnit(playerName).dead ~= isDead then
+                    self:getUnit(playerName).dead = isDead
                 end
                 self:refreshPlayerCooldowns(playerName)
             end
@@ -814,17 +819,17 @@ function HomeCheck:cooldownSorter(frame1, frame2)
     local groupIndex = self:getSpellGroup(frame1.spellID)
     local spellId1 = self.spells[frame1.spellID].parent or frame1.spellID
     local spellId2 = self.spells[frame2.spellID].parent or frame2.spellID
-    if self.deadUnits[frame1.playerName]
-            and not self.deadUnits[frame2.playerName]
+    if self:getUnit(frame1.playerName).dead
+            and not self:getUnit(frame2.playerName).dead
             and spellId1 == spellId2 then
         return true
-    elseif frame1.inRange < frame2.inRange then
+    elseif self:getUnit(frame1.playerName).range < self:getUnit(frame2.playerName).range then
         if self:getIProp(groupIndex, "rangeUngroup") then
             return true
         elseif spellId1 == spellId2 and self:getIProp(groupIndex, "rangeDimout") then
             return true
         end
-    elseif frame1.inRange > frame2.inRange then
+    elseif self:getUnit(frame1.playerName).range > self:getUnit(frame2.playerName).range then
         if self:getIProp(groupIndex, "rangeUngroup") or spellId1 == spellId2 then
             return
         end
@@ -969,35 +974,9 @@ function HomeCheck:setTarget(frame, target)
     return target
 end
 
-function HomeCheck:updateRange(frame)
-    if not frame.inRange then
-        if frame.testMode then
-            frame.inRange = (random(1, 100) <= 80) and 1 or 0
-        else
-            frame.inRange = self:UnitInRange(frame.playerName) and 1 or 0
-        end
-
-        self:setBarColor(frame)
-    elseif not frame.testMode then
-        if frame.inRange == 1 then
-            if not self:UnitInRange(frame.playerName) then
-                frame.inRange = 0
-                if self:getIPropBySpellId(frame.spellID, "rangeDimout") then
-                    self:setBarColor(frame)
-                end
-            end
-        elseif self:UnitInRange(frame.playerName) then
-            frame.inRange = 1
-            if self:getIPropBySpellId(frame.spellID, "rangeDimout") then
-                self:setBarColor(frame)
-            end
-        end
-    end
-end
-
 ---@param frame
 function HomeCheck:setBarColor(frame)
-    if frame.inRange == 1 or not self:getIPropBySpellId(frame.spellID, "rangeDimout") then
+    if self:getUnit(frame.playerName).range == 1 or not self:getIPropBySpellId(frame.spellID, "rangeDimout") then
         local playerClassColor = RAID_CLASS_COLORS[frame.class]
         frame.bar.active:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self:getIPropBySpellId(frame.spellID, "opacity"))
     else
@@ -1006,7 +985,7 @@ function HomeCheck:setBarColor(frame)
 end
 
 function HomeCheck:setTimerColor(frame)
-    if self.deadUnits[frame.playerName] then
+    if self:getUnit(frame.playerName).dead then
         frame.timerFontString:SetTextColor(1, 0, 0, 1)
     elseif frame.CDLeft <= 0 then
         if self.db.profile.spells[frame.spellID].alwaysShow then
@@ -1210,12 +1189,12 @@ end
 
 function HomeCheck:Rebirth(event, playerName, target)
     if event == "UNIT_SPELLCAST_SENT" then
-        self.RebirthTargets[playerName] = target
+        self:getUnit(playerName).rebirth = target
     elseif event == "UNIT_SPELLCAST_FAILED" then
-        self.RebirthTargets[playerName] = nil
+        self:getUnit(playerName).rebirth = nil
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        self:setCooldown(48477, playerName, true, self.RebirthTargets[playerName])
-        self.RebirthTargets[playerName] = nil
+        self:setCooldown(48477, playerName, true, self:getUnit(playerName).rebirth)
+        self:getUnit(playerName).rebirth = nil
     end
 end
 
@@ -1311,4 +1290,11 @@ function HomeCheck:setTestMode(enable)
     end
 
     self:repositionFrames()
+end
+
+function HomeCheck:getUnit(playerName)
+    if not self.units[playerName] then
+        self.units[playerName] = {}
+    end
+    return self.units[playerName]
 end
