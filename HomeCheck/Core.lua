@@ -976,11 +976,13 @@ end
 
 ---@param frame
 function HomeCheck:setBarColor(frame)
-    if self:getUnit(frame.playerName).range == 1 or not self:getIPropBySpellId(frame.spellID, "rangeDimout") then
+    if self:getUnit(frame.playerName).dead
+            or (self:getUnit(frame.playerName).range == 0
+                    and self:getIPropBySpellId(frame.spellID, "rangeDimout")) then
+        frame.bar.active:SetVertexColor(0.5, 0.5, 0.5, self:getIPropBySpellId(frame.spellID, "opacity"))
+    else
         local playerClassColor = RAID_CLASS_COLORS[frame.class]
         frame.bar.active:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self:getIPropBySpellId(frame.spellID, "opacity"))
-    else
-        frame.bar.active:SetVertexColor(0.5, 0.5, 0.5, self:getIPropBySpellId(frame.spellID, "opacity"))
     end
 end
 
