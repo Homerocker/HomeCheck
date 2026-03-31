@@ -188,15 +188,17 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         end
 
         self:ScheduleRepeatingTimer(function()
-            for playerName, _ in pairs(self.units) do
-                if not UnitInRaid(playerName) and not UnitInParty(playerName) then
-                    self.units[playerName] = nil
-                else
-                    if self:getUnit(playerName).dead and not UnitIsDeadOrGhost(playerName) then
-                        self:getUnit(playerName).dead = nil
-                    end
+            if not self.db.global.testMode then
+                for playerName, _ in pairs(self.units) do
+                    if not UnitInRaid(playerName) and not UnitInParty(playerName) then
+                        self.units[playerName] = nil
+                    else
+                        if self:getUnit(playerName).dead and not UnitIsDeadOrGhost(playerName) then
+                            self:getUnit(playerName).dead = nil
+                        end
 
-                    self:getUnit(playerName).range = self:UnitInRange(playerName) and 1 or 0
+                        self:getUnit(playerName).range = self:UnitInRange(playerName) and 1 or 0
+                    end
                 end
             end
 
@@ -544,8 +546,6 @@ function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
     frame.bar.inactive = frame.bar:CreateTexture(nil, "ARTWORK")
     frame.bar.inactive:SetPoint("RIGHT")
     frame.bar.inactive:SetPoint("LEFT", frame.bar.active, "RIGHT")
-
-    self:getUnit(playerName).range = self:UnitInRange(playerName) and 1 or 0
 
     frame.playerNameFontString = frame.bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.playerNameFontString:SetText(frame.playerName)
@@ -1283,7 +1283,7 @@ function HomeCheck:setTestMode(enable)
             if self.spells[spellId] then
                 -- Create test cooldown with varying times
                 local testCDLeft = random(1, 5) * 10
-                self:setCooldown(spellId, "Test frame", testCDLeft, nil, nil, true)
+                self:setCooldown(spellId, "Testframe" .. random(1, 4), testCDLeft, nil, nil, true)
             end
         end
     else
@@ -1296,7 +1296,10 @@ end
 
 function HomeCheck:getUnit(playerName)
     if not self.units[playerName] then
-        self.units[playerName] = {}
+        self.units[playerName] = {
+            dead = self.db.global.testMode and (random(1, 100) > 80 and 1 or nil) or UnitIsDeadOrGhost(playerName),
+            range = self.db.global.testMode and (random(1, 100) > 80 and 0 or 1) or (self:UnitInRange(playerName) and 1 or 0)
+        }
     end
     return self.units[playerName]
 end
