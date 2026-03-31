@@ -60,9 +60,15 @@ end
 HomeCheck:SetScript("OnEvent", function(self, event, ...)
     if event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local _, combatEvent, _, playerName, _, _, targetName, _, spellID, spellName = ...
+
+        if combatEvent == "UNIT_DIED" then
+            playerName = targetName
+        end
+
         if not UnitInRaid(playerName) and not UnitInParty(playerName) then
             return
         end
+
         if combatEvent == "SPELL_CAST_SUCCESS" or combatEvent == "SPELL_RESURRECT" or combatEvent == "SPELL_AURA_APPLIED" then
             if not self.spells[spellID] then
                 spellID = self.localizedSpellNames[spellName]
@@ -195,6 +201,8 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                     self:updateRange(self.groups[i].CooldownFrames[j])
                 end
             end
+
+            self:sortFrames()
         end, 1)
     end
 end)
@@ -581,19 +589,20 @@ function HomeCheck:EnableMouse(frame, disable)
     end
 end
 
+--- called when group sizing changes (icon, padding, etc.), or titleBar is toggled, or cooldown frame is added or removed
 function HomeCheck:repositionFrames(groupIndex)
     if not groupIndex then
         for i = 1, #self.groups do
             self:repositionFrames(i)
         end
-        return
-    end
-    local titleBarHeight = 0
-    if self:getIProp(groupIndex, "showTitleBar") and self.groups[groupIndex].titleBar and self.groups[groupIndex].titleBar:IsShown() then
-        titleBarHeight = self:getIProp(groupIndex, "titleBarHeight")
-    end
-    for j = 1, #self.groups[groupIndex].CooldownFrames do
-        self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -titleBarHeight - (self:getIProp(groupIndex, "iconSize") + self:getIProp(groupIndex, "padding")) * (j - 1))
+    else
+        local titleBarHeight = 0
+        if self:getIProp(groupIndex, "showTitleBar") and self.groups[groupIndex].titleBar and self.groups[groupIndex].titleBar:IsShown() then
+            titleBarHeight = self:getIProp(groupIndex, "titleBarHeight")
+        end
+        for j = 1, #self.groups[groupIndex].CooldownFrames do
+            self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -titleBarHeight - (self:getIProp(groupIndex, "iconSize") + self:getIProp(groupIndex, "padding")) * (j - 1))
+        end
     end
 end
 
@@ -679,18 +688,28 @@ function HomeCheck:updateRaidCooldowns()
     if GetNumRaidMembers() > 0 then
         for i = 1, 40 do
             local playerName, _, _, _, _, class, _, online, isDead = GetRaidRosterInfo(i)
-            if isDead then
-                self.deadUnits[playerName] = true
-            end
             if playerName and online then
+                if self.deadUnits[playerName] ~= isDead then
+                    self.deadUnits[playerName] = isDead
+                end
                 self:refreshPlayerCooldowns(playerName, class)
             end
         end
     else
+        local isDead = UnitIsDeadOrGhost("player")
+        local playerName = (UnitName("player"))
+        if self.deadUnits[playerName] ~= isDead then
+            self.deadUnits[playerName] = isDead
+        end
         self:refreshPlayerCooldowns((UnitName("player")))
         for i = 1, GetNumPartyMembers() do
             if UnitIsConnected("party" .. i) then
-                self:refreshPlayerCooldowns((UnitName("party" .. i)))
+                playerName = (UnitName("party" .. i))
+                isDead = UnitIsDeadOrGhost("party" .. i)
+                if self.deadUnits[playerName] ~= isDead then
+                    self.deadUnits[playerName] = isDead
+                end
+                self:refreshPlayerCooldowns(playerName)
             end
         end
     end
@@ -795,7 +814,11 @@ function HomeCheck:cooldownSorter(frame1, frame2)
     local groupIndex = self:getSpellGroup(frame1.spellID)
     local spellId1 = self.spells[frame1.spellID].parent or frame1.spellID
     local spellId2 = self.spells[frame2.spellID].parent or frame2.spellID
-    if frame1.inRange < frame2.inRange then
+    if self.deadUnits[frame1.playerName]
+            and not self.deadUnits[frame2.playerName]
+            and spellId1 == spellId2 then
+        return true
+    elseif frame1.inRange < frame2.inRange then
         if self:getIProp(groupIndex, "rangeUngroup") then
             return true
         elseif spellId1 == spellId2 and self:getIProp(groupIndex, "rangeDimout") then
@@ -955,7 +978,6 @@ function HomeCheck:updateRange(frame)
         end
 
         self:setBarColor(frame)
-        self:sortFrames()
     elseif not frame.testMode then
         if frame.inRange == 1 then
             if not self:UnitInRange(frame.playerName) then
@@ -963,14 +985,12 @@ function HomeCheck:updateRange(frame)
                 if self:getIPropBySpellId(frame.spellID, "rangeDimout") then
                     self:setBarColor(frame)
                 end
-                self:sortFrames()
             end
         elseif self:UnitInRange(frame.playerName) then
             frame.inRange = 1
             if self:getIPropBySpellId(frame.spellID, "rangeDimout") then
                 self:setBarColor(frame)
             end
-            self:sortFrames()
         end
     end
 end
