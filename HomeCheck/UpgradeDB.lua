@@ -44,6 +44,10 @@ function HomeCheck:upgradeDB()
             self.db.global.db_ver = 4
         end
 
+        if self.db.global.db_ver == 4 then
+            self.db.global.db_ver = 5
+        end
+
         if self.db.global.db_ver ~= self.db_ver then
             -- unknown db version, resetting db to defaults
             self.db:ResetDB("Default")

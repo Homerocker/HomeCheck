@@ -11,7 +11,7 @@ LibStub("AceSerializer-3.0"):Embed(HomeCheck)
 HomeCheck.groups = {}
 HomeCheck.localizedSpellNames = {}
 HomeCheck.units = {}
-HomeCheck.db_ver = 4
+HomeCheck.db_ver = 5
 
 HomeCheck.comms = {
     oRA = "oRA",
