@@ -44,8 +44,25 @@ function HomeCheck:upgradeDB()
             self.db.global.db_ver = 4
         end
 
-        if self.db.global.db_ver == 4 then
-            self.db.global.db_ver = 5
+        if self.db.global.db_ver == 4 or self.db.global.db_ver == 5 then
+            -- reloading db without defaults
+            self.db = LibStub("AceDB-3.0"):New("HomeCheck_DB", {}, true)
+
+            local currentProfile = self.db:GetCurrentProfile()
+            local profiles = self.db:GetProfiles()
+            for _, profile in ipairs(profiles) do
+                self.db:SetProfile(profile)
+                for k, _ in ipairs(self.db.profile) do
+                    if not self.db.profile[k].showTitleBar then
+                        self.db.profile[k].showTitleBar = false
+                    end
+                end
+            end
+            self.db:SetProfile(currentProfile)
+            self.db.global.db_ver = 6
+
+            -- restoring defaults
+            self.db = LibStub("AceDB-3.0"):New("HomeCheck_DB", self.defaults, true)
         end
 
         if self.db.global.db_ver ~= self.db_ver then
