@@ -2,6 +2,7 @@
 
 # Why HomeCheck?
 
+- Works in raid/party/solo
 - Receives cooldowns info sent by most popular cooldown addons, if any of your raid members use them:
     - oRA
     - oRA3
@@ -10,16 +11,24 @@
     - BLT
     - FatCooldowns
     - more addons can be added by request
-- Grey out players out of range (>80 yards) to improve visual perception (very useful on Halion to filter out players from other realm)
+- Shares cooldowns info with other HomeCheck users in raid
+- Up to 10 separate frames to sort cooldowns, 2 used by default:
+    - Frame 1: important raid defensives (Divine Sacrifice, Hand of Sacrifice, Guardian Spirit etc.)
+    - Frame 2: all other raid cooldowns (Misdirection, Innervate, Rebirth, etc.)
+
+  You can adjust everything to your needs and move spells between frames however you like
+- Spells priority: adjust which spells should be displayed above others.
+- Gray out players out of range (>80 yards) to improve visual perception (very useful on Halion to filter out players from other realm)
 - Hide cooldowns when player leaves raid or goes offline
 - Restore cooldowns after relog or UI reload
 - Adjust frame size, fonts, textures and more
-- Scans talents to detect which spells raid members have and get precise cooldowns duration
+- Scans talents and glyphs to detect which spells raid members have and get their precise cooldowns duration
 - Correct Misdirection and Tricks of Trade cooldown duration (can be more than 30 sec)
-- Track Guardian Spirit proc
-- Track Readiness
-- Display double Rebirth on same target
-- Link cooldown duration in raid chat
+- Tracks Guardian Spirit proc and updates its cooldown
+- Tracks Readiness
+- Displays double Rebirth on same target
+- Link cooldown duration to raid chat
+- Bug fixes, updates and support
 - etc.
 
 # Settings
@@ -47,4 +56,4 @@
 
 # Donate
 
-https://www.donationalerts.com/r/homerocker or contact me in any other way
+https://dalink.to/homerocker or contact me in any other way
