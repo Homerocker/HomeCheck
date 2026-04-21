@@ -527,9 +527,15 @@ function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
     frame.spellID = spellID
     frame.CDLeft = 0
     frame.class = self.spells[spellID].class
-    if not frame.class then
-        frame.class = testMode and select(2, UnitClass("player")) or select(2, UnitClass(playerName))
+
+    function frame:getClass()
+        if self.class then
+            return self.class
+        end
+        self.class = testMode and select(2, UnitClass("player")) or select(2, UnitClass(self.playerName))
+        return self.class
     end
+
     frame.CD = self:getSpellCooldown(frame)
     frame.testMode = testMode
 
@@ -981,8 +987,10 @@ function HomeCheck:setBarColor(frame)
                     and self:getIPropBySpellId(frame.spellID, "rangeDimout")) then
         frame.bar.active:SetVertexColor(0.5, 0.5, 0.5, self:getIPropBySpellId(frame.spellID, "opacity"))
     else
-        local playerClassColor = RAID_CLASS_COLORS[frame.class]
-        frame.bar.active:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self:getIPropBySpellId(frame.spellID, "opacity"))
+        local playerClassColor = RAID_CLASS_COLORS[frame:getClass()]
+        if playerClassColor then
+            frame.bar.active:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self:getIPropBySpellId(frame.spellID, "opacity"))
+        end
     end
 end
 
