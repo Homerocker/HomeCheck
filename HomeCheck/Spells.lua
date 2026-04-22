@@ -355,5 +355,10 @@ HomeCheck.spells = {
     [47883] = {
         cd = 900,
         class = "WARLOCK"
+    },
+    -- PvP Trinket
+    [42292] = {
+        cd = 120,
+        trinket = {51377, 51378}
     }
 }
