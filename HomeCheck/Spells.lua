@@ -137,11 +137,13 @@ HomeCheck.spells = {
     },
     -- Eyes of Twilight (normal)
     [75490] = {
-        cd = 120
+        cd = 120,
+        parent = 75495
     },
     -- Eyes of Twilight (heroic)
     [75495] = {
-        cd = 120
+        cd = 120,
+        trinket = {54573, 54589}
     },
     -- Mana Tide Totem
     [16190] = {
@@ -185,9 +187,15 @@ HomeCheck.spells = {
         cd = 60,
         class = "DEATHKNIGHT"
     },
+    -- Aegis of Dalaran (normal)
+    [71635] = {
+        cd = 60,
+        parent = 71638
+    },
     -- Aegis of Dalaran (heroic)
     [71638] = {
-        cd = 60
+        cd = 60,
+        trinket = {50361, 50364}
     },
     -- Army of the Dead
     [42650] = {

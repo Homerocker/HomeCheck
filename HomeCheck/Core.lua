@@ -38,7 +38,8 @@ local groups = 10
 
 local date, floor, GetTime, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, GetTime, pairs, select, {
     find = string.find,
-    gmatch = string.gmatch
+    gmatch = string.gmatch,
+    match = string.match
 }, strsplit, {
     insert = table.insert,
     remove = table.remove,
@@ -198,6 +199,28 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                         end
 
                         self:getUnit(playerName).range = self:UnitInRange(playerName) and 1 or 0
+
+                        if CanInspect(playerName) and CheckInteractDistance(playerName, 1) then
+                            local trinket1 = GetInventoryItemID(playerName, 13)
+                            local trinket2 = GetInventoryItemID(playerName, 14)
+
+                            local refresh = false
+                            if trinket1 or trinket2 then
+                                if self:getUnit(playerName).trinket1 ~= trinket1 then
+                                    self:getUnit(playerName).trinket1 = trinket1
+                                    refresh = true
+                                end
+
+                                if self:getUnit(playerName).trinket2 ~= trinket2 then
+                                    self:getUnit(playerName).trinket2 = trinket2
+                                    refresh = true
+                                end
+
+                                if refresh then
+                                    self:refreshPlayerCooldowns(playerName)
+                                end
+                            end
+                        end
                     end
                 end
             end
@@ -751,6 +774,12 @@ function HomeCheck:UnitHasAbility(playerName, spellID)
     if self.spells[spellID].parent then
         spellID = self.spells[spellID].parent
     end
+
+    if self.spells[spellID].trinket then
+        -- trinket proc
+        return self:UnitTrinketEquipped(playerName, self.spells[spellID].trinket)
+    end
+
     -- using UnitHasTalent() as GetTalentInfo() does not return correct value right after respec
     return not self.spells[spellID].talentTab or not self.spells[spellID].talentIndex or self.LibGroupTalents:UnitHasTalent(playerName, (GetSpellInfo(spellID)))
 end
@@ -984,7 +1013,7 @@ end
 function HomeCheck:setBarColor(frame)
     if self:getUnit(frame.playerName).dead
             or (self:getUnit(frame.playerName).range == 0
-                    and self:getIPropBySpellId(frame.spellID, "rangeDimout")) then
+            and self:getIPropBySpellId(frame.spellID, "rangeDimout")) then
         frame.bar.active:SetVertexColor(0.5, 0.5, 0.5, self:getIPropBySpellId(frame.spellID, "opacity"))
     else
         local playerClassColor = RAID_CLASS_COLORS[frame:getClass()]
@@ -1310,4 +1339,20 @@ function HomeCheck:getUnit(playerName)
         }
     end
     return self.units[playerName]
+end
+
+function HomeCheck:UnitTrinketEquipped(playerName, trinketId)
+    if type(trinketId) == "table" then
+        for _, id in ipairs(trinketId) do
+            if self:getUnit(playerName).trinket1 == id or self:getUnit(playerName).trinket2 == id then
+                return true
+            end
+        end
+    else
+        if self:getUnit(playerName).trinket1 == trinketId or self:getUnit(playerName).trinket2 == trinketId then
+            return true
+        end
+    end
+
+    return false
 end
