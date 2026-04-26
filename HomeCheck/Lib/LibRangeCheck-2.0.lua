@@ -1,6 +1,6 @@
 --[[
 Name: LibRangeCheck-2.0
-Revision: $Revision: 112 $
+Revision: $Revision: 98 $
 Author(s): mitch0
 Website: http://www.wowace.com/projects/librangecheck-2-0/
 Description: A range checking library based on interact distances and spell ranges
@@ -41,7 +41,7 @@ License: Public Domain
 -- @class file
 -- @name LibRangeCheck-2.0
 local MAJOR_VERSION = "LibRangeCheck-2.0"
-local MINOR_VERSION = tonumber(("$Revision: 112 $"):match("%d+")) + 100000
+local MINOR_VERSION = tonumber(("$Revision: 98 $"):match("%d+")) + 100000
 
 local lib, oldminor = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
 if not lib then
@@ -83,115 +83,115 @@ local HarmSpells = {}
 
 FriendSpells["DRUID"] = {
     5185, -- ["Healing Touch"], -- 40
-    467, -- ["Thorns"], -- 30
+    467, -- ["Thorns"], -- 30 (Nature's Reach: 33, 36)
+    1126, -- ["Mark of the Wild"], -- 30
 }
 HarmSpells["DRUID"] = {
-    5176, -- ["Wrath"], -- 40
-    770, -- ["Faerie Fire"] -- 35 (Glyph of Faerie Fire: +10)
-    339, -- ["Entangling Roots"], -- 35
-    6795, -- ["Growl"], -- 30
     16979, -- ["Feral Charge"], -- 8-25
-    33786, -- ["Cyclone"], -- 20 (Gale Winds: 22, 24)
-    80964, -- ["Skull Bash"] -- 13
+    5176, -- ["Wrath"], -- 30 (Nature's Reach: 33, 36)
+    33786, -- ["Cyclone"], -- 20 (Nature's Reach: 22, 24; Gale Winds: +10/20%)
+    6795, -- ["Growl"], -- 20
     5211, -- ["Bash"], -- 5
 }
 
 FriendSpells["HUNTER"] = {}
 HarmSpells["HUNTER"] = {
     1130, -- ["Hunter's Mark"] -- 100
-    53351, -- ["Kill Shot"] -- 45
-    75, -- ["Auto Shot"], -- 40
-    19801, -- ["Tranquilizing Shot"] -- 35
-    34490, -- ["Silencing Shot"] -- 35
+    53351, -- ["Kill Shot"] -- 5-45 (Hawk Eye: 47, 49, 51)
+    75, -- ["Auto Shot"], -- 5-35 (Hawk Eye: 37, 39, 41)
     2764, -- ["Throw"], -- 30
-    19503, -- ["Scatter Shot"], -- 20 (Glyph of Scatter Shot: +3)
-    2973, -- ["Raptor Strike"] -- 5
+    19503, -- ["Scatter Shot"], -- 15 (Hawk Eye: 17, 19, 21; Glyph of Scatter Shot: +3)
+    2974, -- ["Wing Clip"], -- 5
 }
 
 FriendSpells["MAGE"] = {
-    475, -- ["Remove Curse"], -- 40
-    1459, -- ["Arcane Brilliance"], -- 30
+    475, -- ["Remove Curse"], -- 40 (Magic Attunement: 43, 46)
+    1459, -- ["Arcane Intellect"], -- 30 (Magic Attunement: 33, 36)
 }
 HarmSpells["MAGE"] = {
-    133, -- ["Fireball"], -- 40
-    116, -- ["Frostbolt"], -- 35
-    30455, -- ["Ice Lance"], -- 35 (Ice Shards: +2, +5)
+    44614, -- ["Frostfire Bolt"], -- 40
+    133, -- ["Fireball"], -- 35 (Flame Throwing: 38, 41)
+    116, -- ["Frostbolt"], -- 30 (Arctic Reach: 33, 36)
+    30455, -- ["Ice Lance"], -- 30 (Arctic Reach: 33, 36, Glyph of Ice Lance: +5)
+    5143, -- ["Arcane Missiles"], -- 30 (Magic Attunement: 33, 36; Glyph of Arcane Missiles: +5)
+    30451, -- ["Arcane Blast"], -- 30 (Magic Attunement: 33, 36)
+    2948, -- ["Scorch"], -- 30 (Flame Throwing: 33, 36)
     5019, -- ["Shoot"], -- 30
+    2136, -- ["Fire Blast"], -- 20 (Flame Throwing: 23, 26; Gladiator Gloves: +5)
 }
 
 FriendSpells["PALADIN"] = {
     635, -- ["Holy Light"], -- 40
-    20217, -- ["Blessing of Kings"], -- 30
+    19740, -- ["Blessing of Might"], -- 30
     20473, -- ["Holy Shock"], -- 20
 }
 HarmSpells["PALADIN"] = {
-    62124, -- ["Hand of Reckoning"], -- 30
+    24275, -- ["Hammer of Wrath"],  -- 30 (Glyph of Hammer of Wrath: +5)
     20473, -- ["Holy Shock"], -- 20
-    20271, -- ["Judgement"], -- 10 (Improved Judgement: +10, +20; Elnightened Judgements: +5, +10)
-    853, -- ["Hammer of Justice"], -- 10 (Glyph of Hammer of Justice: +5)
+    20271, -- ["Judgement"], -- 10
     35395, -- ["Crusader Strike"], -- 5
 } 
 
 FriendSpells["PRIEST"] = {
-    2061, -- ["Flash Heal"], -- 40
-    6346, -- ["Fear Ward"], -- 30
+    2050, -- ["Lesser Heal"], -- 40
+    1243, -- ["Power Word: Fortitude"], -- 30
 }
 HarmSpells["PRIEST"] = {
-    589, -- ["Shadow Word: Pain"], -- 40
-    48045, -- ["Mind Sear"], -- 35
+    585, -- ["Smite"], -- 30 (Holy Reach: 33, 36)
+    589, -- ["Shadow Word: Pain"], -- 30 (Shadow Reach: 33, 36)
     5019, -- ["Shoot"], -- 30
+    15407, -- ["Mind Flay"], -- 20 (Shadow Reach: 22, 24, Glyph of Mind Flay: +10)
 }
 
 FriendSpells["ROGUE"] = {}
 HarmSpells["ROGUE"] = {
-    2764, -- ["Throw"], -- 30 (Throwing Specialization: +5, +10)
-    3018, -- ["Shoot"], -- 30
-    2094, -- ["Blind"], -- 15
---    8676, -- ["Ambush"], -- 5 (Glyph of Ambush: +5)
---    921, -- ["Pick Pocket"], -- 5 (Glyph of Pick Pocket: + 5)
+    2764, -- ["Throw"], -- 30
+    26679, -- ["Deadly Throw"], -- 30 (Glyph of Deadly Throw: +5)
+    2094, -- ["Blind"], -- 10 (Dirty Tricks: 12, 15)
     2098, -- ["Eviscerate"], -- 5
 }
 
 FriendSpells["SHAMAN"] = {
     331, -- ["Healing Wave"], -- 40
-    546, -- ["Water Walking"], -- 30
+    526, -- ["Cure Poison"], -- 30
 }
 HarmSpells["SHAMAN"] = {
-    403, -- ["Lightning Bolt"], -- 30 (Elemental Reach: +5)
+    403, -- ["Lightning Bolt"], -- 30 (Storm Reach: 33, 36)
     370, -- ["Purge"], -- 30
-    8042, -- ["Earth Shock"], -- 25 (Elemental Reach: +7; Gladiator Gloves: +5)
-    73899, -- ["Primal Strike"],. -- 5
+    8050, -- ["Flame Shock"], -- 20 (Elemental Reach: 27, 35; Gladiator Gloves: +5)
+--    8042, -- ["Earth Shock"], -- 20 (Storm, Earth and Fire: 21-25; Gladiator Gloves: +5)
+    8056, -- ["Frost Shock"], -- 20 (Gladiator Gloves: +5)
 }
 
 FriendSpells["WARRIOR"] = {}
 HarmSpells["WARRIOR"] = {
+    100, -- ["Charge"], -- 8-25 (Glyph of Charge: +5)
     3018, -- ["Shoot"], -- 30
     2764, -- ["Throw"], -- 30
     355, -- ["Taunt"], -- 30
-    100, -- ["Charge"], -- 8-25 (Glyph of Long Charge: +5)
-    20252, -- ["Intercept"], -- 8-25
     5246, -- ["Intimidating Shout"], -- 8
-    88161, -- ["Strike"], -- 5
+    772, -- ["Rend"], -- 5
 }
 
 FriendSpells["WARLOCK"] = {
-    5697, -- ["Unending Breath"], -- 30
+    5697, -- ["Unending Breath"], -- 30 (demo)
 }
 HarmSpells["WARLOCK"] = {
-    348, -- ["Immolate"], -- 40
-    27243, -- ["Seed of Corruption"], -- 35
     5019, -- ["Shoot"], -- 30
-    18223, -- ["Curse of Exhaustion"], -- 30 (Glyph of Exhaustion: +5)
+    348, -- ["Immolate"], -- 30 (Destructive Reach: 33, 36)
+    172, -- ["Corruption"], -- 30 (Grim Reach: 33, 36)
+    18223, -- ["Curse of Exhaustion"], -- 30 (Grim Reach: 33, 36, Glyph of Curse of Exhaustion: +5)
+    5782, -- ["Fear"], -- 20 (Grim Reach: 22, 24)
+    17877, -- ["Shadowburn"], -- 20 (Destructive Reach: 22, 24)
 }
 
 FriendSpells["DEATHKNIGHT"] = {
-    49016, -- ["Unholy Frenzy"], -- 30
 }
 HarmSpells["DEATHKNIGHT"] = {
-    77606, -- ["Dark Simulacrum"], -- 40
     47541, -- ["Death Coil"], -- 30
-    49576, -- ["Death Grip"], -- 30 (Glyph of Death Grip: +5)
-    45477, -- ["Icy Touch"], -- 20 (Icy Reach: +5, +10)
+    47476, -- ["Strangulate"], -- 30 (Glyph of Strangulate: +20)
+    45477, -- ["Icy Touch"], -- 20 (Icy Reach: 25, 30)
+    56222, -- ["Dark Command"], -- 20
     50842, -- ["Pestilence"], -- 5
     45902, -- ["Blood Strike"], -- 5, but requires weapon, use Pestilence if possible, so keep it after Pestilence in this list
 }
@@ -330,7 +330,7 @@ local tinsert = tinsert
 local tremove = tremove
 local BOOKTYPE_SPELL = BOOKTYPE_SPELL
 local GetSpellInfo = GetSpellInfo
-local GetSpellName = GetSpellName or GetSpellBookItemName
+local GetSpellName = GetSpellName
 local GetItemInfo = GetItemInfo
 local UnitCanAttack = UnitCanAttack
 local UnitCanAssist = UnitCanAssist
