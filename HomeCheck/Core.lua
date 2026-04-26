@@ -1340,10 +1340,8 @@ function HomeCheck:UnitTrinketEquipped(playerName, trinketId)
                 return true
             end
         end
-    else
-        if self:getUnit(playerName).trinket1 == trinketId or self:getUnit(playerName).trinket2 == trinketId then
-            return true
-        end
+    elseif self:getUnit(playerName).trinket1 == trinketId or self:getUnit(playerName).trinket2 == trinketId then
+        return true
     end
 
     return false
