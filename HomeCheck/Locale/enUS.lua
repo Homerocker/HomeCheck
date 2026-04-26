@@ -57,3 +57,4 @@ L["Title text"] = true
 L["Title bar height"] = true
 L["Title font size"] = true
 L["Title background color"] = true
+L["Does not check actual spell range. Used mostly to filter players in different realm on Halion."] = true

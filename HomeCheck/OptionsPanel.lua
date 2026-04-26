@@ -468,6 +468,11 @@ function HomeCheck:OptionsPanel()
                     type = "group",
                     disabled = self.db.profile[i].inherit and i ~= 1,
                     args = {
+                        desc = {
+                            type = "description",
+                            name = L["Does not check actual spell range. Used mostly to filter players in different realm on Halion."],
+                            order = 1
+                        },
                         dimout = {
                             name = L["Dim out"],
                             desc = L["Dim out cooldown bars of spells that are out of range"],
