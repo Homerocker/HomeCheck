@@ -30,8 +30,6 @@ local updateRaidRosterCooldown = 2
 local updateRaidRosterTimestamp
 local updateRaidRosterScheduleTimer
 
-local ReadinessTimestamp = {}
-
 local childSpells = {}
 
 local groups = 10
@@ -789,7 +787,7 @@ function HomeCheck:saveFramePosition(groupIndex)
 end
 
 function HomeCheck:Readiness(hunterName)
-    if ReadinessTimestamp[hunterName] and time() - ReadinessTimestamp[hunterName] < 100 then
+    if self:getUnit(hunterName).readiness and time() - self:getUnit(hunterName).readiness < 100 then
         return
     end
 
@@ -806,7 +804,7 @@ function HomeCheck:Readiness(hunterName)
         self:setCooldown(spellID, hunterName, 0)
     end
 
-    ReadinessTimestamp[hunterName] = time()
+    self:getUnit(hunterName).readiness = time()
 end
 
 function HomeCheck:GSProc(targetName)
