@@ -388,5 +388,10 @@ HomeCheck.spells = {
         class = "PALADIN",
         talentTab = 3,
         talentIndex = 18
+    },
+    -- Tranquilizing Shot
+    [19801] = {
+        cd = 8,
+        class = "HUNTER"
     }
 }
