@@ -74,9 +74,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         end
 
         if combatEvent == "SPELL_CAST_SUCCESS" or combatEvent == "SPELL_RESURRECT" then
-            if self.spells[spellID] then
-                self:setCooldown(spellID, playerName, true, targetName)
-            end
+            self:setCooldown(spellID, playerName, true, targetName)
         elseif combatEvent == "SPELL_AURA_APPLIED" then
             if self.spells[spellID] and self.spells[spellID].nocast then
                 self:setCooldown(spellID, playerName, true)
