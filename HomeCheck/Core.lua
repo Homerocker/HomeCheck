@@ -93,8 +93,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             or event == "UNIT_SPELLCAST_FAILED"
             or event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unit, spellName, _, targetName = ...
-        local spellID = self.localizedSpellNames[spellName]
-        if spellID == 48477 then
+        if self.localizedSpellNames[spellName] == 48477 then
             self:Rebirth(event, (UnitName(unit)), targetName)
         end
     elseif event == "RAID_ROSTER_UPDATE" then
