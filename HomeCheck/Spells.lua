@@ -60,7 +60,8 @@ HomeCheck.spells = {
     [35079] = {
         cd = 30,
         class = "HUNTER",
-        noself = true
+        noself = true,
+        nocast = true
     },
     -- Tricks of the Trade initial cast
     [57934] = {
@@ -73,7 +74,8 @@ HomeCheck.spells = {
     [59628] = {
         cd = 30,
         class = "ROGUE",
-        noself = true
+        noself = true,
+        nocast = true
     },
     -- Divine Shield
     [642] = {
@@ -185,7 +187,8 @@ HomeCheck.spells = {
     -- Blood Armor (4T10)
     [70654] = {
         cd = 60,
-        class = "DEATHKNIGHT"
+        class = "DEATHKNIGHT",
+        nocast = true
     },
     -- Aegis of Dalaran (normal)
     [71635] = {
@@ -226,13 +229,15 @@ HomeCheck.spells = {
         cd = 120,
         class = "PALADIN",
         talentTab = 2,
-        talentIndex = 18
+        talentIndex = 18,
+        nocast = true
     },
     -- Stoneform
     [20594] = {
         cd = 120,
         race = "Dwarf",
-        tanksonly = true
+        tanksonly = true,
+        nocast = true
     },
     -- Shield Wall
     [871] = {
@@ -354,7 +359,8 @@ HomeCheck.spells = {
     -- Soulstone Resurrection buff
     [47883] = {
         cd = 900,
-        class = "WARLOCK"
+        class = "WARLOCK",
+        nocast = true
     },
     -- PvP Trinket
     [42292] = {

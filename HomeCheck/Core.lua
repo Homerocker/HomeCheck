@@ -69,12 +69,16 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             return
         end
 
-        if combatEvent == "SPELL_CAST_SUCCESS" or combatEvent == "SPELL_RESURRECT" or combatEvent == "SPELL_AURA_APPLIED" then
-            if not self.spells[spellID] then
-                spellID = self.localizedSpellNames[spellName]
-            end
+        if spellID and not self.spells[spellID] then
+            spellID = self.localizedSpellNames[spellName]
+        end
 
-            if combatEvent == "SPELL_AURA_APPLIED" then
+        if combatEvent == "SPELL_CAST_SUCCESS" or combatEvent == "SPELL_RESURRECT" then
+            if self.spells[spellID] then
+                self:setCooldown(spellID, playerName, true, targetName)
+            end
+        elseif combatEvent == "SPELL_AURA_APPLIED" then
+            if self.spells[spellID] and self.spells[spellID].nocast then
                 targetName = nil
                 if spellID == 64843 or spellID == 64901 or spellID == 48447 then
                     -- workaround for Divine Hymn, Hymn of Hope and Tranquility ticks incorrectly updating timers
@@ -82,9 +86,8 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                         return
                     end
                 end
+                self:setCooldown(spellID, playerName, true, targetName)
             end
-
-            self:setCooldown(spellID, playerName, true, targetName)
         elseif combatEvent == "SPELL_HEAL" and spellID == 48153 then
             -- Guardian Spirit proced
             self:GSProc(targetName)
@@ -380,13 +383,13 @@ end
 ---@param target string|nil
 ---@param isRemote boolean|nil
 function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, testMode)
+    if not spellID or not self.spells[spellID] then
+        return
+    end
+
     if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)
-    end
-
-    if not spellID or not self.spells[spellID] then
-        return
     end
 
     if not isRemote and CDLeft == true then
