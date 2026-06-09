@@ -380,6 +380,10 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, te
         return
     end
 
+    if self.spells[spellID].ignore then
+        return
+    end
+
     if spellID == 23989 then
         -- Readiness
         self:Readiness(playerName)

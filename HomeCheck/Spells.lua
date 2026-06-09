@@ -1,3 +1,15 @@
+--[[
+    cd                      - base cooldown in seconds
+    class                   - class name (capitalized english), only if spell is available for certain class
+    talentTab, talentIndex  - both must be specified if spell must be learned through talents
+    notarget                - true to hide spell target (for AoE, e. g. Divine Sacrifice applied on multiple raid members)
+    noself                  - true if spell caster should not be displayed as its target (workaround for MD and ToT auras applied on self, not required for most self-cast abilities)
+    tanksonly               - display cooldown for tanks only
+    parent                  - share cooldown frame with specified spell id (e.g. MD cast and MD proc)
+    ignore                  - completely ignore spell by id, used for duplicate auras sharing same name for some spells (e.g. Tricks of the Trade cast + threat aura + damage buff aura)
+                              required as spell ids not present in this file will be looked up by spell names
+]]
+
 HomeCheck.spells = {
     -- PS
     [33206] = {
@@ -53,8 +65,7 @@ HomeCheck.spells = {
     [34477] = {
         cd = 60,
         class = "HUNTER",
-        parent = 35079,
-        noself = true
+        parent = 35079
     },
     -- Misdirection
     [35079] = {
@@ -67,15 +78,18 @@ HomeCheck.spells = {
     [57934] = {
         cd = 60,
         class = "ROGUE",
-        parent = 59628,
-        noself = true
+        parent = 59628
     },
-    -- Tricks of the Trade
+    -- Tricks of the Trade proc
     [59628] = {
         cd = 30,
         class = "ROGUE",
         noself = true,
         nocast = true
+    },
+    -- Tricks of the Trade proc second aura (damage buff)
+    [57933] = {
+        ignore = true
     },
     -- Divine Shield
     [642] = {
