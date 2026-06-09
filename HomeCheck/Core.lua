@@ -79,14 +79,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
         elseif combatEvent == "SPELL_AURA_APPLIED" then
             if self.spells[spellID] and self.spells[spellID].nocast then
-                targetName = nil
-                if spellID == 64843 or spellID == 64901 or spellID == 48447 then
-                    -- workaround for Divine Hymn, Hymn of Hope and Tranquility ticks incorrectly updating timers
-                    if self:getCDLeft(playerName, spellID) > 10 then
-                        return
-                    end
-                end
-                self:setCooldown(spellID, playerName, true, targetName)
+                self:setCooldown(spellID, playerName, true)
             end
         elseif combatEvent == "SPELL_HEAL" and spellID == 48153 then
             -- Guardian Spirit proced
