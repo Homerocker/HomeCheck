@@ -81,9 +81,11 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             if self.spells[spellID] and self.spells[spellID].nocast then
                 self:setCooldown(spellID, playerName, true)
             end
-        elseif combatEvent == "SPELL_HEAL" and spellID == 48153 then
-            -- Guardian Spirit proced
-            self:GSProc(targetName)
+        elseif combatEvent == "SPELL_HEAL" then
+            if spellID == 48153 then
+                -- Guardian Spirit proced
+                self:GSProc(targetName)
+            end
         elseif combatEvent == "UNIT_DIED" then
             self:getUnit(playerName).dead = true
         end
