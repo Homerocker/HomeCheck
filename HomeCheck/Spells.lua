@@ -6,6 +6,7 @@
     noself                  - true if spell caster should not be displayed as its target (workaround for MD and ToT auras applied on self, not required for most self-cast abilities)
     tanksonly               - display cooldown for tanks only
     parent                  - share cooldown frame with specified spell id (e.g. MD cast and MD proc)
+    nocast                  - true if SPELL_AURA_APPLIED should be parsed instead of SPELL_CAST_SUCCESS (when spell is not casted by player directly; aura proc)
     ignore                  - completely ignore spell by id, used for duplicate auras sharing same name for some spells (e.g. Tricks of the Trade cast + threat aura + damage buff aura)
                               required as spell ids not present in this file will be looked up by spell names
 ]]
