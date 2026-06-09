@@ -381,5 +381,12 @@ HomeCheck.spells = {
     [42292] = {
         cd = 120,
         trinket = {51377, 51378}
+    },
+    -- Repentance
+    [20066] = {
+        cd = 60,
+        class = "PALADIN",
+        talentTab = 3,
+        talentIndex = 18
     }
 }
