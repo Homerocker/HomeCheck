@@ -3,12 +3,14 @@
     class                   - class name (capitalized english), only if spell is available for certain class
     talentTab, talentIndex  - both must be specified if spell must be learned through talents
     notarget                - true to hide spell target (for AoE, e. g. Divine Sacrifice applied on multiple raid members)
-    noself                  - true if spell caster should not be displayed as its target (workaround for MD and ToT auras applied on self, not required for most self-cast abilities)
+    noself                  - true if spell caster should not be displayed as its target (workaround for MD and ToT auras applied on self)
     tanksonly               - display cooldown for tanks only
     parent                  - share cooldown frame with specified spell id (e.g. MD cast and MD proc)
     nocast                  - true if SPELL_AURA_APPLIED should be parsed instead of SPELL_CAST_SUCCESS (when spell is not casted by player directly; aura proc)
     ignore                  - completely ignore spell by id, used for duplicate auras sharing same name for some spells (e.g. Tricks of the Trade cast + threat aura + damage buff aura)
                               required as spell ids not present in this file will be looked up by spell names
+
+    notarget or noself can be applied to self-cast abilities and trinkets if you want to hide target name which is always equal to caster name
 ]]
 
 HomeCheck.spells = {
