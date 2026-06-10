@@ -72,10 +72,13 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         end
 
         if combatEvent == "SPELL_CAST_SUCCESS" or combatEvent == "SPELL_RESURRECT" then
+            -- don't evaluate "nocast" as it should only be set to true for spells that do not trigger SPELL_CAST_SUCCESS
+            -- (assume nocast=nil at this point)
             self:setCooldown(spellID, playerName, true, targetName)
         elseif combatEvent == "SPELL_AURA_APPLIED" then
             if self.spells[spellID] and self.spells[spellID].nocast then
-                self:setCooldown(spellID, playerName, true)
+                -- evaluate nocast to skip spells that also trigger SPELL_CAST_SUCCESS (prevent double cooldown trigger)
+                self:setCooldown(spellID, playerName, true, targetName)
             end
         elseif combatEvent == "SPELL_HEAL" then
             if spellID == 48153 then
