@@ -1075,8 +1075,14 @@ function HomeCheck:getTarget(playerName, spellID)
 end
 
 function HomeCheck:setTarget(frame, target)
-    if not target or target == frame.target or self.spells[frame.spellID].notarget then
+    if not target or self.spells[frame.spellID].notarget then
         return
+    end
+    -- The bar already shows this target: there is nothing to set, but the
+    -- caller must not read the answer as "no target" and go looking for one
+    -- elsewhere, because the one it has is right.
+    if target == frame.target then
+        return target
     end
     if self.spells[frame.spellID].noself and target == frame.playerName then
         return
