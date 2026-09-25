@@ -9,7 +9,7 @@
     parent                  - share cooldown frame with specified spell id (e.g. MD cast and MD proc)
     nocast                  - true if spell DOES NOT trigger SPELL_CAST_SUCCESS and SPELL_AURA_APPLIED should be parsed instead
                                 (when spell is not casted by player directly; aura proc)
-    ignore                  - completely ignore spell by id, used for duplicate auras sharing same name for some spells
+    ignore                  - completely ignore spell cooldown by id, used for duplicate auras sharing same name for some spells
                                 (e.g. Tricks of the Trade cast + threat aura + damage buff aura)
                                 required as spell ids not present in this file will be looked up by spell names
 
@@ -33,12 +33,16 @@ HomeCheck.spells = {
         talentIndex = 6,
         notarget = true
     },
-    -- GS
+    -- Guardian Spirit
     [47788] = {
         cd = 70,
         class = "PRIEST",
         talentTab = 2,
         talentIndex = 27
+    },
+    -- Guardian Spirit proc
+    [48153] = {
+        ignore = true
     },
     -- Hand of Sacrifice
     [6940] = {
