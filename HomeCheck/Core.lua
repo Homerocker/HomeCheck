@@ -1272,19 +1272,19 @@ function HomeCheck:setFrameHeight(frame, height)
     self:updateCooldownBarProgress(frame)
 end
 
+-- Title bar properties are never inherited - always use the specific group's settings
+local titleBarProperties = {
+    showTitleBar = true,
+    titleText = true,
+    titleBarHeight = true,
+    titleFontSize = true,
+    titleBackgroundColor = true
+}
+
 ---getIProp
 ---@param frameId number frame group number
 ---@param propertyName string property name to get
 function HomeCheck:getIProp(frameId, propertyName)
-    -- Title bar properties are never inherited - always use the specific group's settings
-    local titleBarProperties = {
-        showTitleBar = true,
-        titleText = true,
-        titleBarHeight = true,
-        titleFontSize = true,
-        titleBackgroundColor = true
-    }
-
     if titleBarProperties[propertyName] then
         return self.db.profile[frameId][propertyName]
     else
