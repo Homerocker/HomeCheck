@@ -13,6 +13,8 @@ HomeCheck.localizedSpellNames = {}
 HomeCheck.units = {}
 HomeCheck.db_ver = 6
 
+local RebirthTarget
+
 HomeCheck.comms = {
     oRA = "oRA",
     oRA3 = "oRA3",
@@ -90,12 +92,23 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         end
 
         -- UNIT_SPELLCAST events are used to detect double Rebirth only
-    elseif event == "UNIT_SPELLCAST_SENT"
-            or event == "UNIT_SPELLCAST_FAILED"
-            or event == "UNIT_SPELLCAST_SUCCEEDED" then
-        local unit, spellName, _, targetName = ...
+    elseif event == "UNIT_SPELLCAST_SENT" then
+        local _, spellName, _, targetName = ...
         if self.localizedSpellNames[spellName] == 48477 then
-            self:Rebirth(event, (UnitName(unit)), targetName)
+            RebirthTarget = targetName
+        end
+    elseif event == "UNIT_SPELLCAST_FAILED" then
+        local unit, spellName = ...
+        if self.localizedSpellNames[spellName] == 48477 and unit == "player" then
+            RebirthTarget = nil
+        end
+    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+        local unit, spellName = ...
+        if self.localizedSpellNames[spellName] == 48477 then
+            self:setCooldown(48477, (UnitName(unit)), true, unit == "player" and RebirthTarget)
+            if unit == "player" then
+                RebirthTarget = nil
+            end
         end
     elseif event == "RAID_ROSTER_UPDATE" then
         local instant
@@ -1226,17 +1239,6 @@ end
 
 function HomeCheck:isSpellTanksOnly(spellID)
     return self.spells[spellID].parent and self.db.profile.spells[self.spells[spellID].parent].tanksonly or self.db.profile.spells[spellID].tanksonly
-end
-
-function HomeCheck:Rebirth(event, playerName, target)
-    if event == "UNIT_SPELLCAST_SENT" then
-        self:getUnit(playerName).rebirth = target
-    elseif event == "UNIT_SPELLCAST_FAILED" then
-        self:getUnit(playerName).rebirth = nil
-    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        self:setCooldown(48477, playerName, true, self:getUnit(playerName).rebirth)
-        self:getUnit(playerName).rebirth = nil
-    end
 end
 
 function HomeCheck:UnitHasGlyph(unit, glyphID, default)
