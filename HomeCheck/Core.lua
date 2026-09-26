@@ -65,6 +65,7 @@ local combatLogEvents = {
     SPELL_CAST_SUCCESS = true,
     SPELL_RESURRECT = true,
     SPELL_AURA_APPLIED = true,
+    SPELL_AURA_REMOVED = true,
     SPELL_HEAL = true,
     UNIT_DIED = true,
     SPELL_INSTAKILL = true
@@ -106,6 +107,14 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             if self.spells[spellID] and self.spells[spellID].nocast then
                 -- evaluate nocast to skip spells that also trigger SPELL_CAST_SUCCESS (prevent double cooldown trigger)
                 self:setCooldown(spellID, playerName, true, targetName)
+            end
+        elseif combatEvent == "SPELL_AURA_REMOVED" then
+            if spellID == 34477 then
+                -- Misdirection cancelled
+                self:setCooldown(35079, playerName, true)
+            elseif spellID == 57934 then
+                -- Tricks of the Trade cancelled
+                self:setCooldown(59628, playerName, true)
             end
         elseif combatEvent == "SPELL_HEAL" then
             if spellID == 48153 then
