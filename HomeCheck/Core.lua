@@ -1014,25 +1014,55 @@ function HomeCheck:setTarget(frame, target)
     return target
 end
 
+-- Both colour setters run for every bar once a second, and the colour almost
+-- never differs from the one the bar already carries. Each remembers what it
+-- last applied and does nothing until that changes.
 ---@param frame
 function HomeCheck:setBarColor(frame)
-    if self:getUnit(frame.playerName).dead
+    local dimmed = self:getUnit(frame.playerName).dead
             or (self:getUnit(frame.playerName).range == 0
-            and self:getIPropBySpellId(frame.spellID, "rangeDimout")) then
-        frame.bar.active:SetVertexColor(0.5, 0.5, 0.5, self:getIPropBySpellId(frame.spellID, "opacity"))
+            and self:getIPropBySpellId(frame.spellID, "rangeDimout"))
+    local opacity = self:getIPropBySpellId(frame.spellID, "opacity")
+
+    if frame.barColorDimmed == dimmed and frame.barColorOpacity == opacity and frame.barColorClass == frame.class then
+        return
+    end
+    frame.barColorDimmed, frame.barColorOpacity, frame.barColorClass = dimmed, opacity, frame.class
+
+    if dimmed then
+        frame.bar.active:SetVertexColor(0.5, 0.5, 0.5, opacity)
     else
         local playerClassColor = RAID_CLASS_COLORS[frame.class]
-        frame.bar.active:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, self:getIPropBySpellId(frame.spellID, "opacity"))
+        frame.bar.active:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, opacity)
     end
 end
 
+-- what setTimerColor last painted: dead, ready, or counting down
+local TIMER_DEAD, TIMER_READY, TIMER_RUNNING = 1, 2, 3
+
 function HomeCheck:setTimerColor(frame)
+    local state
     if self:getUnit(frame.playerName).dead then
-        frame.timerFontString:SetTextColor(1, 0, 0, 1)
+        state = TIMER_DEAD
     elseif frame.CDLeft <= 0 then
-        if self.db.profile.spells[frame.spellID].alwaysShow then
-            frame.timerFontString:SetTextColor(0, 1, 0, 1)
+        if not self.db.profile.spells[frame.spellID].alwaysShow then
+            -- the bar is on its way out, leave the colour alone
+            return
         end
+        state = TIMER_READY
+    else
+        state = TIMER_RUNNING
+    end
+
+    if frame.timerColorState == state then
+        return
+    end
+    frame.timerColorState = state
+
+    if state == TIMER_DEAD then
+        frame.timerFontString:SetTextColor(1, 0, 0, 1)
+    elseif state == TIMER_READY then
+        frame.timerFontString:SetTextColor(0, 1, 0, 1)
     else
         frame.timerFontString:SetTextColor(0.9, 0.7, 0, 1)
     end
