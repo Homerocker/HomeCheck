@@ -832,8 +832,9 @@ function HomeCheck:GSProc(targetName)
     for i = #self.groups[spellGroup].CooldownFrames, 1, -1 do
         if self.groups[spellGroup].CooldownFrames[i].spellID == 47788
                 and self.groups[spellGroup].CooldownFrames[i].target == targetName
-                and self.groups[spellGroup].CooldownFrames[i].CDLeft > 0 then
-            self:setCooldown(47788, self.groups[spellGroup].CooldownFrames[i].playerName, 180)
+                and self.groups[spellGroup].CooldownFrames[i].CDLeft > 55
+                and self.groups[spellGroup].CooldownFrames[i].CDLeft <= 70 then
+            self:setCooldown(47788, self.groups[spellGroup].CooldownFrames[i].playerName, 180 - 70 + self.groups[spellGroup].CooldownFrames[i].CDLeft)
             break
         end
     end
@@ -1273,19 +1274,19 @@ function HomeCheck:setFrameHeight(frame, height)
     self:updateCooldownBarProgress(frame)
 end
 
+-- Title bar properties are never inherited - always use the specific group's settings
+local titleBarProperties = {
+    showTitleBar = true,
+    titleText = true,
+    titleBarHeight = true,
+    titleFontSize = true,
+    titleBackgroundColor = true
+}
+
 ---getIProp
 ---@param frameId number frame group number
 ---@param propertyName string property name to get
 function HomeCheck:getIProp(frameId, propertyName)
-    -- Title bar properties are never inherited - always use the specific group's settings
-    local titleBarProperties = {
-        showTitleBar = true,
-        titleText = true,
-        titleBarHeight = true,
-        titleFontSize = true,
-        titleBackgroundColor = true
-    }
-
     if titleBarProperties[propertyName] then
         return self.db.profile[frameId][propertyName]
     else
