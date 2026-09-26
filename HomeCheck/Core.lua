@@ -819,8 +819,9 @@ function HomeCheck:GSProc(targetName)
     for i = #self.groups[spellGroup].CooldownFrames, 1, -1 do
         if self.groups[spellGroup].CooldownFrames[i].spellID == 47788
                 and self.groups[spellGroup].CooldownFrames[i].target == targetName
-                and self.groups[spellGroup].CooldownFrames[i].CDLeft > 0 then
-            self:setCooldown(47788, self.groups[spellGroup].CooldownFrames[i].playerName, 180)
+                and self.groups[spellGroup].CooldownFrames[i].CDLeft > 55
+                and self.groups[spellGroup].CooldownFrames[i].CDLeft <= 70 then
+            self:setCooldown(47788, self.groups[spellGroup].CooldownFrames[i].playerName, 180 - 70 + self.groups[spellGroup].CooldownFrames[i].CDLeft)
             break
         end
     end
