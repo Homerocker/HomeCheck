@@ -1337,19 +1337,30 @@ function HomeCheck:setTimerPosition(frame)
     end
 end
 
+-- A cast and its proc (Misdirection, Tricks of the Trade) share one line in
+-- the options, and these three read the setting behind that line.
+--
+-- They used to read it as "parent and parentSetting or ownSetting", which only
+-- works while the parent's setting is true: a false one falls through to the
+-- other half of the pair, whose own setting is a leftover nobody edits and
+-- which defaults to true. Turning such a spell off in the options therefore
+-- did nothing at all. The spell the line stands for is picked first now, and
+-- its setting is returned whatever it is.
+function HomeCheck:getSpellSetting(spellID, setting)
+    local spell = self.spells[spellID]
+    return self.db.profile.spells[spell and spell.parent or spellID][setting]
+end
+
 function HomeCheck:getSpellAlwaysShow(spellID)
-    return self.spells[spellID]
-            and self.spells[spellID].parent
-            and self.db.profile.spells[self.spells[spellID].parent].alwaysShow
-            or self.db.profile.spells[spellID].alwaysShow
+    return self:getSpellSetting(spellID, "alwaysShow")
 end
 
 function HomeCheck:isSpellEnabled(spellID)
-    return self.spells[spellID].parent and self.db.profile.spells[self.spells[spellID].parent].enable or self.db.profile.spells[spellID].enable
+    return self:getSpellSetting(spellID, "enable")
 end
 
 function HomeCheck:isSpellTanksOnly(spellID)
-    return self.spells[spellID].parent and self.db.profile.spells[self.spells[spellID].parent].tanksonly or self.db.profile.spells[spellID].tanksonly
+    return self:getSpellSetting(spellID, "tanksonly")
 end
 
 function HomeCheck:UnitHasGlyph(unit, glyphID, default)
