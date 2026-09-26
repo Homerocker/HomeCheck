@@ -672,7 +672,7 @@ function HomeCheck:OptionsPanel()
         }
     end
     for spellID, spellConfig in pairs(self.spells) do
-        if not spellConfig.parent then
+        if not spellConfig.parent and not spellConfig.ignore then
             local name, _, icon = GetSpellInfo(spellID)
             myOptionsTable.args.spells.args[tostring(spellID)] = {
                 name = name,
