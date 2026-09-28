@@ -28,6 +28,16 @@ HomeCheck.comms = {
 
 local playerInRaid = UnitInRaid("player")
 
+-- Auto announce. Every client with the option on tells the others about it on
+-- a prefix of its own, so a cast is announced once instead of once per client
+-- running HomeCheck. A caster who announces for himself is left alone; anybody
+-- else is covered by a single announcer, picked the same way on every client.
+HomeCheck.announceComm = "HomeCheckA"
+local announceHeartbeat = 30 -- how often we say we are still here
+local announceExpiry = 95 -- a peer unheard of for this long is gone
+local announcePeers = {} -- playerName -> timestamp of its last heartbeat
+local announcer -- the player covering everybody who does not announce himself
+
 local updateRaidRosterCooldown = 2
 local updateRaidRosterTimestamp
 local updateRaidRosterScheduleTimer
@@ -161,8 +171,13 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         if playerInRaid then
             self:updateRaidRoster(instant)
         end
+        -- ranks and who is around decide who announces
+        self:electAnnouncer()
+        self:sendAnnounceHeartbeat()
     elseif event == "PARTY_MEMBERS_CHANGED" then
         self:updateRaidRoster()
+        self:electAnnouncer()
+        self:sendAnnounceHeartbeat()
     elseif event == "PLAYER_ENTERING_WORLD" then
         self:cacheLocalizedSpellNames()
         self:ScheduleTimer(function()
@@ -231,6 +246,14 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             end
         end
 
+        -- auto announce peers talk on their own prefix: older clients are not
+        -- subscribed to it and never see these messages
+        self:RegisterComm(self.announceComm)
+        self:sendAnnounceHeartbeat()
+        self:ScheduleRepeatingTimer(function()
+            self:sendAnnounceHeartbeat()
+        end, announceHeartbeat)
+
         self:ScheduleRepeatingTimer(function()
             if not self.db.global.testMode then
                 for playerName, _ in pairs(self.units) do
@@ -282,6 +305,13 @@ end)
 
 function HomeCheck:OnCommReceived(...)
     local prefix, message, _, sender = ...
+
+    if prefix == self.announceComm then
+        if sender ~= (UnitName("player")) then
+            self:onAnnounceHeartbeat(sender, message)
+        end
+        return
+    end
 
     if not self.db.global.comms[prefix] then
         return
@@ -442,6 +472,9 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, te
         else
             self:SendCommMessage("HomeCheck", self:Serialize(spellID, playerName, target), "RAID")
         end
+
+        -- a cast we saw ourselves in the combat log, so it is worth announcing
+        self:announceCooldown(playerName, spellID, target)
     end
 
     if self.db.global.selfignore and playerName == UnitName("player") then
@@ -689,13 +722,10 @@ function HomeCheck:EnableMouse(frame, disable)
     else
         frame:SetScript("OnMouseDown", function(_, button)
             if button == "LeftButton" and (IsShiftKeyDown() or IsControlKeyDown()) then
-                local message = frame.playerName .. " " .. (GetSpellLink(frame.spellID))
+                local message = self:getChatMessage(frame.playerName, frame.spellID, frame.target)
                 if frame.CDLeft == 0 then
                     message = message .. " READY"
                 else
-                    if frame.target then
-                        message = message .. " (" .. frame.target .. ")"
-                    end
                     message = message .. " " .. date("!%M:%S", frame.CDLeft)
                 end
                 if IsShiftKeyDown() then
@@ -707,6 +737,131 @@ function HomeCheck:EnableMouse(frame, disable)
         end)
         frame:EnableMouse(true)
     end
+end
+
+---The chat channel announcements go to, or nil when there is nobody to tell.
+local function announceChannel()
+    if GetNumRaidMembers() > 0 then
+        return "RAID"
+    elseif GetNumPartyMembers() > 0 then
+        return "PARTY"
+    end
+end
+
+---Raid rank of a player: 2 leader, 1 assistant, 0 everybody else.
+local function rank(playerName)
+    if GetNumRaidMembers() > 0 then
+        for i = 1, 40 do
+            local name, playerRank = GetRaidRosterInfo(i)
+            if name == playerName then
+                return playerRank or 0
+            end
+        end
+        return 0
+    end
+    if playerName == (UnitName("player")) then
+        return IsPartyLeader() and 2 or 0
+    end
+    for i = 1, GetNumPartyMembers() do
+        if (UnitName("party" .. i)) == playerName and UnitIsPartyLeader("party" .. i) then
+            return 2
+        end
+    end
+    return 0
+end
+
+---Everybody picks the same announcer from the same list: the leader if he is
+---among them, then an assistant, then the first name alphabetically.
+function HomeCheck:electAnnouncer()
+    announcer = nil
+    if not self.db.global.autoannounce then
+        -- we are not in the running, and we only ever need this to decide
+        -- whether it is us
+        return
+    end
+
+    announcer = (UnitName("player"))
+    local best = rank(announcer)
+    local now = time()
+    for playerName, lastSeen in pairs(announcePeers) do
+        if now - lastSeen > announceExpiry then
+            announcePeers[playerName] = nil
+        elseif UnitInRaid(playerName) or UnitInParty(playerName) then
+            local playerRank = rank(playerName)
+            if playerRank > best or (playerRank == best and playerName < announcer) then
+                announcer, best = playerName, playerRank
+            end
+        end
+    end
+end
+
+---Tell the others whether we announce. Sent on login, on roster changes, when
+---the option is toggled, and every half minute so a client that just joined
+---learns about us.
+function HomeCheck:sendAnnounceHeartbeat()
+    local channel = announceChannel()
+    if not channel then
+        return
+    end
+    self:SendCommMessage(self.announceComm, self.db.global.autoannounce and "1" or "0", channel)
+end
+
+function HomeCheck:onAnnounceHeartbeat(sender, message)
+    if message == "1" then
+        announcePeers[sender] = time()
+    else
+        announcePeers[sender] = nil
+    end
+    self:electAnnouncer()
+end
+
+---Whose casts we announce: our own always, somebody else's only when he does
+---not announce them himself and we are the one covering the rest. With nobody
+---else around we are that one, so a cast is never left unannounced.
+function HomeCheck:shouldAnnounce(playerName)
+    if not self.db.global.autoannounce then
+        return false
+    end
+    if playerName == (UnitName("player")) then
+        return true
+    end
+    local lastSeen = announcePeers[playerName]
+    if lastSeen and time() - lastSeen <= announceExpiry then
+        -- he runs HomeCheck with the option on and is about to say it himself
+        return false
+    end
+    if not announcer then
+        self:electAnnouncer()
+    end
+    return announcer == (UnitName("player"))
+end
+
+---"Playername [Spell] (Target)", the target left out when there is none or the
+---spell hits everybody anyway.
+---The line every message here is built from: the spell first, then who used it
+---and on whom - "[Guardian Spirit] (Krizy)", "[Misdirection] (Krizy -> Tank)".
+function HomeCheck:getChatMessage(playerName, spellID, target)
+    local message = (GetSpellLink(spellID) or (GetSpellInfo(spellID)) or tostring(spellID)) .. " (" .. playerName
+    if target and not self.spells[spellID].notarget then
+        message = message .. " -> " .. target
+    end
+    return message .. ")"
+end
+
+function HomeCheck:announceCooldown(playerName, spellID, target)
+    if childSpells[spellID] then
+        -- the proc half of a cast/proc pair (Misdirection, Tricks of the Trade):
+        -- the cast itself was announced already, when it was used
+        return
+    end
+    if not self:isSpellAnnounced(spellID) then
+        return
+    end
+    local channel = announceChannel()
+    if not channel or not self:shouldAnnounce(playerName) then
+        return
+    end
+    ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", self:getChatMessage(playerName, spellID, target), channel)
 end
 
 --- called when group sizing changes (icon, padding, etc.), or titleBar is toggled, or cooldown frame is added or removed
@@ -1357,6 +1512,14 @@ end
 
 function HomeCheck:isSpellEnabled(spellID)
     return self:getSpellSetting(spellID, "enable")
+end
+
+---A cast/proc pair is one line in the options, so the pair follows the setting
+---of the spell that line stands for. Written out rather than with and/or: the
+---setting is a boolean, and false has to stay false instead of falling through
+---to the other half of the pair.
+function HomeCheck:isSpellAnnounced(spellID)
+    return self.db.profile.spells[self.spells[spellID].parent or spellID].announce
 end
 
 function HomeCheck:isSpellTanksOnly(spellID)

@@ -16,6 +16,7 @@ HomeCheck.defaults = {
             FRCD3 = true
         },
         link = true,
+        autoannounce = false,
         selfignore = false,
         hidesolo = false,
         testMode = false
@@ -57,7 +58,8 @@ HomeCheck.defaults = {
         spells = {
             ["**"] = {
                 group = 2,
-                priority = 100
+                priority = 100,
+                announce = true
             },
             -- DSac
             [64205] = {
