@@ -23,6 +23,20 @@ function HomeCheck:OptionsPanel()
                     return self.db.global.link
                 end
             },
+            autoannounce = {
+                name = L["Announce cooldowns to chat"],
+                desc = L["Announce every cooldown as it is used, to raid or party chat. Clients running HomeCheck agree on one announcer, so a cast is announced once: casters announce themselves, and the raid leader (or an assistant) covers everybody else."],
+                type = "toggle",
+                width = "double",
+                set = function(_, val)
+                    self.db.global.autoannounce = val
+                    self:electAnnouncer()
+                    self:sendAnnounceHeartbeat()
+                end,
+                get = function()
+                    return self.db.global.autoannounce
+                end
+            },
             selfignore = {
                 name = L["Ignore myself"],
                 desc = L["Do not show your own cooldowns."],
@@ -732,6 +746,19 @@ function HomeCheck:OptionsPanel()
                         end,
                         get = function(_)
                             return self.db.profile.spells[spellID].alwaysShow
+                        end
+                    },
+                    announce = {
+                        name = L["Announce"],
+                        type = "toggle",
+                        desc = L["Announce this spell to chat when it is used. Needs \"Announce cooldowns to chat\" in the general options."],
+                        order = 3,
+                        disabled = not self.db.profile.spells[spellID].enable,
+                        set = function(_, val)
+                            self.db.profile.spells[spellID].announce = val
+                        end,
+                        get = function(_)
+                            return self.db.profile.spells[spellID].announce
                         end
                     },
                     frame = {
