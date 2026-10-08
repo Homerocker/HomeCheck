@@ -1,3 +1,30 @@
+local date = date
+local floor = floor
+local GetItemInfo = GetItemInfo
+local GetSpellInfo = GetSpellInfo
+local GetTime = GetTime
+local pairs = pairs
+local select = select
+local find = string.find
+local gmatch = gmatch
+local strsplit = strsplit
+local insert = table.insert
+local ipairs = ipairs
+local random = random
+local remove = table.remove
+local wipe = table.wipe
+local time = time
+local tonumber = tonumber
+local tostring = tostring
+local type = type
+local UnitClass = UnitClass
+local UnitInParty = UnitInParty
+local UnitInRaid = UnitInRaid
+local UnitIsConnected = UnitIsConnected
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local UnitName = UnitName
+local unpack = unpack
+
 HomeCheck = CreateFrame("Frame")
 
 HomeCheck.LibGroupTalents = LibStub("LibGroupTalents-1.0")
@@ -38,16 +65,6 @@ local childSpells = {}
 local framePool = {}
 
 local groups = 10
-
-local date, floor, GetSpellInfo, GetTime, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, GetSpellInfo, GetTime, pairs, select, {
-    find = string.find,
-    gmatch = string.gmatch,
-    match = string.match
-}, strsplit, {
-    insert = table.insert,
-    remove = table.remove,
-    wipe = table.wipe
-}, time, tonumber, tostring, type, unpack
 
 HomeCheck:RegisterEvent("ADDON_LOADED")
 
@@ -187,10 +204,11 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
 
         self:upgradeDB()
 
+        local current_time = time()
         for playerName, spells in pairs(self.db.global.CDs) do
             for spellID, cd in pairs(spells) do
-                if not cd.timestamp or cd.timestamp < time() then
-                    table.wipe(self.db.global.CDs[playerName][spellID])
+                if not cd.timestamp or cd.timestamp < current_time then
+                    wipe(self.db.global.CDs[playerName][spellID])
                 end
             end
         end
@@ -303,7 +321,7 @@ function HomeCheck:OnCommReceived(...)
             return
         end
     elseif prefix == "BLT" then
-        if not string.find(message, ":") then
+        if not find(message, ":") then
             return
         end
 
@@ -312,7 +330,7 @@ function HomeCheck:OnCommReceived(...)
             return
         end
 
-        if not string.find(message, ";") then
+        if not find(message, ";") then
             return
         end
 
@@ -329,7 +347,7 @@ function HomeCheck:OnCommReceived(...)
             return
         end
 
-        for w in string.gmatch(message, "([^,]*),") do
+        for w in gmatch(message, "([^,]*),") do
             spellID, CDLeft = select(3, w:find("(%d+)-(%d+)"))
             spellID = tonumber(spellID)
             CDLeft = tonumber(CDLeft)
@@ -558,7 +576,7 @@ function HomeCheck:tickCooldown(frame)
 
     if frame.CDLeft <= 0 then
         frame.ticking = nil
-        table.wipe(self.db.global.CDs[playerName][spellID])
+        wipe(self.db.global.CDs[playerName][spellID])
         if not self:getSpellAlwaysShow(spellID) then
             self:removeCooldownFrames(playerName, spellID)
             self:repositionFrames(self:getSpellGroup(spellID))
@@ -619,7 +637,7 @@ function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
     -- A bar is built once and kept: frames are never collected by the garbage
     -- collector, so a raid's worth of cooldowns coming and going would leave
     -- hundreds of them behind. A released bar waits in the pool instead.
-    frame = table.remove(framePool)
+    frame = remove(framePool)
     if frame then
         frame:SetParent(group)
         frame:ClearAllPoints()
@@ -668,7 +686,7 @@ function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
     frame.timerColorState = nil
     frame.barColorDimmed, frame.barColorOpacity, frame.barColorClass = nil, nil, nil
 
-    frame.icon:SetTexture(self:getSpellIcon(spellID))
+    frame.icon:SetTexture(select(2, self:getSpellInfo(spellID)))
     frame.playerNameFontString:SetText(playerName)
     frame.targetFontString:SetText("")
     frame.timerFontString:SetText("")
@@ -677,7 +695,7 @@ function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
 
     self:EnableMouse(frame, not self.db.global.link)
 
-    table.insert(group.CooldownFrames, frame)
+    insert(group.CooldownFrames, frame)
     self:updateFramesVisibility(self:getSpellGroup(spellID))
     return frame
 end
@@ -755,7 +773,7 @@ function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, star
             ) or (
                     testMode and self.groups[i].CooldownFrames[j].testMode
             ) then
-                local released = table.remove(self.groups[i].CooldownFrames, j)
+                local released = remove(self.groups[i].CooldownFrames, j)
                 released:Hide()
                 released.ticking = nil
                 framePool[#framePool + 1] = released
@@ -889,7 +907,7 @@ function HomeCheck:Readiness(hunterName)
     for i = 1, #self.groups do
         for j = 1, #self.groups[i].CooldownFrames do
             if self.groups[i].CooldownFrames[j].playerName == hunterName and self.groups[i].CooldownFrames[j].spellID ~= 34477 then
-                table.insert(refreshSpellIDs, self.groups[i].CooldownFrames[j].spellID)
+                insert(refreshSpellIDs, self.groups[i].CooldownFrames[j].spellID)
             end
         end
     end
@@ -1058,7 +1076,7 @@ function HomeCheck:getGroup(i)
 
     frame:Hide()
 
-    table.insert(self.groups, frame)
+    insert(self.groups, frame)
     return frame
 end
 
@@ -1283,10 +1301,10 @@ end
 function HomeCheck:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, startIndex)
     for i = startIndex or 1, #self.groups[sourceGroupIndex].CooldownFrames do
         if spellID == self.groups[sourceGroupIndex].CooldownFrames[i].spellID then
-            local frame = table.remove(self.groups[sourceGroupIndex].CooldownFrames, i)
+            local frame = remove(self.groups[sourceGroupIndex].CooldownFrames, i)
             self:updateFramesVisibility(sourceGroupIndex)
             self:applyGroupSettings(frame, destGroupIndex)
-            table.insert(self.groups[destGroupIndex].CooldownFrames, frame)
+            insert(self.groups[destGroupIndex].CooldownFrames, frame)
             self:updateFramesVisibility(destGroupIndex)
             return self:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, i)
         end
@@ -1337,15 +1355,6 @@ function HomeCheck:setTimerPosition(frame)
     end
 end
 
--- A cast and its proc (Misdirection, Tricks of the Trade) share one line in
--- the options, and these three read the setting behind that line.
---
--- They used to read it as "parent and parentSetting or ownSetting", which only
--- works while the parent's setting is true: a false one falls through to the
--- other half of the pair, whose own setting is a leftover nobody edits and
--- which defaults to true. Turning such a spell off in the options therefore
--- did nothing at all. The spell the line stands for is picked first now, and
--- its setting is returned whatever it is.
 function HomeCheck:getSpellSetting(spellID, setting)
     local spell = self.spells[spellID]
     return self.db.profile.spells[spell and spell.parent or spellID][setting]
@@ -1481,16 +1490,29 @@ function HomeCheck:UnitTrinketEquipped(playerName, trinketId)
     return false
 end
 
-function HomeCheck:getSpellIcon(spellId)
+function HomeCheck:getSpellInfo(spellId)
     local spell = self.spells[spellId]
+
+    local name = spell.name
     local icon = spell.icon
 
-    if not icon then
-        local parent = self.spells[spell.parent]
-        icon = parent and parent.icon or select(3, GetSpellInfo(spellId))
-        -- caching
-        spell.icon = icon
+    if not name or not icon then
+        local trinket = spell.trinket
+
+        if not trinket then
+            local parent = self.spells[spell.parent]
+            trinket = parent and parent.trinket
+        end
+
+        if trinket then
+            name, _, _, _, _, _, _, _, _, icon = GetItemInfo(type(trinket) == "table" and trinket[1] or trinket)
+        else
+            name, _, icon = GetSpellInfo(spellId)
+        end
     end
 
-    return icon
+    --caching
+    spell.name, spell.icon = name, icon
+
+    return name, icon
 end

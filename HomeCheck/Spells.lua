@@ -2,7 +2,6 @@
     cd                      - base cooldown in seconds
     class                   - class name (CAPITALIZED english), only if spell is available for certain class
     talentTab, talentIndex  - BOTH must be specified if spell must be learned through talents
-    icon                    - optional custom icon, used mostly for trinkets where spell icon does not match item icon
     notarget                - true to hide spell target (for AoE, e. g. Divine Sacrifice applied on multiple raid members)
     noself                  - true if spell caster should not be displayed as its target
                                 (workaround for MD and ToT auras applied on self)
@@ -171,8 +170,7 @@ HomeCheck.spells = {
     -- Eyes of Twilight (heroic)
     [75495] = {
         cd = 120,
-        trinket = {54573, 54589},
-        icon = "Interface\\Icons\\inv_misc_rubysanctum1"
+        trinket = {54573, 54589}
     },
     -- Mana Tide Totem
     [16190] = {
@@ -225,8 +223,7 @@ HomeCheck.spells = {
     -- Aegis of Dalaran (heroic)
     [71638] = {
         cd = 60,
-        trinket = {50361, 50364},
-        icon = "Interface\\Icons\\inv_jewelry_trinket_06"
+        trinket = {50361, 50364}
     },
     -- Army of the Dead
     [42650] = {
@@ -393,8 +390,7 @@ HomeCheck.spells = {
     -- PvP Trinket
     [42292] = {
         cd = 120,
-        trinket = {51377, 51378},
-        icon = "Interface\\Icons\\INV_Jewelry_TrinketPVP_01"
+        trinket = {51377, 51378}
     },
     -- Repentance
     [20066] = {
