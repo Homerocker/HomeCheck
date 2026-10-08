@@ -761,34 +761,30 @@ function HomeCheck:loadProfile()
     self:sortFrames()
 end
 
-function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, startGroup, startIndex, testMode)
-    if spellID then
-        startGroup = self:getSpellGroup(spellID)
-    end
-    for i = startGroup or 1, #self.groups do
-        for j = startIndex or 1, #self.groups[i].CooldownFrames do
+function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, testMode)
+    for i = spellID and self:getSpellGroup(spellID) or 1, #self.groups do
+        local group = self.groups[i].CooldownFrames
+        for j = #group, 1, -1 do
+            local frame = group[j]
             if (
-                    self.groups[i].CooldownFrames[j].playerName == playerName
-                            and (not spellID or self.groups[i].CooldownFrames[j].spellID == spellID)
-                            and (not onlyWhenReady or self.groups[i].CooldownFrames[j].CDLeft <= 0)
+                    frame.playerName == playerName
+                            and (not spellID or frame.spellID == spellID)
+                            and (not onlyWhenReady or frame.CDLeft <= 0)
             ) or (
-                    testMode and self.groups[i].CooldownFrames[j].testMode
+                    testMode and frame.testMode
             ) then
-                local released = remove(self.groups[i].CooldownFrames, j)
+                local released = remove(group, j)
                 released:Hide()
                 released.ticking = nil
                 framePool[#framePool + 1] = released
                 self:updateFramesVisibility(i)
-                if spellID then
-                    break
+                if playerName and spellID then
+                    return
                 end
-                return self:removeCooldownFrames(playerName, spellID, onlyWhenReady, i, j, testMode)
             end
         end
-
-        if startIndex then
-            -- reset start frame index when we proceed to next frames group
-            startIndex = nil
+        if spellID then
+            return
         end
     end
 end
@@ -1460,7 +1456,7 @@ function HomeCheck:setTestMode(enable)
         end
     else
         -- Remove all test frames
-        self:removeCooldownFrames(nil, nil, nil, nil, nil, true)
+        self:removeCooldownFrames(nil, nil, nil, true)
     end
 
     self:repositionFrames()
