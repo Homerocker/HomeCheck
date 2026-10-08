@@ -53,6 +53,7 @@ HomeCheck.comms = {
     HomeCheck = "HomeCheck",
 }
 
+local PLAYER = UnitName("player")
 local playerInRaid = UnitInRaid("player")
 
 local updateRaidRosterCooldown = 2
@@ -305,7 +306,7 @@ function HomeCheck:OnCommReceived(...)
         return
     end
 
-    if sender == (UnitName("player")) then
+    if sender == PLAYER then
         return
     end
 
@@ -462,7 +463,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, te
         end
     end
 
-    if self.db.global.selfignore and playerName == UnitName("player") then
+    if self.db.global.selfignore and playerName == PLAYER then
         return
     end
 
@@ -834,14 +835,13 @@ function HomeCheck:updateRaidCooldowns()
         end
     else
         local isDead = UnitIsDeadOrGhost("player")
-        local playerName = (UnitName("player"))
-        if self:getUnit(playerName).dead ~= isDead then
-            self:getUnit(playerName).dead = isDead
+        if self:getUnit(PLAYER).dead ~= isDead then
+            self:getUnit(PLAYER).dead = isDead
         end
-        self:refreshPlayerCooldowns((UnitName("player")))
+        self:refreshPlayerCooldowns(PLAYER)
         for i = 1, GetNumPartyMembers() do
             if UnitIsConnected("party" .. i) then
-                playerName = (UnitName("party" .. i))
+                local playerName = (UnitName("party" .. i))
                 isDead = UnitIsDeadOrGhost("party" .. i)
                 if self:getUnit(playerName).dead ~= isDead then
                     self:getUnit(playerName).dead = isDead
@@ -862,7 +862,7 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
         if not spellConfig.class or spellConfig.class == class then
             if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID)
                     and (not self:isSpellTanksOnly(spellID) or self.LibGroupTalents:GetUnitRole(playerName) == "tank")
-                    and (not self.db.global.selfignore or playerName ~= UnitName("player")) then
+                    and (not self.db.global.selfignore or playerName ~= PLAYER) then
                 if not spellConfig.parent then
                     self:setCooldown(spellID, playerName)
                 end
