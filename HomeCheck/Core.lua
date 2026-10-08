@@ -39,7 +39,7 @@ local framePool = {}
 
 local groups = 10
 
-local date, floor, GetTime, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, GetTime, pairs, select, {
+local date, floor, GetSpellInfo, GetTime, pairs, select, string, strsplit, table, time, tonumber, tostring, type, unpack = date, floor, GetSpellInfo, GetTime, pairs, select, {
     find = string.find,
     gmatch = string.gmatch,
     match = string.match
@@ -668,7 +668,7 @@ function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
     frame.timerColorState = nil
     frame.barColorDimmed, frame.barColorOpacity, frame.barColorClass = nil, nil, nil
 
-    frame.icon:SetTexture(select(3, GetSpellInfo(spellID)))
+    frame.icon:SetTexture(self:getSpellIcon(spellID))
     frame.playerNameFontString:SetText(playerName)
     frame.targetFontString:SetText("")
     frame.timerFontString:SetText("")
@@ -1479,4 +1479,18 @@ function HomeCheck:UnitTrinketEquipped(playerName, trinketId)
     end
 
     return false
+end
+
+function HomeCheck:getSpellIcon(spellId)
+    local spell = self.spells[spellId]
+    local icon = spell.icon
+
+    if not icon then
+        local parent = self.spells[spell.parent]
+        icon = parent and parent.icon or select(3, GetSpellInfo(spellId))
+        -- caching
+        spell.icon = icon
+    end
+
+    return icon
 end
