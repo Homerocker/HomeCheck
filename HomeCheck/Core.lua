@@ -1,6 +1,12 @@
+local CanInspect = CanInspect
+local CheckInteractDistance = CheckInteractDistance
 local date = date
 local floor = floor
+local GetInventoryItemID = GetInventoryItemID
 local GetItemInfo = GetItemInfo
+local GetNumPartyMembers = GetNumPartyMembers
+local GetNumRaidMembers = GetNumRaidMembers
+local GetRaidRosterInfo = GetRaidRosterInfo
 local GetSpellInfo = GetSpellInfo
 local GetTime = GetTime
 local pairs = pairs
@@ -53,7 +59,7 @@ HomeCheck.comms = {
     HomeCheck = "HomeCheck",
 }
 
-local PLAYER = UnitName("player")
+local currentPlayer = UnitName("player")
 local playerInRaid = UnitInRaid("player")
 
 local updateRaidRosterCooldown = 2
@@ -306,7 +312,7 @@ function HomeCheck:OnCommReceived(...)
         return
     end
 
-    if sender == PLAYER then
+    if sender == currentPlayer then
         return
     end
 
@@ -463,7 +469,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, te
         end
     end
 
-    if self.db.global.selfignore and playerName == PLAYER then
+    if self.db.global.selfignore and playerName == currentPlayer then
         return
     end
 
@@ -831,10 +837,10 @@ function HomeCheck:updateRaidCooldowns()
         end
     else
         local isDead = UnitIsDeadOrGhost("player")
-        if self:getUnit(PLAYER).dead ~= isDead then
-            self:getUnit(PLAYER).dead = isDead
+        if self:getUnit(currentPlayer).dead ~= isDead then
+            self:getUnit(currentPlayer).dead = isDead
         end
-        self:refreshPlayerCooldowns(PLAYER)
+        self:refreshPlayerCooldowns(currentPlayer)
         for i = 1, GetNumPartyMembers() do
             if UnitIsConnected("party" .. i) then
                 local playerName = (UnitName("party" .. i))
@@ -858,7 +864,7 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
         if not spellConfig.class or spellConfig.class == class then
             if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID)
                     and (not self:isSpellTanksOnly(spellID) or self.LibGroupTalents:GetUnitRole(playerName) == "tank")
-                    and (not self.db.global.selfignore or playerName ~= PLAYER) then
+                    and (not self.db.global.selfignore or playerName ~= currentPlayer) then
                 if not spellConfig.parent then
                     self:setCooldown(spellID, playerName)
                 end
