@@ -2,6 +2,7 @@ local CanInspect = CanInspect
 local CheckInteractDistance = CheckInteractDistance
 local date = date
 local floor = floor
+local format = format
 local GetInventoryItemID = GetInventoryItemID
 local GetItemInfo = GetItemInfo
 local GetNumPartyMembers = GetNumPartyMembers
@@ -557,22 +558,19 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, te
     end
 
     if frame.CDLeft > 0 then
-        frame.timerFontString:SetText(date("!%M:%S", frame.CDLeft):gsub('^0+:?0?', ''))
         -- the shared ticker counts it down from here
         frame.ticking = true
     elseif not self:getSpellAlwaysShow(spellID) then
         self:removeCooldownFrames(playerName, spellID, true)
         self:repositionFrames(self:getSpellGroup(spellID))
         return
-    else
-        frame.timerFontString:SetText("R")
     end
+
+    self:setTimerText(frame)
 
     self:updateCooldownBarProgress(frame)
 
     self:sortFrames(self:getSpellGroup(spellID))
-
-    self:setTimerColor(frame)
 
     frame.initialized = true
 end
@@ -593,13 +591,8 @@ function HomeCheck:tickCooldown(frame)
         if frame.CDLeft < 0 then
             frame.CDLeft = 0
         end
-        frame.timerFontString:SetText("R")
-        self:setTimerColor(frame)
-    elseif frame.timerText ~= floor(frame.CDLeft) then
-        frame.timerText = floor(frame.CDLeft)
-        frame.timerFontString:SetText(date("!%M:%S", frame.CDLeft):gsub('^0+:?0?', ''))
-        self:setTimerColor(frame)
     end
+    self:setTimerText(frame)
     self:updateCooldownBarProgress(frame)
 end
 
@@ -1191,6 +1184,28 @@ function HomeCheck:setTimerColor(frame)
         frame.timerFontString:SetTextColor(0, 1, 0, 1)
     else
         frame.timerFontString:SetTextColor(0.9, 0.7, 0, 1)
+    end
+end
+
+function HomeCheck:setTimerText(frame)
+    local CDLeft = frame.CDLeft
+    if CDLeft <= 0 then
+        if frame.timerText ~= "R" then
+            frame.timerText = "R"
+            frame.timerFontString:SetText("R")
+            self:setTimerColor(frame)
+        end
+    else
+        CDLeft = floor(CDLeft)
+        if frame.timerText ~= CDLeft then
+            frame.timerText = CDLeft
+            if CDLeft < 60 then
+                frame.timerFontString:SetText(CDLeft)
+            end
+
+            frame.timerFontString:SetText(format("%d:%02d", floor(CDLeft / 60), CDLeft % 60))
+            self:setTimerColor(frame)
+        end
     end
 end
 
