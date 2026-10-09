@@ -14,10 +14,11 @@ local select = select
 local find = string.find
 local gmatch = gmatch
 local strsplit = strsplit
-local insert = table.insert
 local ipairs = ipairs
 local random = random
+local insert = table.insert
 local remove = table.remove
+local sort = table.sort
 local wipe = table.wipe
 local time = time
 local tonumber = tonumber
@@ -942,56 +943,68 @@ function HomeCheck:sortFrames(groupIndex)
         return
     end
 
-    for j = 1, #self.groups[groupIndex].CooldownFrames - 1 do
-        for k = j + 1, #self.groups[groupIndex].CooldownFrames do
-            if self:cooldownSorter(self.groups[groupIndex].CooldownFrames[j], self.groups[groupIndex].CooldownFrames[k]) then
-                self.groups[groupIndex].CooldownFrames[j], self.groups[groupIndex].CooldownFrames[k] = self.groups[groupIndex].CooldownFrames[k], self.groups[groupIndex].CooldownFrames[j]
-            end
-        end
-    end
+    local frames = self.groups[groupIndex].CooldownFrames
+    if #frames <= 1 then return end
+
+    sort(frames, function(a, b)
+        return self:cooldownSorter(a, b)
+    end)
+
     self:repositionFrames(groupIndex)
 end
 
 ---cooldownSorter
----@param frame1 table cooldown frame to be moved
----@param frame2 table cooldown frame to compare against
----@return boolean true if frame1 should be below frame2
+---@param frame1 table cooldown frame A
+---@param frame2 table cooldown frame B
+---@return boolean true if frame1 belongs BEFORE frame2
 function HomeCheck:cooldownSorter(frame1, frame2)
     local groupIndex = self:getSpellGroup(frame1.spellID)
     local spellId1 = self.spells[frame1.spellID].parent or frame1.spellID
     local spellId2 = self.spells[frame2.spellID].parent or frame2.spellID
 
-    if self:getUnit(frame1.playerName).range < self:getUnit(frame2.playerName).range then
+    -- 1. Range Check Logic
+    local range1 = self:getUnit(frame1.playerName).range
+    local range2 = self:getUnit(frame2.playerName).range
+
+    if range1 ~= range2 then
         if self:getIProp(groupIndex, "rangeUngroup") then
-            return true
+            return range1 > range2 -- In range players go to the top
         elseif spellId1 == spellId2 and self:getIProp(groupIndex, "rangeDimout") then
-            return true
-        end
-    elseif self:getUnit(frame1.playerName).range > self:getUnit(frame2.playerName).range then
-        if self:getIProp(groupIndex, "rangeUngroup") or spellId1 == spellId2 then
-            return
+            return range1 > range2 -- Same spells: out of range dims go to the bottom
         end
     end
 
+    -- 2. Dead/Ghost Status Logic (Only grouped this way if spells are identical)
     if spellId1 == spellId2 then
-        if self:getUnit(frame1.playerName).dead
-                and not self:getUnit(frame2.playerName).dead then
-            return true
-        elseif self:getUnit(frame1.playerName).dead ~= self:getUnit(frame2.playerName).dead then
-            return
+        local dead1 = self:getUnit(frame1.playerName).dead and 1 or 0
+        local dead2 = self:getUnit(frame2.playerName).dead and 1 or 0
+        if dead1 ~= dead2 then
+            return dead1 < dead2 -- Living players go above dead players
         end
     end
 
-    if self.db.profile.spells[spellId1].priority < self.db.profile.spells[spellId2].priority then
-        return true
-    elseif spellId1 == spellId2 then
-        if frame1.CDLeft > frame2.CDLeft then
-            return true
-        end
-    elseif self.db.profile.spells[spellId1].priority == self.db.profile.spells[spellId2].priority and spellId1 < spellId2 then
-        -- attempt to group spells by ID
-        return true
+    -- 3. Spell Priority Configuration
+    local priority1 = self.db.profile.spells[spellId1].priority or 100
+    local priority2 = self.db.profile.spells[spellId2].priority or 100
+
+    if priority1 ~= priority2 then
+        return priority1 > priority2 -- Higher priority number goes to the top
     end
+
+    -- 4. Cooldown Duration Remaining
+    if spellId1 == spellId2 then
+        if frame1.CDLeft ~= frame2.CDLeft then
+            return frame1.CDLeft < frame2.CDLeft -- Shorter cooldown remaining goes to the top
+        end
+    else
+        -- 5. Fallback grouping alignment by Spell ID
+        if spellId1 ~= spellId2 then
+            return spellId1 < spellId2
+        end
+    end
+
+    -- 6. Strict stable sort fallback (Alphabetical by Player Name)
+    return frame1.playerName < frame2.playerName
 end
 
 function HomeCheck:getGroup(i)
