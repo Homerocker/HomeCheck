@@ -944,11 +944,11 @@ function HomeCheck:sortFrames(groupIndex)
     end
 
     local frames = self.groups[groupIndex].CooldownFrames
-    if #frames <= 1 then return end
-
-    sort(frames, function(a, b)
-        return self:cooldownSorter(a, b)
-    end)
+    if #frames > 1 then
+        sort(frames, function(a, b)
+            return self:cooldownSorter(a, b)
+        end)
+    end
 
     self:repositionFrames(groupIndex)
 end
