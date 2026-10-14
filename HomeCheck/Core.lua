@@ -270,7 +270,8 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
 
                         self:getUnit(playerName).range = self:UnitInRange(playerName) and 1 or 0
 
-                        if CanInspect(playerName) and CheckInteractDistance(playerName, 1) then
+                        if playerName == currentPlayer
+                                or (CanInspect(playerName) and CheckInteractDistance(playerName, 1)) then
                             local trinket1 = GetInventoryItemID(playerName, 13)
                             local trinket2 = GetInventoryItemID(playerName, 14)
 
