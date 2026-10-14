@@ -35,9 +35,9 @@ local unpack = unpack
 
 HomeCheck = CreateFrame("Frame")
 
-HomeCheck.LibGroupTalents = LibStub("LibGroupTalents-1.0")
+local LibGroupTalents = LibStub("LibGroupTalents-1.0")
+local LibRangeCheck = LibStub("LibRangeCheck-2.0")
 HomeCheck.LibSharedMedia = LibStub("LibSharedMedia-3.0")
-HomeCheck.LibRangeCheck = LibStub("LibRangeCheck-2.0")
 
 LibStub("AceTimer-3.0"):Embed(HomeCheck)
 LibStub("AceComm-3.0"):Embed(HomeCheck)
@@ -249,8 +249,8 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         end
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-        self.LibGroupTalents.RegisterCallback(self, "LibGroupTalents_Update")
-        self.LibGroupTalents.RegisterCallback(self, "LibGroupTalents_RoleChange")
+        LibGroupTalents.RegisterCallback(self, "LibGroupTalents_Update")
+        LibGroupTalents.RegisterCallback(self, "LibGroupTalents_RoleChange")
 
         for k, _ in pairs(self.comms) do
             if self.db.global.comms[k] then
@@ -857,7 +857,7 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
     for spellID, spellConfig in pairs(self.spells) do
         if not spellConfig.class or spellConfig.class == class then
             if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID)
-                    and (not self:isSpellTanksOnly(spellID) or self.LibGroupTalents:GetUnitRole(playerName) == "tank")
+                    and (not self:isSpellTanksOnly(spellID) or LibGroupTalents:GetUnitRole(playerName) == "tank")
                     and (not self.db.global.selfignore or playerName ~= currentPlayer) then
                 if not spellConfig.parent then
                     self:setCooldown(spellID, playerName)
@@ -880,7 +880,7 @@ function HomeCheck:UnitHasAbility(playerName, spellID)
     end
 
     -- using UnitHasTalent() as GetTalentInfo() does not return correct value right after respec
-    return not self.spells[spellID].talentTab or not self.spells[spellID].talentIndex or self.LibGroupTalents:UnitHasTalent(playerName, (GetSpellInfo(spellID)))
+    return not self.spells[spellID].talentTab or not self.spells[spellID].talentIndex or LibGroupTalents:UnitHasTalent(playerName, (GetSpellInfo(spellID)))
 end
 
 function HomeCheck:saveFramePosition(groupIndex)
@@ -1213,19 +1213,19 @@ function HomeCheck:getSpellCooldown(frame)
     local CDmodifier = 0
     if frame.spellID == 498 or frame.spellID == 642 then
         -- Divine Shield and Divine Protection
-        CDmodifier = -30 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 2, 14)) or 0)
+        CDmodifier = -30 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 2, 14)) or 0)
     elseif frame.spellID == 10278 then
         -- HoP
-        CDmodifier = -60 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 2, 4)) or 0)
+        CDmodifier = -60 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 2, 4)) or 0)
     elseif frame.spellID == 48788 then
         -- Lay on Hands
-        CDmodifier = -120 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 1, 8)) or 0)
+        CDmodifier = -120 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 1, 8)) or 0)
         if self:UnitHasGlyph(frame.playerName, 57955) then
             CDmodifier = CDmodifier - 300
         end
     elseif frame.spellID == 20608 then
         -- Reincarnation
-        local talentPoints = select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 3, 3))
+        local talentPoints = select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 3))
         if talentPoints == 1 then
             CDmodifier = -420
         elseif talentPoints == 2 then
@@ -1233,7 +1233,7 @@ function HomeCheck:getSpellCooldown(frame)
         end
     elseif frame.spellID == 871 then
         -- Shield Wall
-        CDmodifier = -30 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 3, 13)) or 0)
+        CDmodifier = -30 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 13)) or 0)
         if self:UnitHasGlyph(frame.playerName, 63329) then
             CDmodifier = CDmodifier - 120
         end
@@ -1244,7 +1244,7 @@ function HomeCheck:getSpellCooldown(frame)
         end
     elseif frame.spellID == 48447 then
         -- Tranquility
-        local talentPoints = select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 3, 14))
+        local talentPoints = select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 14))
         if talentPoints == 1 then
             CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.3
         elseif talentPoints == 2 then
@@ -1257,7 +1257,7 @@ function HomeCheck:getSpellCooldown(frame)
         end
     elseif frame.spellID == 45438 then
         -- Ice Block
-        local talentPoints = select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 3, 3))
+        local talentPoints = select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 3))
         if talentPoints == 1 then
             CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.07
         elseif talentPoints == 2 then
@@ -1267,13 +1267,13 @@ function HomeCheck:getSpellCooldown(frame)
         end
     elseif frame.spellID == 66 or frame.spellID == 12051 then
         -- Invisibility or Evocation
-        CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.15 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 1, 24)) or 0)
+        CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.15 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 1, 24)) or 0)
     elseif frame.spellID == 12292 then
         -- Death Wish
-        CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.11 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 2, 18)) or 0)
+        CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.11 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 2, 18)) or 0)
     elseif frame.spellID == 10060 or frame.spellID == 33206 then
         -- Power Infusion and Pain Suppression
-        CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.1 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 1, 23)) or 0)
+        CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.1 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 1, 23)) or 0)
     elseif frame.spellID == 47788 then
         -- Guardian spirit
         if frame.CDLeft > self.spells[frame.spellID].cd then
@@ -1284,7 +1284,7 @@ function HomeCheck:getSpellCooldown(frame)
         end
     elseif frame.spellID == 42650 then
         -- Army of the Dead
-        CDmodifier = -120 * (select(5, self.LibGroupTalents:GetTalentInfo(frame.playerName, 3, 13)) or 0)
+        CDmodifier = -120 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 13)) or 0)
     end
 
     return self.spells[frame.spellID].cd + CDmodifier
@@ -1342,7 +1342,11 @@ function HomeCheck:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, s
 end
 
 function HomeCheck:UnitInRange(unit)
-    return select(2, self.LibRangeCheck:GetRange(unit))
+    if unit == currentPlayer then
+        return true
+    end
+    local _, maxRange = LibRangeCheck:GetRange(unit)
+    return maxRange
 end
 
 function HomeCheck:updateCooldownBarProgress(frame)
@@ -1403,13 +1407,13 @@ function HomeCheck:isSpellTanksOnly(spellID)
 end
 
 function HomeCheck:UnitHasGlyph(unit, glyphID, default)
-    if self.LibGroupTalents:UnitHasGlyph(unit, glyphID) then
+    if LibGroupTalents:UnitHasGlyph(unit, glyphID) then
         return true
     end
     if not default then
         return false
     end
-    local a, b, c, d, e, f = self.LibGroupTalents:GetUnitGlyphs(unit)
+    local a, b, c, d, e, f = LibGroupTalents:GetUnitGlyphs(unit)
     if a or b or c or d or e or f then
         -- checking if any glyph info exists to make sure glyph info was actually fetched
         return false
