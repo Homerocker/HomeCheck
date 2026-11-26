@@ -1172,7 +1172,7 @@ function HomeCheck:setTimerColor(frame)
     if self:getUnit(frame.playerName).dead then
         state = TIMER_DEAD
     elseif frame.CDLeft <= 0 then
-        if not self.db.profile.spells[frame.spellID].alwaysShow then
+        if not self:getSpellAlwaysShow(frame.spellID) then
             -- the bar is on its way out, leave the colour alone
             return
         end
