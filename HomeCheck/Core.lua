@@ -995,9 +995,7 @@ function HomeCheck:cooldownSorter(frame1, frame2)
         end
     else
     -- 5. Fallback grouping alignment by Spell ID
-        if spellId1 ~= spellId2 then
-            return spellId1 < spellId2
-        end
+        return spellId1 < spellId2
     end
 
     -- 6. Strict stable sort fallback (Alphabetical by Player Name)
