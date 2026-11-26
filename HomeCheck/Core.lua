@@ -1326,25 +1326,33 @@ function HomeCheck:applyGroupSettings(frame, groupIndex)
 end
 
 function HomeCheck:setSpellGroupIndex(spellID, groupIndex)
-    if self.db.profile.spells[spellID].group == groupIndex then
+    -- expected to be only called from Options Panel UI where child spells are hidden
+    -- so we assume spellID does not have "parent" and skip getSpellGroup() checks
+    local oldGroup = self.db.profile.spells[spellID].group
+    if oldGroup == groupIndex then
         return
     end
-    self:moveFrameToGroup(spellID, self.db.profile.spells[spellID].group, groupIndex)
-    self:sortFrames(self.db.profile.spells[spellID].group)
+    self:moveFrameToGroup(spellID, oldGroup, groupIndex)
+    self:sortFrames(oldGroup)
     self:sortFrames(groupIndex)
     self.db.profile.spells[spellID].group = groupIndex
 end
 
-function HomeCheck:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, startIndex)
-    for i = startIndex or 1, #self.groups[sourceGroupIndex].CooldownFrames do
+function HomeCheck:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex)
+    local moved
+
+    for i = #self.groups[sourceGroupIndex].CooldownFrames, 1, -1  do
         if spellID == self.groups[sourceGroupIndex].CooldownFrames[i].spellID then
             local frame = remove(self.groups[sourceGroupIndex].CooldownFrames, i)
-            self:updateFramesVisibility(sourceGroupIndex)
             self:applyGroupSettings(frame, destGroupIndex)
             insert(self.groups[destGroupIndex].CooldownFrames, frame)
-            self:updateFramesVisibility(destGroupIndex)
-            return self:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex, i)
+            moved = true
         end
+    end
+
+    if moved then
+        self:updateFramesVisibility(sourceGroupIndex)
+        self:updateFramesVisibility(destGroupIndex)
     end
 end
 
