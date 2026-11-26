@@ -1040,8 +1040,12 @@ function HomeCheck:applyTitleBarSettings(group, groupIndex)
     -- Show/hide title bar based on settings
     if self:getIProp(groupIndex, "showTitleBar") then
         group.titleBar:Show()
+        group.titleBar:EnableMouse(true)
+        group.titleBar:RegisterForDrag("LeftButton")
     else
         group.titleBar:Hide()
+        group.titleBar:EnableMouse(false)
+        group.titleBar:RegisterForDrag()
     end
 end
 
@@ -1077,8 +1081,6 @@ function HomeCheck:getGroup(i)
     frame.titleBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
 
     -- Enable dragging on title bar
-    frame.titleBar:EnableMouse(true)
-    frame.titleBar:RegisterForDrag("LeftButton")
     frame.titleBar:SetScript("OnDragStart", function()
         frame.anchor:StartMoving()
     end)
