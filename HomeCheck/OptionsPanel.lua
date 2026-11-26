@@ -500,7 +500,7 @@ function HomeCheck:OptionsPanel()
                             end,
                             set = function(_, val)
                                 self.db.profile[i].rangeUngroup = val
-                                self:sortFrames(i)
+                                self:sortFrames()
                             end
                         }
                     }
