@@ -1204,11 +1204,13 @@ function HomeCheck:setTimerText(frame)
         CDLeft = floor(CDLeft)
         if frame.timerText ~= CDLeft then
             frame.timerText = CDLeft
+
             if CDLeft < 60 then
                 frame.timerFontString:SetText(CDLeft)
+            else
+                frame.timerFontString:SetText(format("%d:%02d", floor(CDLeft / 60), CDLeft % 60))
             end
 
-            frame.timerFontString:SetText(format("%d:%02d", floor(CDLeft / 60), CDLeft % 60))
             self:setTimerColor(frame)
         end
     end
