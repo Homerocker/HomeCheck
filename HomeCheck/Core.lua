@@ -563,7 +563,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, te
         frame.ticking = true
     elseif not self:getSpellAlwaysShow(spellID) then
         self:removeCooldownFrames(playerName, spellID, true)
-        self:repositionFrames(self:getSpellGroup(spellID))
+        self:repositionFrames(frame.groupIndex)
         return
     end
 
@@ -571,7 +571,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, te
 
     self:updateCooldownBarProgress(frame)
 
-    self:sortFrames(self:getSpellGroup(spellID))
+    self:sortFrames(frame.groupIndex)
 
     frame.initialized = true
 end
@@ -586,7 +586,7 @@ function HomeCheck:tickCooldown(frame)
         wipe(self.db.global.CDs[playerName][spellID])
         if not self:getSpellAlwaysShow(spellID) then
             self:removeCooldownFrames(playerName, spellID)
-            self:repositionFrames(self:getSpellGroup(spellID))
+            self:repositionFrames(frame.groupIndex)
             return
         end
         if frame.CDLeft < 0 then
@@ -700,7 +700,7 @@ function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
     self:EnableMouse(frame, not self.db.global.link)
 
     insert(group.CooldownFrames, frame)
-    self:updateFramesVisibility(self:getSpellGroup(spellID))
+    self:updateFramesVisibility(frame.groupIndex)
     return frame
 end
 
@@ -955,7 +955,7 @@ end
 ---@param frame2 table cooldown frame B
 ---@return boolean true if frame1 belongs BEFORE frame2
 function HomeCheck:cooldownSorter(frame1, frame2)
-    local groupIndex = self:getSpellGroup(frame1.spellID)
+    local groupIndex = frame1.groupIndex
     local spellId1 = self.spells[frame1.spellID].parent or frame1.spellID
     local spellId2 = self.spells[frame2.spellID].parent or frame2.spellID
 
@@ -1173,8 +1173,8 @@ end
 function HomeCheck:setBarColor(frame)
     local dimmed = self:getUnit(frame.playerName).dead
             or (self:getUnit(frame.playerName).range == 0
-            and self:getIPropBySpellId(frame.spellID, "rangeDimout"))
-    local opacity = self:getIPropBySpellId(frame.spellID, "opacity")
+            and self:getIProp(frame.groupIndex, "rangeDimout"))
+    local opacity = self:getIProp(frame.groupIndex, "opacity")
 
     if frame.barColorDimmed == dimmed and frame.barColorOpacity == opacity and frame.barColorClass == frame.class then
         return
@@ -1339,6 +1339,7 @@ end
 function HomeCheck:applyGroupSettings(frame)
     local groupIndex = self:getSpellGroup(frame.spellID)
 
+    frame.groupIndex = groupIndex
     frame:SetParent(self:getGroup(groupIndex))
 
     self:setFrameHeight(frame, self:getIProp(groupIndex, "iconSize"))
@@ -1394,13 +1395,13 @@ end
 
 function HomeCheck:updateCooldownBarProgress(frame)
     local pct = frame.CDLeft / frame.CD
-    if self:getIPropBySpellId(frame.spellID, "invertColors") then
+    if self:getIProp(frame.groupIndex, "invertColors") then
         if pct ~= 0 then
             if not frame.bar.active:IsShown() then
                 frame.bar.active:Show()
                 frame.bar.inactive:SetPoint("LEFT", frame.bar.active, "RIGHT")
             end
-            frame.bar.active:SetWidth((self:getIPropBySpellId(frame.spellID, "frameWidth") - self:getIPropBySpellId(frame.spellID, "iconSize")) * pct)
+            frame.bar.active:SetWidth((self:getIProp(frame.groupIndex, "frameWidth") - self:getIProp(frame.groupIndex, "iconSize")) * pct)
         elseif frame.bar.active:IsShown() then
             frame.bar.active:Hide()
             frame.bar.inactive:SetPoint("LEFT", frame.icon, "RIGHT")
@@ -1411,7 +1412,7 @@ function HomeCheck:updateCooldownBarProgress(frame)
                 frame.bar.active:Show()
                 frame.bar.inactive:SetPoint("LEFT", frame.bar.active, "RIGHT")
             end
-            frame.bar.active:SetWidth((self:getIPropBySpellId(frame.spellID, "frameWidth") - self:getIPropBySpellId(frame.spellID, "iconSize")) * (1 - pct))
+            frame.bar.active:SetWidth((self:getIProp(frame.groupIndex, "frameWidth") - self:getIProp(frame.groupIndex, "iconSize")) * (1 - pct))
         elseif frame.bar.active:IsShown() then
             frame.bar.active:Hide()
             frame.bar.inactive:SetPoint("LEFT", frame.icon, "RIGHT")
@@ -1421,7 +1422,7 @@ end
 
 function HomeCheck:setTimerPosition(frame)
     frame.timerFontString:ClearAllPoints()
-    if self:getIPropBySpellId(frame.spellID, "timerPosition") == "l" then
+    if self:getIProp(frame.groupIndex, "timerPosition") == "l" then
         frame.timerFontString:SetPoint("LEFT", frame.icon, "RIGHT", 1, 0)
         frame.playerNameFontString:SetPoint("LEFT", frame.timerFontString, "RIGHT", 2, 0)
         frame.targetFontString:SetPoint("RIGHT", frame, "RIGHT", -2, 0)
@@ -1472,7 +1473,7 @@ end
 
 function HomeCheck:setFrameHeight(frame, height)
     if not height then
-        height = self:getIPropBySpellId(frame.spellID, "iconSize")
+        height = self:getIProp(frame.groupIndex, "iconSize")
     end
     frame:SetHeight(height)
     frame.icon:SetSize(height, height)
@@ -1499,10 +1500,6 @@ function HomeCheck:getIProp(frameId, propertyName)
     else
         return self.db.profile[self.db.profile[frameId].inherit or frameId][propertyName]
     end
-end
-
-function HomeCheck:getIPropBySpellId(spellId, propertyName)
-    return self:getIProp(self:getSpellGroup(spellId), propertyName)
 end
 
 function HomeCheck:updateFramesVisibility(groupIndex)
