@@ -750,6 +750,9 @@ function HomeCheck:loadProfile()
     for i = 1, #self.groups do
         self.groups[i].anchor:ClearAllPoints()
         self.groups[i].anchor:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
+
+        self:applyTitleBarSettings(self.groups[i], i)
+
         for j = #self.groups[i].CooldownFrames, 1, -1  do
             local frame = self.groups[i].CooldownFrames[j]
             if frame then
@@ -1008,6 +1011,29 @@ function HomeCheck:cooldownSorter(frame1, frame2)
     return frame1.playerName < frame2.playerName
 end
 
+function HomeCheck:applyTitleBarSettings(group, groupIndex)
+    group.titleBar:SetHeight(self:getIProp(groupIndex, "titleBarHeight"))
+    group.titleBar:SetWidth(self:getIProp(groupIndex, "frameWidth"))
+
+    -- Title background
+    local bgColor = self:getIProp(groupIndex, "titleBackgroundColor")
+    group.titleBar.bg:SetVertexColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+
+    -- Title text
+    local titleText = self:getIProp(groupIndex, "titleText")
+    local displayText = titleText ~= "" and titleText or ("Group " .. groupIndex)
+    group.titleBar.text:SetText(displayText)
+    local font = group.titleBar.text:GetFont()
+    group.titleBar.text:SetFont(font, self:getIProp(groupIndex, "titleFontSize"))
+
+    -- Show/hide title bar based on settings
+    if self:getIProp(groupIndex, "showTitleBar") then
+        group.titleBar:Show()
+    else
+        group.titleBar:Hide()
+    end
+end
+
 function HomeCheck:getGroup(i)
     i = i or 1
     if self.groups[i] then
@@ -1037,8 +1063,6 @@ function HomeCheck:getGroup(i)
 
     -- Create title bar
     frame.titleBar = CreateFrame("Frame", nil, frame)
-    frame.titleBar:SetHeight(self:getIProp(i, "titleBarHeight"))
-    frame.titleBar:SetWidth(self:getIProp(i, "frameWidth"))
     frame.titleBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
 
     -- Enable dragging on title bar
@@ -1052,6 +1076,11 @@ function HomeCheck:getGroup(i)
         self:saveFramePosition(i)
     end)
 
+    -- Title background
+    frame.titleBar.bg = frame.titleBar:CreateTexture(nil, "BACKGROUND")
+    frame.titleBar.bg:SetAllPoints(frame.titleBar)
+    frame.titleBar.bg:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
+
     -- Visual feedback when hovering over title bar
     frame.titleBar:SetScript("OnEnter", function(s)
         local bgColor = self:getIProp(i, "titleBackgroundColor")
@@ -1062,31 +1091,14 @@ function HomeCheck:getGroup(i)
         s.bg:SetVertexColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
     end)
 
-    -- Title background (optional)
-    frame.titleBar.bg = frame.titleBar:CreateTexture(nil, "BACKGROUND")
-    frame.titleBar.bg:SetAllPoints(frame.titleBar)
-    frame.titleBar.bg:SetTexture("Interface\\ChatFrame\\ChatFrameBackground")
-    local bgColor = self:getIProp(i, "titleBackgroundColor")
-    frame.titleBar.bg:SetVertexColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
-
     -- Title text
     frame.titleBar.text = frame.titleBar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.titleBar.text:SetPoint("LEFT", frame.titleBar, "LEFT", 2, 0)
     frame.titleBar.text:SetPoint("RIGHT", frame.titleBar, "RIGHT", -2, 0)
     frame.titleBar.text:SetJustifyH("LEFT")
-    local titleText = self:getIProp(i, "titleText")
-    local displayText = titleText ~= "" and titleText or ("Group " .. i)
-    frame.titleBar.text:SetText(displayText)
     frame.titleBar.text:SetTextColor(1, 1, 1, 1)
-    local font = frame.titleBar.text:GetFont()
-    frame.titleBar.text:SetFont(font, self:getIProp(i, "titleFontSize"))
 
-    -- Show/hide title bar based on settings
-    if self:getIProp(i, "showTitleBar") then
-        frame.titleBar:Show()
-    else
-        frame.titleBar:Hide()
-    end
+    self:applyTitleBarSettings(frame, i)
 
     frame.CooldownFrames = {}
 

@@ -606,13 +606,6 @@ function HomeCheck:OptionsPanel()
                                 -- Only update the specific group, not inherited ones
                                 if self.groups[i] and self.groups[i].titleBar and self.groups[i].titleBar.bg then
                                     self.groups[i].titleBar.bg:SetVertexColor(r, g, b, a)
-                                    -- Update the hover handlers to use new color
-                                    self.groups[i].titleBar:SetScript("OnEnter", function(s)
-                                        s.bg:SetVertexColor(r * 1.2, g * 1.2, b * 1.2, a)
-                                    end)
-                                    self.groups[i].titleBar:SetScript("OnLeave", function(s)
-                                        s.bg:SetVertexColor(r, g, b, a)
-                                    end)
                                 end
                             end
                         }
