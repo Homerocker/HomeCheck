@@ -950,24 +950,6 @@ function HomeCheck:GSProc(targetName)
     end
 end
 
-function HomeCheck:sortFrames(groupIndex)
-    if not groupIndex then
-        for i = 1, #self.groups do
-            self:sortFrames(i)
-        end
-        return
-    end
-
-    local frames = self.groups[groupIndex].CooldownFrames
-    if #frames > 1 then
-        sort(frames, function(a, b)
-            return self:cooldownSorter(a, b)
-        end)
-    end
-
-    self:repositionFrames(groupIndex)
-end
-
 ---cooldownSorter
 ---@param frame1 table cooldown frame A
 ---@param frame2 table cooldown frame B
@@ -1012,7 +994,7 @@ function HomeCheck:cooldownSorter(frame1, frame2)
             return frame1.CDLeft < frame2.CDLeft -- Shorter cooldown remaining goes to the top
         end
     else
-        -- 5. Fallback grouping alignment by Spell ID
+    -- 5. Fallback grouping alignment by Spell ID
         if spellId1 ~= spellId2 then
             return spellId1 < spellId2
         end
@@ -1020,6 +1002,26 @@ function HomeCheck:cooldownSorter(frame1, frame2)
 
     -- 6. Strict stable sort fallback (Alphabetical by Player Name)
     return frame1.playerName < frame2.playerName
+end
+
+local function cooldownSorter(a, b)
+    return HomeCheck:cooldownSorter(a, b)
+end
+
+function HomeCheck:sortFrames(groupIndex)
+    if not groupIndex then
+        for i = 1, #self.groups do
+            self:sortFrames(i)
+        end
+        return
+    end
+
+    local frames = self.groups[groupIndex].CooldownFrames
+    if #frames > 1 then
+        sort(frames, cooldownSorter)
+    end
+
+    self:repositionFrames(groupIndex)
 end
 
 function HomeCheck:applyTitleBarSettings(group, groupIndex)
