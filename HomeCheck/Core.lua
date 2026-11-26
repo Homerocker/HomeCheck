@@ -750,11 +750,14 @@ function HomeCheck:loadProfile()
     for i = 1, #self.groups do
         self.groups[i].anchor:ClearAllPoints()
         self.groups[i].anchor:SetPoint(self.db.profile[i].pos.point, self.db.profile[i].pos.relativeTo, self.db.profile[i].pos.relativePoint, self.db.profile[i].pos.xOfs, self.db.profile[i].pos.yOfs)
-        for j = 1, #self.groups[i].CooldownFrames do
-            if i ~= self:getSpellGroup(self.groups[i].CooldownFrames[j].spellID) then
-                self:moveFrameToGroup(self.groups[i].CooldownFrames[j].spellID, i, self:getSpellGroup(self.groups[i].CooldownFrames[j].spellID))
-            else
-                self:applyGroupSettings(self.groups[i].CooldownFrames[j])
+        for j = #self.groups[i].CooldownFrames, 1, -1  do
+            local frame = self.groups[i].CooldownFrames[j]
+            if frame then
+                if i ~= self:getSpellGroup(frame.spellID) then
+                    self:moveFrameToGroup(frame.spellID, i, self:getSpellGroup(frame.spellID))
+                else
+                    self:applyGroupSettings(frame)
+                end
             end
         end
     end
