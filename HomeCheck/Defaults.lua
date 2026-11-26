@@ -127,7 +127,7 @@ HomeCheck.defaults = {
                 enable = true
             },
             -- Heroism
-            [16190] = {
+            [32182] = {
                 enable = true
             },
             -- Bloodlust
