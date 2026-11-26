@@ -790,7 +790,7 @@ function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, test
     end
 end
 
-function HomeCheck:updateRaidRoster(instant, startGroup, startIndex)
+function HomeCheck:updateRaidRoster(instant)
     if not instant then
         if updateRaidRosterScheduleTimer then
             -- update is scheduled
@@ -807,14 +807,18 @@ function HomeCheck:updateRaidRoster(instant, startGroup, startIndex)
         end
     end
 
-    for i = startGroup or 1, #self.groups do
-        for j = startIndex or 1, #self.groups[i].CooldownFrames do
-            if not UnitInRaid(self.groups[i].CooldownFrames[j].playerName) and not UnitInParty(self.groups[i].CooldownFrames[j].playerName) or not UnitIsConnected(self.groups[i].CooldownFrames[j].playerName) then
-                self:removeCooldownFrames(self.groups[i].CooldownFrames[j].playerName)
-                return self:updateRaidRoster(true, i, j)
+    for i = 1, #self.groups do
+        for j = #self.groups[i].CooldownFrames, 1, -1 do
+            local frame = self.groups[i].CooldownFrames[j]
+            if frame then
+                local playerName = frame.playerName
+                if not UnitInRaid(playerName) and not UnitInParty(playerName) or not UnitIsConnected(playerName) then
+                    self:removeCooldownFrames(playerName)
+                end
             end
         end
     end
+
     self:updateRaidCooldowns()
     updateRaidRosterTimestamp = time()
 end
