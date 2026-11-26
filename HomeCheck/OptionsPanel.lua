@@ -522,17 +522,7 @@ function HomeCheck:OptionsPanel()
                                 self.db.profile[i].showTitleBar = val
                                 -- Only update the specific group, not inherited ones
                                 if self.groups[i] and self.groups[i].titleBar then
-                                    if val then
-                                        self.groups[i].titleBar:Show()
-                                        -- Re-enable dragging when showing title bar
-                                        self.groups[i].titleBar:EnableMouse(true)
-                                        self.groups[i].titleBar:RegisterForDrag("LeftButton")
-                                    else
-                                        self.groups[i].titleBar:Hide()
-                                        -- Disable dragging when hiding title bar
-                                        self.groups[i].titleBar:EnableMouse(false)
-                                        self.groups[i].titleBar:RegisterForDrag()
-                                    end
+                                    self:applyTitleBarSettings(self.groups[i], i)
                                 end
                                 self:repositionFrames(i)
                             end
