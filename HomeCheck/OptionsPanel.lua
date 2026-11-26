@@ -95,7 +95,7 @@ function HomeCheck:OptionsPanel()
                 size = {
                     name = L["Size and position"],
                     type = "group",
-                    disabled = self.db.profile[i].inherit and i ~= 1,
+                    disabled = function() return self.db.profile[i].inherit and i ~= 1 end,
                     args = {
                         frameWidth = {
                             name = L["Frame width"],
@@ -288,7 +288,7 @@ function HomeCheck:OptionsPanel()
                 colors = {
                     name = L["Colors"],
                     type = "group",
-                    disabled = self.db.profile[i].inherit and i ~= 1,
+                    disabled = function() return self.db.profile[i].inherit and i ~= 1 end,
                     args = {
                         invertColors = {
                             name = L["Invert colors"],
@@ -366,7 +366,7 @@ function HomeCheck:OptionsPanel()
                 textures = {
                     name = L["Textures and fonts"],
                     type = "group",
-                    disabled = self.db.profile[i].inherit and i ~= 1,
+                    disabled = function() return self.db.profile[i].inherit and i ~= 1 end,
                     args = {
                         barTexture = {
                             name = L["Bar texture"],
@@ -466,7 +466,7 @@ function HomeCheck:OptionsPanel()
                 range = {
                     name = L["Range"],
                     type = "group",
-                    disabled = self.db.profile[i].inherit and i ~= 1,
+                    disabled = function() return self.db.profile[i].inherit and i ~= 1 end,
                     args = {
                         desc = {
                             type = "description",
@@ -539,7 +539,7 @@ function HomeCheck:OptionsPanel()
                             name = L["Title text"],
                             type = "input",
                             order = 2,
-                            disabled = not self.db.profile[i].showTitleBar,
+                            disabled = function() return not self.db.profile[i].showTitleBar end,
                             get = function()
                                 return self.db.profile[i].titleText
                             end,
@@ -559,7 +559,7 @@ function HomeCheck:OptionsPanel()
                             max = 30,
                             step = 1,
                             order = 3,
-                            disabled = not self.db.profile[i].showTitleBar,
+                            disabled = function() return not self.db.profile[i].showTitleBar end,
                             get = function()
                                 return self.db.profile[i].titleBarHeight
                             end,
@@ -579,7 +579,7 @@ function HomeCheck:OptionsPanel()
                             max = 20,
                             step = 1,
                             order = 4,
-                            disabled = not self.db.profile[i].showTitleBar,
+                            disabled = function() return not self.db.profile[i].showTitleBar end,
                             get = function()
                                 return self.db.profile[i].titleFontSize
                             end,
@@ -597,7 +597,7 @@ function HomeCheck:OptionsPanel()
                             type = "color",
                             hasAlpha = true,
                             order = 5,
-                            disabled = not self.db.profile[i].showTitleBar,
+                            disabled = function() return not self.db.profile[i].showTitleBar end,
                             get = function()
                                 return unpack(self.db.profile[i].titleBackgroundColor)
                             end,
@@ -635,10 +635,6 @@ function HomeCheck:OptionsPanel()
                         self:applyGroupSettings(self.groups[i].CooldownFrames[j])
                     end
                     self:repositionFrames(i)
-                    myOptionsTable.args.frames.args["frame" .. i].args.colors.disabled = val
-                    myOptionsTable.args.frames.args["frame" .. i].args.range.disabled = val
-                    myOptionsTable.args.frames.args["frame" .. i].args.size.disabled = val
-                    myOptionsTable.args.frames.args["frame" .. i].args.textures.disabled = val
                     LibStub("AceConfigRegistry-3.0"):NotifyChange("HomeCheck")
                 end,
                 get = function()
@@ -686,32 +682,17 @@ function HomeCheck:OptionsPanel()
                         order = 1,
                         set = function(_, val)
                             self.db.profile.spells[spellID].enable = val
-                            if val then
-                                for k, _ in pairs(myOptionsTable.args.spells.args[tostring(spellID)].args) do
-                                    if k ~= "enable" then
-                                        myOptionsTable.args.spells.args[tostring(spellID)].args[k].disabled = false
-                                    end
-                                end
-                            else
-                                for k, _ in pairs(myOptionsTable.args.spells.args[tostring(spellID)].args) do
-                                    if k ~= "enable" then
-                                        myOptionsTable.args.spells.args[tostring(spellID)].args[k].disabled = true
-                                    end
-                                end
-                            end
                             LibStub("AceConfigRegistry-3.0"):NotifyChange("HomeCheck")
                             self:updateRaidCooldowns()
                         end,
-                        get = function(_)
-                            return self.db.profile.spells[spellID].enable
-                        end
+                        get = function() return self.db.profile.spells[spellID].enable end
                     },
                     alwaysShow = {
                         name = L["Always visible"],
                         type = "toggle",
                         desc = L["Do not hide cooldown bar when spell is ready"],
                         order = 2,
-                        disabled = not self.db.profile.spells[spellID].enable,
+                        disabled = function() return not self.db.profile.spells[spellID].enable end,
                         set = function(_, val)
                             self.db.profile.spells[spellID].alwaysShow = val
                             -- TODO is scan neccessary?
@@ -733,7 +714,7 @@ function HomeCheck:OptionsPanel()
                         max = #self.groups,
                         step = 1,
                         order = 4,
-                        disabled = not self.db.profile.spells[spellID].enable,
+                        disabled = function() return not self.db.profile.spells[spellID].enable end,
                         get = function()
                             return self.db.profile.spells[spellID].group
                         end,
@@ -748,7 +729,7 @@ function HomeCheck:OptionsPanel()
                         max = 200,
                         step = 1,
                         order = 5,
-                        disabled = not self.db.profile.spells[spellID].enable,
+                        disabled = function() return not self.db.profile.spells[spellID].enable end,
                         get = function()
                             return self.db.profile.spells[spellID].priority
                         end,
