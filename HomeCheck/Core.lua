@@ -907,7 +907,7 @@ function HomeCheck:Readiness(hunterName)
     local refreshSpellIDs = {}
     for i = 1, #self.groups do
         for j = 1, #self.groups[i].CooldownFrames do
-            if self.groups[i].CooldownFrames[j].playerName == hunterName and self.groups[i].CooldownFrames[j].spellID ~= 34477 then
+            if self.groups[i].CooldownFrames[j].playerName == hunterName and self.groups[i].CooldownFrames[j].spellID ~= 34477 and self.groups[i].CooldownFrames[j].spellID ~= 35079 then
                 insert(refreshSpellIDs, self.groups[i].CooldownFrames[j].spellID)
             end
         end
