@@ -693,6 +693,8 @@ function HomeCheck:createCooldownFrame(playerName, spellID, testMode)
     frame.targetFontString:SetText("")
     frame.timerFontString:SetText("")
 
+    frame.yOffset = nil
+
     self:applyGroupSettings(frame)
 
     self:EnableMouse(frame, not self.db.global.link)
@@ -736,12 +738,21 @@ function HomeCheck:repositionFrames(groupIndex)
             self:repositionFrames(i)
         end
     else
-        local titleBarHeight = 0
+        local titleBarHeight
         if self:getIProp(groupIndex, "showTitleBar") and self.groups[groupIndex].titleBar and self.groups[groupIndex].titleBar:IsShown() then
             titleBarHeight = self:getIProp(groupIndex, "titleBarHeight")
+        else
+            titleBarHeight = 0
         end
-        for j = 1, #self.groups[groupIndex].CooldownFrames do
-            self.groups[groupIndex].CooldownFrames[j]:SetPoint("TOPLEFT", 0, -titleBarHeight - (self:getIProp(groupIndex, "iconSize") + self:getIProp(groupIndex, "padding")) * (j - 1))
+        local frames = self.groups[groupIndex].CooldownFrames
+        if #frames == 0 then return end
+        local step = self:getIProp(groupIndex, "iconSize") + self:getIProp(groupIndex, "padding")
+        for j = 1, #frames do
+            local yOffset = -titleBarHeight - step * (j - 1)
+            if frames[j].yOffset ~= yOffset then
+                frames[j]:SetPoint("TOPLEFT", 0, yOffset)
+                frames[j].yOffset = yOffset
+            end
         end
     end
 end
