@@ -1309,7 +1309,7 @@ function HomeCheck:getSpellGroup(spellID)
 end
 
 function HomeCheck:applyGroupSettings(frame)
-    groupIndex = self:getSpellGroup(frame.spellID)
+    local groupIndex = self:getSpellGroup(frame.spellID)
 
     frame:SetParent(self:getGroup(groupIndex))
 
