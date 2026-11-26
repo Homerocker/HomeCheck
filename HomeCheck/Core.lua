@@ -1230,7 +1230,7 @@ function HomeCheck:getSpellCooldown(frame)
         if self:UnitHasGlyph(frame.playerName, 57955) then
             CDmodifier = CDmodifier - 300
         end
-    elseif frame.spellID == 20608 then
+    elseif frame.spellID == 21169 then
         -- Reincarnation
         local talentPoints = select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 3))
         if talentPoints == 1 then
