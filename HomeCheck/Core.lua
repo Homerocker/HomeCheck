@@ -1308,8 +1308,8 @@ function HomeCheck:getSpellGroup(spellID)
     return self.spells[spellID].parent and self.db.profile.spells[self.spells[spellID].parent].group or self.db.profile.spells[spellID].group
 end
 
-function HomeCheck:applyGroupSettings(frame, groupIndex)
-    groupIndex = groupIndex or self:getSpellGroup(frame.spellID)
+function HomeCheck:applyGroupSettings(frame)
+    groupIndex = self:getSpellGroup(frame.spellID)
 
     frame:SetParent(self:getGroup(groupIndex))
 
@@ -1332,10 +1332,10 @@ function HomeCheck:setSpellGroupIndex(spellID, groupIndex)
     if oldGroup == groupIndex then
         return
     end
+    self.db.profile.spells[spellID].group = groupIndex
     self:moveFrameToGroup(spellID, oldGroup, groupIndex)
     self:sortFrames(oldGroup)
     self:sortFrames(groupIndex)
-    self.db.profile.spells[spellID].group = groupIndex
 end
 
 function HomeCheck:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex)
@@ -1344,7 +1344,7 @@ function HomeCheck:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex)
     for i = #self.groups[sourceGroupIndex].CooldownFrames, 1, -1  do
         if spellID == self.groups[sourceGroupIndex].CooldownFrames[i].spellID then
             local frame = remove(self.groups[sourceGroupIndex].CooldownFrames, i)
-            self:applyGroupSettings(frame, destGroupIndex)
+            self:applyGroupSettings(frame)
             insert(self.groups[destGroupIndex].CooldownFrames, frame)
             moved = true
         end
