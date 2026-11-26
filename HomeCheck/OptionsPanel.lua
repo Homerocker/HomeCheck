@@ -3,6 +3,8 @@ local AceConfig = LibStub("AceConfig-3.0")
 local ipairs, max, min, pairs, tonumber = ipairs, max, min, pairs, tonumber
 
 function HomeCheck:OptionsPanel()
+    local statusbars = self.LibSharedMedia:List("statusbar")
+    local fonts = self.LibSharedMedia:List("font")
     local myOptionsTable = {
         type = "group",
         childGroups = "tab",
@@ -371,17 +373,17 @@ function HomeCheck:OptionsPanel()
                         barTexture = {
                             name = L["Bar texture"],
                             type = "select",
-                            values = self.LibSharedMedia:List("statusbar"),
+                            values = statusbars,
                             order = 7,
                             get = function()
-                                for key, name in ipairs(self.LibSharedMedia:List("statusbar")) do
+                                for key, name in ipairs(statusbars) do
                                     if name == self.db.profile[i].statusbar then
                                         return key
                                     end
                                 end
                             end,
                             set = function(_, val)
-                                self.db.profile[i].statusbar = self.LibSharedMedia:List("statusbar")[val]
+                                self.db.profile[i].statusbar = statusbars[val]
                                 local texture = self.LibSharedMedia:Fetch("statusbar", self.db.profile[i].statusbar)
                                 for j = 1, #self.groups do
                                     if j == i or self.db.profile[j].inherit == i then
@@ -395,17 +397,17 @@ function HomeCheck:OptionsPanel()
                         fontPlayer = {
                             name = L["Font"],
                             type = "select",
-                            values = self.LibSharedMedia:List("font"),
+                            values = fonts,
                             order = 8,
                             get = function()
-                                for key, name in ipairs(self.LibSharedMedia:List("font")) do
+                                for key, name in ipairs(fonts) do
                                     if name == self.db.profile[i].fontPlayer then
                                         return key
                                     end
                                 end
                             end,
                             set = function(_, val)
-                                self.db.profile[i].fontPlayer = self.LibSharedMedia:List("font")[val]
+                                self.db.profile[i].fontPlayer = fonts[val]
                                 for j = 1, #self.groups do
                                     if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
@@ -418,17 +420,17 @@ function HomeCheck:OptionsPanel()
                         fontTarget = {
                             name = L["Target font"],
                             type = "select",
-                            values = self.LibSharedMedia:List("font"),
+                            values = fonts,
                             order = 9,
                             get = function()
-                                for key, name in ipairs(self.LibSharedMedia:List("font")) do
+                                for key, name in ipairs(fonts) do
                                     if name == self.db.profile[i].fontTarget then
                                         return key
                                     end
                                 end
                             end,
                             set = function(_, val)
-                                self.db.profile[i].fontTarget = self.LibSharedMedia:List("font")[val]
+                                self.db.profile[i].fontTarget = fonts[val]
                                 for j = 1, #self.groups do
                                     if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
@@ -441,17 +443,17 @@ function HomeCheck:OptionsPanel()
                         fontTimer = {
                             name = L["Timer font"],
                             type = "select",
-                            values = self.LibSharedMedia:List("font"),
+                            values = fonts,
                             order = 10,
                             get = function()
-                                for key, name in ipairs(self.LibSharedMedia:List("font")) do
+                                for key, name in ipairs(fonts) do
                                     if name == self.db.profile[i].fontTimer then
                                         return key
                                     end
                                 end
                             end,
                             set = function(_, val)
-                                self.db.profile[i].fontTimer = self.LibSharedMedia:List("font")[val]
+                                self.db.profile[i].fontTimer = fonts[val]
                                 for j = 1, #self.groups do
                                     if j == i or self.db.profile[j].inherit == i then
                                         for k = 1, #self.groups[j].CooldownFrames do
