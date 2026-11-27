@@ -684,11 +684,11 @@ function HomeCheck:OptionsPanel()
                             if val then
                                 self:updateRaidCooldowns()
                             else
-                                self:removeCooldownFrames(nil, spellID)
+                                self:removeCooldownFrames(nil, spellID, true)
                                 self:repositionFrames()
                             end
                         end,
-                        get = function(_)
+                        get = function()
                             return self.db.profile.spells[spellID].alwaysShow
                         end
                     },

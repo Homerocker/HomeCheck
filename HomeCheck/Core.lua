@@ -785,7 +785,7 @@ function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, test
         for j = #group, 1, -1 do
             local frame = group[j]
             if (
-                    frame.playerName == playerName
+                    (not playerName or frame.playerName == playerName)
                             and (not spellID or frame.spellID == spellID)
                             and (not onlyWhenReady or frame.CDLeft <= 0)
             ) or (
