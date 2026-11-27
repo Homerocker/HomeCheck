@@ -554,7 +554,8 @@ function HomeCheck:OptionsPanel()
                 desc = L["Copy settings from other frame"],
                 values = {},
                 set = function(_, val)
-                    if val == 0 then val = nil end
+                    -- false to overwrite defaults (nil defaults to 1)
+                    if val == 0 then val = false end
                     self.db.profile[i].inherit = val
                     for j = 1, #self.groups[i].CooldownFrames do
                         self:applyGroupSettings(self.groups[i].CooldownFrames[j])
