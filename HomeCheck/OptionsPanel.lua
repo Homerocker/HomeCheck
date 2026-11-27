@@ -719,6 +719,7 @@ function HomeCheck:OptionsPanel()
                     type = "toggle",
                     desc = L["Show cooldown for tanks only"],
                     order = 3,
+                    disabled = function() return not self.db.profile.spells[spellID].enable end,
                     set = function(_, val)
                         self.db.profile.spells[spellID].tanksonly = val
                         self:updateRaidCooldowns()
