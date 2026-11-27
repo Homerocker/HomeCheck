@@ -21,7 +21,7 @@ HomeCheck.defaults = {
         testMode = false
     },
     profile = {
-        ['*'] = {
+        ['**'] = {
             frameWidth = 155,
             iconSize = 14,
             fontSize = 9,
