@@ -685,7 +685,7 @@ function HomeCheck:OptionsPanel()
                                 self:updateRaidCooldowns()
                             else
                                 self:removeCooldownFrames(nil, spellID, true)
-                                self:repositionFrames()
+                                self:repositionFrames(self:getSpellGroup(spellID))
                             end
                         end,
                         get = function()
