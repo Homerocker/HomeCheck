@@ -21,9 +21,7 @@ function HomeCheck:OptionsPanel()
                         end
                     end
                 end,
-                get = function()
-                    return self.db.global.link
-                end
+                get = function() return self.db.global.link end
             },
             selfignore = {
                 name = L["Ignore myself"],
@@ -33,9 +31,7 @@ function HomeCheck:OptionsPanel()
                     self.db.global.selfignore = val
                     self:updateRaidCooldowns()
                 end,
-                get = function()
-                    return self.db.global.selfignore
-                end
+                get = function() return self.db.global.selfignore end
             },
             hidesolo = {
                 name = L["Hide when not in raid"],
@@ -45,20 +41,14 @@ function HomeCheck:OptionsPanel()
                     self.db.global.hidesolo = val
                     self:updateFramesVisibility()
                 end,
-                get = function()
-                    return self.db.global.hidesolo
-                end
+                get = function() return self.db.global.hidesolo end
             },
             testMode = {
                 name = L["Test Mode"],
                 desc = L["Enable test mode to display sample abilities in each group for layout testing."],
                 type = "toggle",
-                set = function(_, val)
-                    self:setTestMode(val)
-                end,
-                get = function()
-                    return self.db.global.testMode
-                end
+                set = function(_, val) self:setTestMode(val) end,
+                get = function() return self.db.global.testMode end
             },
             frames = {
                 name = L["Frames"],
@@ -106,9 +96,7 @@ function HomeCheck:OptionsPanel()
                             max = 300,
                             step = 1,
                             order = 1,
-                            get = function()
-                                return self.db.profile[i].frameWidth
-                            end,
+                            get = function() return self.db.profile[i].frameWidth end,
                             set = function(_, val)
                                 self.db.profile[i].frameWidth = val
                                 for j = 1, #self.groups do
@@ -132,9 +120,7 @@ function HomeCheck:OptionsPanel()
                             max = 30,
                             step = 1,
                             order = 3,
-                            get = function()
-                                return self.db.profile[i].fontSize
-                            end,
+                            get = function() return self.db.profile[i].fontSize end,
                             set = function(_, val)
                                 self.db.profile[i].fontSize = val
                                 local font
@@ -157,9 +143,7 @@ function HomeCheck:OptionsPanel()
                             max = 30,
                             step = 1,
                             order = 4,
-                            get = function()
-                                return self.db.profile[i].fontSizeTarget
-                            end,
+                            get = function() return self.db.profile[i].fontSizeTarget end,
                             set = function(_, val)
                                 self.db.profile[i].fontSizeTarget = val
                                 local font
@@ -182,9 +166,7 @@ function HomeCheck:OptionsPanel()
                             max = 30,
                             step = 1,
                             order = 5,
-                            get = function()
-                                return self.db.profile[i].fontSizeTimer
-                            end,
+                            get = function() return self.db.profile[i].fontSizeTimer end,
                             set = function(_, val)
                                 self.db.profile[i].fontSizeTimer = val
                                 local font
@@ -207,9 +189,7 @@ function HomeCheck:OptionsPanel()
                             max = 60,
                             step = 1,
                             order = 2,
-                            get = function()
-                                return self.db.profile[i].iconSize
-                            end,
+                            get = function() return self.db.profile[i].iconSize end,
                             set = function(_, val)
                                 self.db.profile[i].iconSize = val
                                 for j = 1, #self.groups do
@@ -229,9 +209,7 @@ function HomeCheck:OptionsPanel()
                             max = 50,
                             step = 1,
                             order = 6,
-                            get = function()
-                                return self.db.profile[i].padding
-                            end,
+                            get = function() return self.db.profile[i].padding end,
                             set = function(_, val)
                                 self.db.profile[i].padding = val
                                 for j = 1, #self.groups do
@@ -249,9 +227,7 @@ function HomeCheck:OptionsPanel()
                                 r = L["Right"]
                             },
                             order = 11,
-                            get = function()
-                                return self.db.profile[i].targetJustify
-                            end,
+                            get = function() return self.db.profile[i].targetJustify end,
                             set = function(_, val)
                                 self.db.profile[i].targetJustify = val
                                 for j = 1, #self.groups do
@@ -271,9 +247,7 @@ function HomeCheck:OptionsPanel()
                                 r = L["Right"]
                             },
                             order = 12,
-                            get = function()
-                                return self.db.profile[i].timerPosition
-                            end,
+                            get = function() return self.db.profile[i].timerPosition end,
                             set = function(_, val)
                                 self.db.profile[i].timerPosition = val
                                 for j = 1, #self.groups do
@@ -297,9 +271,7 @@ function HomeCheck:OptionsPanel()
                             type = "toggle",
                             desc = L["Makes cooldown bar transparent when spell is ready"],
                             order = 5,
-                            get = function()
-                                return self.db.profile[i].invertColors
-                            end,
+                            get = function() return self.db.profile[i].invertColors end,
                             set = function(_, val)
                                 self.db.profile[i].invertColors = val
                                 for j = 1, #self.groups do
@@ -324,9 +296,7 @@ function HomeCheck:OptionsPanel()
                             step = 0.01,
                             isPercent = true,
                             order = 15,
-                            get = function()
-                                return tonumber((("%%.%df"):format(2)):format(1 - self.db.profile[i].opacity))
-                            end,
+                            get = function() return tonumber((("%%.%df"):format(2)):format(1 - self.db.profile[i].opacity)) end,
                             set = function(_, val)
                                 self.db.profile[i].opacity = tonumber((("%%.%df"):format(2)):format(1 - val))
                                 for j = 1, #self.groups do
@@ -349,9 +319,7 @@ function HomeCheck:OptionsPanel()
                             type = "color",
                             hasAlpha = true,
                             order = 25,
-                            get = function()
-                                return unpack(self.db.profile[i].background)
-                            end,
+                            get = function() return unpack(self.db.profile[i].background) end,
                             set = function(_, r, g, b, a)
                                 self.db.profile[i].background = { r, g, b, a }
                                 for j = 1, #self.groups do
@@ -479,9 +447,7 @@ function HomeCheck:OptionsPanel()
                             name = L["Dim out"],
                             desc = L["Dim out cooldown bars of spells that are out of range"],
                             type = "toggle",
-                            get = function()
-                                return self.db.profile[i].rangeDimout
-                            end,
+                            get = function() return self.db.profile[i].rangeDimout end,
                             set = function(_, val)
                                 self.db.profile[i].rangeDimout = val
                                 for j = 1, #self.groups do
@@ -497,12 +463,10 @@ function HomeCheck:OptionsPanel()
                             name = L["Ungroup"],
                             desc = L["Ignore priority and move out of range spells to the bottom of the list"],
                             type = "toggle",
-                            get = function()
-                                return self.db.profile[i].rangeUngroup
-                            end,
+                            get = function() return self.db.profile[i].rangeUngroup end,
                             set = function(_, val)
                                 self.db.profile[i].rangeUngroup = val
-                                self:sortFrames()
+                                self:sortFrames(i)
                             end
                         }
                     }
@@ -515,9 +479,7 @@ function HomeCheck:OptionsPanel()
                             name = L["Show title bar"],
                             type = "toggle",
                             order = 1,
-                            get = function()
-                                return self.db.profile[i].showTitleBar
-                            end,
+                            get = function() return self.db.profile[i].showTitleBar end,
                             set = function(_, val)
                                 self.db.profile[i].showTitleBar = val
                                 -- Only update the specific group, not inherited ones
@@ -530,9 +492,7 @@ function HomeCheck:OptionsPanel()
                             type = "input",
                             order = 2,
                             disabled = function() return not self.db.profile[i].showTitleBar end,
-                            get = function()
-                                return self.db.profile[i].titleText
-                            end,
+                            get = function() return self.db.profile[i].titleText end,
                             set = function(_, val)
                                 self.db.profile[i].titleText = val
                                 -- Only update the specific group, not inherited ones
@@ -547,9 +507,7 @@ function HomeCheck:OptionsPanel()
                             step = 1,
                             order = 3,
                             disabled = function() return not self.db.profile[i].showTitleBar end,
-                            get = function()
-                                return self.db.profile[i].titleBarHeight
-                            end,
+                            get = function() return self.db.profile[i].titleBarHeight end,
                             set = function(_, val)
                                 self.db.profile[i].titleBarHeight = val
                                 -- Only update the specific group, not inherited ones
@@ -565,9 +523,7 @@ function HomeCheck:OptionsPanel()
                             step = 1,
                             order = 4,
                             disabled = function() return not self.db.profile[i].showTitleBar end,
-                            get = function()
-                                return self.db.profile[i].titleFontSize
-                            end,
+                            get = function() return self.db.profile[i].titleFontSize end,
                             set = function(_, val)
                                 self.db.profile[i].titleFontSize = val
                                 -- Only update the specific group, not inherited ones
@@ -580,9 +536,7 @@ function HomeCheck:OptionsPanel()
                             hasAlpha = true,
                             order = 5,
                             disabled = function() return not self.db.profile[i].showTitleBar end,
-                            get = function()
-                                return unpack(self.db.profile[i].titleBackgroundColor)
-                            end,
+                            get = function() return unpack(self.db.profile[i].titleBackgroundColor) end,
                             set = function(_, r, g, b, a)
                                 self.db.profile[i].titleBackgroundColor = { r, g, b, a }
                                 -- Only update the specific group, not inherited ones
@@ -600,9 +554,7 @@ function HomeCheck:OptionsPanel()
                 desc = L["Copy settings from other frame"],
                 values = {},
                 set = function(_, val)
-                    if val == 0 then
-                        val = false
-                    end
+                    if val == 0 then val = nil end
                     self.db.profile[i].inherit = val
                     for j = 1, #self.groups[i].CooldownFrames do
                         self:applyGroupSettings(self.groups[i].CooldownFrames[j])
@@ -610,9 +562,7 @@ function HomeCheck:OptionsPanel()
                     self:repositionFrames(i)
                     LibStub("AceConfigRegistry-3.0"):NotifyChange("HomeCheck")
                 end,
-                get = function()
-                    return self.db.profile[i].inherit or 0
-                end,
+                get = function() return self.db.profile[i].inherit or 0 end,
                 order = 1
             }
             myOptionsTable.args.frames.args["frame" .. i].args.inheritSettings.values[0] = "disabled"
@@ -676,9 +626,7 @@ function HomeCheck:OptionsPanel()
                                 self:repositionFrames(self:getSpellGroup(spellID))
                             end
                         end,
-                        get = function()
-                            return self.db.profile.spells[spellID].alwaysShow
-                        end
+                        get = function() return self.db.profile.spells[spellID].alwaysShow end
                     },
                     frame = {
                         name = L["Frame"],
@@ -688,12 +636,8 @@ function HomeCheck:OptionsPanel()
                         step = 1,
                         order = 4,
                         disabled = function() return not self.db.profile.spells[spellID].enable end,
-                        get = function()
-                            return self.db.profile.spells[spellID].group
-                        end,
-                        set = function(_, val)
-                            self:setSpellGroupIndex(spellID, val)
-                        end
+                        get = function() return self.db.profile.spells[spellID].group end,
+                        set = function(_, val) self:setSpellGroupIndex(spellID, val) end
                     },
                     priority = {
                         name = L["Priority"],
@@ -703,34 +647,29 @@ function HomeCheck:OptionsPanel()
                         step = 1,
                         order = 5,
                         disabled = function() return not self.db.profile.spells[spellID].enable end,
-                        get = function()
-                            return self.db.profile.spells[spellID].priority
-                        end,
+                        get = function() return self.db.profile.spells[spellID].priority end,
                         set = function(_, val)
                             self.db.profile.spells[spellID].priority = val
                             self:sortFrames(self.db.profile.spells[spellID].group)
                         end
+                    },
+                    tanksonly = self.spells[spellID].tanksonly and {
+                        name = L["Tanks only"],
+                        type = "toggle",
+                        desc = L["Show cooldown for tanks only"],
+                        order = 3,
+                        disabled = function() return not self.db.profile.spells[spellID].enable end,
+                        set = function(_, val)
+                            self.db.profile.spells[spellID].tanksonly = val
+                            self:updateRaidCooldowns()
+                        end,
+                        get = function() return self.db.profile.spells[spellID].tanksonly end
                     }
                 }
             }
-            if self.spells[spellID].tanksonly then
-                myOptionsTable.args.spells.args[tostring(spellID)].args.tanksonly = {
-                    name = L["Tanks only"],
-                    type = "toggle",
-                    desc = L["Show cooldown for tanks only"],
-                    order = 3,
-                    disabled = function() return not self.db.profile.spells[spellID].enable end,
-                    set = function(_, val)
-                        self.db.profile.spells[spellID].tanksonly = val
-                        self:updateRaidCooldowns()
-                    end,
-                    get = function(_)
-                        return self.db.profile.spells[spellID].tanksonly
-                    end
-                }
-            end
         end
     end
+
     for prefix, addonName in pairs(self.comms) do
         myOptionsTable.args.comms.args[prefix] = {
             name = addonName,
@@ -741,9 +680,7 @@ function HomeCheck:OptionsPanel()
                 end
                 self.db.global.comms[prefix] = val
             end,
-            get = function(_)
-                return self.db.global.comms[prefix]
-            end
+            get = function() return self.db.global.comms[prefix] end
         }
     end
     AceConfig:RegisterOptionsTable("HomeCheck", myOptionsTable, { "homecheck" })
