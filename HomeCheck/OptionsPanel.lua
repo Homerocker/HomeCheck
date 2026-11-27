@@ -521,9 +521,7 @@ function HomeCheck:OptionsPanel()
                             set = function(_, val)
                                 self.db.profile[i].showTitleBar = val
                                 -- Only update the specific group, not inherited ones
-                                if self.groups[i] and self.groups[i].titleBar then
-                                    self:applyTitleBarSettings(self.groups[i], i)
-                                end
+                                self:applyTitleBarSettings(self.groups[i], i)
                                 self:repositionFrames(i)
                             end
                         },
@@ -538,10 +536,7 @@ function HomeCheck:OptionsPanel()
                             set = function(_, val)
                                 self.db.profile[i].titleText = val
                                 -- Only update the specific group, not inherited ones
-                                if self.groups[i] and self.groups[i].titleBar and self.groups[i].titleBar.text then
-                                    local text = val ~= "" and val or ("Group " .. i)
-                                    self.groups[i].titleBar.text:SetText(text)
-                                end
+                                self:applyTitleBarSettings(self.groups[i], i)
                             end
                         },
                         titleBarHeight = {
@@ -558,9 +553,7 @@ function HomeCheck:OptionsPanel()
                             set = function(_, val)
                                 self.db.profile[i].titleBarHeight = val
                                 -- Only update the specific group, not inherited ones
-                                if self.groups[i] and self.groups[i].titleBar then
-                                    self.groups[i].titleBar:SetHeight(val)
-                                end
+                                self:applyTitleBarSettings(self.groups[i], i)
                                 self:repositionFrames(i)
                             end
                         },
@@ -578,10 +571,7 @@ function HomeCheck:OptionsPanel()
                             set = function(_, val)
                                 self.db.profile[i].titleFontSize = val
                                 -- Only update the specific group, not inherited ones
-                                if self.groups[i] and self.groups[i].titleBar and self.groups[i].titleBar.text then
-                                    local font = self.groups[i].titleBar.text:GetFont()
-                                    self.groups[i].titleBar.text:SetFont(font, val)
-                                end
+                                self:applyTitleBarSettings(self.groups[i], i)
                             end
                         },
                         titleBackgroundColor = {
@@ -596,9 +586,7 @@ function HomeCheck:OptionsPanel()
                             set = function(_, r, g, b, a)
                                 self.db.profile[i].titleBackgroundColor = { r, g, b, a }
                                 -- Only update the specific group, not inherited ones
-                                if self.groups[i] and self.groups[i].titleBar and self.groups[i].titleBar.bg then
-                                    self.groups[i].titleBar.bg:SetVertexColor(r, g, b, a)
-                                end
+                                self:applyTitleBarSettings(self.groups[i], i)
                             end
                         }
                     }
