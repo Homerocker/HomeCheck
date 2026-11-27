@@ -466,7 +466,11 @@ function HomeCheck:OptionsPanel()
                             get = function() return self.db.profile[i].rangeUngroup end,
                             set = function(_, val)
                                 self.db.profile[i].rangeUngroup = val
-                                self:sortFrames(i)
+                                for j = 1, #self.groups do
+                                    if j == i or self.db.profile[j].inherit == i then
+                                        self:sortFrames(j)
+                                    end
+                                end
                             end
                         }
                     }
@@ -552,11 +556,36 @@ function HomeCheck:OptionsPanel()
                 name = L["Inherit settings"],
                 type = "select",
                 desc = L["Copy settings from other frame"],
-                values = {},
+                values = function()
+                    local vals = { [0] = "disabled" }
+                    for j = 1, #self.groups do
+                        if j ~= i and (j == 1 or not self.db.profile[j].inherit) then
+                            vals[j] = "Frame" .. j
+                        end
+                    end
+                    return vals
+                end,
                 set = function(_, val)
                     -- false to overwrite defaults (nil defaults to 1)
-                    if val == 0 then val = false end
+                    if val == 0 then
+                        val = false
+                    elseif val ~= 1 and self.db.profile[val].inherit then
+                        return
+                    end
                     self.db.profile[i].inherit = val
+
+                    if val then
+                        for j = 1, #self.groups do
+                            if self.db.profile[j].inherit == i then
+                                self.db.profile[j].inherit = val
+                                for k = 1, #self.groups[j].CooldownFrames do
+                                    self:applyGroupSettings(self.groups[j].CooldownFrames[k])
+                                end
+                                self:repositionFrames(j)
+                            end
+                        end
+                    end
+
                     for j = 1, #self.groups[i].CooldownFrames do
                         self:applyGroupSettings(self.groups[i].CooldownFrames[j])
                     end
@@ -566,12 +595,6 @@ function HomeCheck:OptionsPanel()
                 get = function() return self.db.profile[i].inherit or 0 end,
                 order = 1
             }
-            myOptionsTable.args.frames.args["frame" .. i].args.inheritSettings.values[0] = "disabled"
-            for j = 1, #self.groups do
-                if j ~= i then
-                    myOptionsTable.args.frames.args["frame" .. i].args.inheritSettings.values[j] = "Frame" .. j
-                end
-            end
         end
         myOptionsTable.args.frames.args["frame" .. i].args.resetpos = {
             name = L["Reset frame position"],

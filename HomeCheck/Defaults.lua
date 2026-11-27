@@ -54,6 +54,9 @@ HomeCheck.defaults = {
             titleFontSize = 9,
             titleBackgroundColor = { 0.1, 0.1, 0.1, 0.8 }
         },
+        [1] = {
+            inherit = false
+        },
         spells = {
             ["**"] = {
                 group = 2,

@@ -46,7 +46,7 @@ LibStub("AceSerializer-3.0"):Embed(HomeCheck)
 HomeCheck.groups = {}
 HomeCheck.localizedSpellNames = {}
 HomeCheck.units = {}
-HomeCheck.db_ver = 6
+HomeCheck.db_ver = 7
 
 local RebirthTarget
 
