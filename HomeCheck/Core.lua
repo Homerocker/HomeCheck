@@ -116,7 +116,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                 spellID = self.localizedSpellNames[spellName]
             end
             if not spellID then
-                -- a spell nobody here tracks
+            -- a spell nobody here tracks
                 return
             end
         end
@@ -126,32 +126,32 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         end
 
         if combatEvent == "SPELL_CAST_SUCCESS" or combatEvent == "SPELL_RESURRECT" then
-            -- don't evaluate "nocast" as it should only be set to true for spells that do not trigger SPELL_CAST_SUCCESS
-            -- (assume nocast=nil at this point)
+        -- don't evaluate "nocast" as it should only be set to true for spells that do not trigger SPELL_CAST_SUCCESS
+        -- (assume nocast=nil at this point)
             self:setCooldown(spellID, playerName, true, targetName)
         elseif combatEvent == "SPELL_AURA_APPLIED" then
             if self.spells[spellID] and self.spells[spellID].nocast then
-                -- evaluate nocast to skip spells that also trigger SPELL_CAST_SUCCESS (prevent double cooldown trigger)
+            -- evaluate nocast to skip spells that also trigger SPELL_CAST_SUCCESS (prevent double cooldown trigger)
                 self:setCooldown(spellID, playerName, true, targetName)
             end
         elseif combatEvent == "SPELL_AURA_REMOVED" then
             if spellID == 34477 then
-                -- Misdirection cancelled
+            -- Misdirection cancelled
                 self:setCooldown(35079, playerName, true)
             elseif spellID == 57934 then
-                -- Tricks of the Trade cancelled
+            -- Tricks of the Trade cancelled
                 self:setCooldown(59628, playerName, true)
             end
         elseif combatEvent == "SPELL_HEAL" then
             if spellID == 48153 then
-                -- Guardian Spirit proced
+            -- Guardian Spirit proced
                 self:GSProc(targetName)
             end
         elseif combatEvent == "UNIT_DIED" or combatEvent == "SPELL_INSTAKILL" then
             self:getUnit(playerName).dead = true
         end
 
-        -- UNIT_SPELLCAST events are used to detect double Rebirth only
+    -- UNIT_SPELLCAST events are used to detect double Rebirth only
     elseif event == "UNIT_SPELLCAST_SENT" then
         local _, spellName, _, targetName = ...
         if self.localizedSpellNames[spellName] == 48477 then
@@ -173,9 +173,9 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
     elseif event == "RAID_ROSTER_UPDATE" then
         local instant
         if playerInRaid ~= UnitInRaid("player") then
-            -- current player joined/left raid
+        -- current player joined/left raid
             if playerInRaid then
-                -- player was in raid (left raid)
+            -- player was in raid (left raid)
                 self:RegisterEvent("PARTY_MEMBERS_CHANGED")
             else
                 self:UnregisterEvent("PARTY_MEMBERS_CHANGED")
@@ -272,7 +272,7 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
                         self:getUnit(playerName).range = self:UnitInRange(playerName) and 1 or 0
 
                         if playerName == currentPlayer
-                                or (CanInspect(playerName) and CheckInteractDistance(playerName, 1)) then
+                        or (CanInspect(playerName) and CheckInteractDistance(playerName, 1)) then
                             local trinket1 = GetInventoryItemID(playerName, 13)
                             local trinket2 = GetInventoryItemID(playerName, 14)
 
@@ -461,7 +461,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, te
     end
 
     if spellID == 23989 then
-        -- Readiness
+    -- Readiness
         self:Readiness(playerName)
     end
 
@@ -500,7 +500,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, te
     end
 
     if not CDLeft and frame.CDLeft == 0 and self.db.global.CDs[playerName][spellID].timestamp and self.db.global.CDs[playerName][spellID].timestamp > time() then
-        -- restoring CD info from SV
+    -- restoring CD info from SV
         CDLeft = self.db.global.CDs[playerName][spellID].timestamp - time()
         target = self.db.global.CDs[playerName][spellID].target
         -- unknown data source and reliability, treat it as remote
@@ -560,7 +560,7 @@ function HomeCheck:setCooldown(spellID, playerName, CDLeft, target, isRemote, te
     end
 
     if frame.CDLeft > 0 then
-        -- the shared ticker counts it down from here
+    -- the shared ticker counts it down from here
         frame.ticking = true
     elseif not self:getSpellAlwaysShow(spellID) then
         self:removeCooldownFrames(playerName, spellID, true)
@@ -765,7 +765,7 @@ function HomeCheck:loadProfile()
 
         self:applyTitleBarSettings(self.groups[i], i)
 
-        for j = #self.groups[i].CooldownFrames, 1, -1  do
+        for j = #self.groups[i].CooldownFrames, 1, -1 do
             local frame = self.groups[i].CooldownFrames[j]
             if frame then
                 if i ~= self:getSpellGroup(frame.spellID) then
@@ -786,11 +786,11 @@ function HomeCheck:removeCooldownFrames(playerName, spellID, onlyWhenReady, test
         for j = #group, 1, -1 do
             local frame = group[j]
             if (
-                    (not playerName or frame.playerName == playerName)
-                            and (not spellID or frame.spellID == spellID)
-                            and (not onlyWhenReady or frame.CDLeft <= 0)
+            (not playerName or frame.playerName == playerName)
+            and (not spellID or frame.spellID == spellID)
+            and (not onlyWhenReady or frame.CDLeft <= 0)
             ) or (
-                    testMode and frame.testMode
+            testMode and frame.testMode
             ) then
                 local released = remove(group, j)
                 released:Hide()
@@ -811,12 +811,12 @@ end
 function HomeCheck:updateRaidRoster(instant)
     if not instant then
         if updateRaidRosterScheduleTimer then
-            -- update is scheduled
+        -- update is scheduled
             return
         end
 
         if updateRaidRosterTimestamp and time() - updateRaidRosterTimestamp < updateRaidRosterCooldown then
-            -- update is on cooldown
+        -- update is on cooldown
             updateRaidRosterScheduleTimer = self:ScheduleTimer(function()
                 updateRaidRosterScheduleTimer = nil
                 self:updateRaidRoster()
@@ -880,8 +880,8 @@ function HomeCheck:refreshPlayerCooldowns(playerName, class)
     for spellID, spellConfig in pairs(self.spells) do
         if not spellConfig.class or spellConfig.class == class then
             if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID)
-                    and (not self:isSpellTanksOnly(spellID) or LibGroupTalents:GetUnitRole(playerName) == "tank")
-                    and (not self.db.global.selfignore or playerName ~= currentPlayer) then
+            and (not self:isSpellTanksOnly(spellID) or LibGroupTalents:GetUnitRole(playerName) == "tank")
+            and (not self.db.global.selfignore or playerName ~= currentPlayer) then
                 if not spellConfig.parent then
                     self:setCooldown(spellID, playerName)
                 end
@@ -898,7 +898,7 @@ function HomeCheck:UnitHasAbility(playerName, spellID)
     end
 
     if self.spells[spellID].trinket then
-        -- trinket proc
+    -- trinket proc
         return self:UnitTrinketEquipped(playerName, self.spells[spellID].trinket)
     end
 
@@ -942,9 +942,9 @@ function HomeCheck:GSProc(targetName)
     local spellGroup = self:getSpellGroup(47788)
     for i = #self.groups[spellGroup].CooldownFrames, 1, -1 do
         if self.groups[spellGroup].CooldownFrames[i].spellID == 47788
-                and self.groups[spellGroup].CooldownFrames[i].target == targetName
-                and self.groups[spellGroup].CooldownFrames[i].CDLeft > 55
-                and self.groups[spellGroup].CooldownFrames[i].CDLeft <= 70 then
+        and self.groups[spellGroup].CooldownFrames[i].target == targetName
+        and self.groups[spellGroup].CooldownFrames[i].CDLeft > 55
+        and self.groups[spellGroup].CooldownFrames[i].CDLeft <= 70 then
             self:setCooldown(47788, self.groups[spellGroup].CooldownFrames[i].playerName, 180 - 70 + self.groups[spellGroup].CooldownFrames[i].CDLeft)
             break
         end
@@ -1127,7 +1127,7 @@ end
 function HomeCheck:getCDLeft(playerName, spellID)
     for i = 1, #self.groups[self:getSpellGroup(spellID)].CooldownFrames do
         if playerName == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].playerName
-                and spellID == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].spellID then
+        and spellID == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].spellID then
             return self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].CDLeft
         end
     end
@@ -1137,7 +1137,7 @@ end
 function HomeCheck:getTarget(playerName, spellID)
     for i = 1, #self.groups[self:getSpellGroup(spellID)].CooldownFrames do
         if playerName == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].playerName
-                and spellID == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].spellID then
+        and spellID == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].spellID then
             return self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].target
         end
     end
@@ -1173,8 +1173,8 @@ end
 ---@param frame
 function HomeCheck:setBarColor(frame)
     local dimmed = self:getUnit(frame.playerName).dead
-            or (self:getUnit(frame.playerName).range == 0
-            and self:getIProp(frame.groupIndex, "rangeDimout"))
+    or (self:getUnit(frame.playerName).range == 0
+    and self:getIProp(frame.groupIndex, "rangeDimout"))
     local opacity = self:getIProp(frame.groupIndex, "opacity")
 
     if frame.barColorDimmed == dimmed and frame.barColorOpacity == opacity and frame.barColorClass == frame.class then
@@ -1185,7 +1185,7 @@ function HomeCheck:setBarColor(frame)
     if dimmed then
         frame.bar.active:SetVertexColor(0.5, 0.5, 0.5, opacity)
     else
-        local playerClassColor = RAID_CLASS_COLORS[frame.class]
+        local playerClassColor = RAID_CLASS_COLORS[frame.class or "WARRIOR"]
         frame.bar.active:SetVertexColor(playerClassColor.r, playerClassColor.g, playerClassColor.b, opacity)
     end
 end
@@ -1199,7 +1199,7 @@ function HomeCheck:setTimerColor(frame)
         state = TIMER_DEAD
     elseif frame.CDLeft <= 0 then
         if not self:getSpellAlwaysShow(frame.spellID) then
-            -- the bar is on its way out, leave the colour alone
+        -- the bar is on its way out, leave the colour alone
             return
         end
         state = TIMER_READY
@@ -1248,19 +1248,19 @@ end
 function HomeCheck:getSpellCooldown(frame)
     local CDmodifier = 0
     if frame.spellID == 498 or frame.spellID == 642 then
-        -- Divine Shield and Divine Protection
+    -- Divine Shield and Divine Protection
         CDmodifier = -30 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 2, 14)) or 0)
     elseif frame.spellID == 10278 then
-        -- HoP
+    -- HoP
         CDmodifier = -60 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 2, 4)) or 0)
     elseif frame.spellID == 48788 then
-        -- Lay on Hands
+    -- Lay on Hands
         CDmodifier = -120 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 1, 8)) or 0)
         if self:UnitHasGlyph(frame.playerName, 57955) then
             CDmodifier = CDmodifier - 300
         end
     elseif frame.spellID == 21169 then
-        -- Reincarnation
+    -- Reincarnation
         local talentPoints = select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 3))
         if talentPoints == 1 then
             CDmodifier = -420
@@ -1268,18 +1268,18 @@ function HomeCheck:getSpellCooldown(frame)
             CDmodifier = -900
         end
     elseif frame.spellID == 871 then
-        -- Shield Wall
+    -- Shield Wall
         CDmodifier = -30 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 13)) or 0)
         if self:UnitHasGlyph(frame.playerName, 63329) then
             CDmodifier = CDmodifier - 120
         end
     elseif frame.spellID == 12975 then
-        -- Last Stand
+    -- Last Stand
         if self:UnitHasGlyph(frame.playerName, 58376) then
             CDmodifier = CDmodifier - 60
         end
     elseif frame.spellID == 48447 then
-        -- Tranquility
+    -- Tranquility
         local talentPoints = select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 14))
         if talentPoints == 1 then
             CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.3
@@ -1287,12 +1287,12 @@ function HomeCheck:getSpellCooldown(frame)
             CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.5
         end
     elseif frame.spellID == 47585 then
-        -- Dispersion
+    -- Dispersion
         if self:UnitHasGlyph(frame.playerName, 63229) then
             CDmodifier = CDmodifier - 45
         end
     elseif frame.spellID == 45438 then
-        -- Ice Block
+    -- Ice Block
         local talentPoints = select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 3))
         if talentPoints == 1 then
             CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.07
@@ -1302,16 +1302,16 @@ function HomeCheck:getSpellCooldown(frame)
             CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.2
         end
     elseif frame.spellID == 66 or frame.spellID == 12051 then
-        -- Invisibility or Evocation
+    -- Invisibility or Evocation
         CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.15 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 1, 24)) or 0)
     elseif frame.spellID == 12292 then
-        -- Death Wish
+    -- Death Wish
         CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.11 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 2, 18)) or 0)
     elseif frame.spellID == 10060 or frame.spellID == 33206 then
-        -- Power Infusion and Pain Suppression
+    -- Power Infusion and Pain Suppression
         CDmodifier = -(self.spells[frame.spellID] and self.spells[frame.spellID].cd or 0) * 0.1 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 1, 23)) or 0)
     elseif frame.spellID == 47788 then
-        -- Guardian spirit
+    -- Guardian spirit
         if frame.CDLeft > self.spells[frame.spellID].cd then
             return 180
         end
@@ -1319,7 +1319,7 @@ function HomeCheck:getSpellCooldown(frame)
             return 180
         end
     elseif frame.spellID == 42650 then
-        -- Army of the Dead
+    -- Army of the Dead
         CDmodifier = -120 * (select(5, LibGroupTalents:GetTalentInfo(frame.playerName, 3, 13)) or 0)
     end
 
@@ -1329,7 +1329,9 @@ end
 function HomeCheck:cacheLocalizedSpellNames()
     for spellID, _ in pairs(self.spells) do
         local spellName = GetSpellInfo(spellID)
-        self.localizedSpellNames[spellName] = spellID
+        if spellName then
+            self.localizedSpellNames[spellName] = spellID
+        end
     end
 end
 
@@ -1356,8 +1358,8 @@ function HomeCheck:applyGroupSettings(frame)
 end
 
 function HomeCheck:setSpellGroupIndex(spellID, groupIndex)
-    -- expected to be only called from Options Panel UI where child spells are hidden
-    -- so we assume spellID does not have "parent" and skip getSpellGroup() checks
+-- expected to be only called from Options Panel UI where child spells are hidden
+-- so we assume spellID does not have "parent" and skip getSpellGroup() checks
     local oldGroup = self.db.profile.spells[spellID].group
     if oldGroup == groupIndex then
         return
@@ -1371,7 +1373,7 @@ end
 function HomeCheck:moveFrameToGroup(spellID, sourceGroupIndex, destGroupIndex)
     local moved
 
-    for i = #self.groups[sourceGroupIndex].CooldownFrames, 1, -1  do
+    for i = #self.groups[sourceGroupIndex].CooldownFrames, 1, -1 do
         if spellID == self.groups[sourceGroupIndex].CooldownFrames[i].spellID then
             local frame = remove(self.groups[sourceGroupIndex].CooldownFrames, i)
             self:applyGroupSettings(frame)
@@ -1460,7 +1462,7 @@ function HomeCheck:UnitHasGlyph(unit, glyphID, default)
     end
     local a, b, c, d, e, f = LibGroupTalents:GetUnitGlyphs(unit)
     if a or b or c or d or e or f then
-        -- checking if any glyph info exists to make sure glyph info was actually fetched
+    -- checking if any glyph info exists to make sure glyph info was actually fetched
         return false
     end
     -- assume player has glyph if glyph info is empty and default=true
@@ -1507,11 +1509,11 @@ function HomeCheck:updateFramesVisibility(groupIndex)
     if groupIndex then
         if self.groups[groupIndex]:IsShown() then
             if #self.groups[groupIndex].CooldownFrames == 0
-                    or (self.db.global.hidesolo and not playerInRaid and GetNumPartyMembers() == 0 and not self.db.global.testMode) then
+            or (self.db.global.hidesolo and not playerInRaid and GetNumPartyMembers() == 0 and not self.db.global.testMode) then
                 self.groups[groupIndex]:Hide()
             end
         elseif #self.groups[groupIndex].CooldownFrames ~= 0
-                and (not self.db.global.hidesolo or playerInRaid or GetNumPartyMembers() ~= 0 or self.db.global.testMode) then
+        and (not self.db.global.hidesolo or playerInRaid or GetNumPartyMembers() ~= 0 or self.db.global.testMode) then
             self.groups[groupIndex]:Show()
         end
     else
@@ -1526,13 +1528,13 @@ function HomeCheck:setTestMode(enable)
     if enable then
         for spellId, _ in pairs(self.db.profile.spells) do
             if self.spells[spellId] then
-                -- Create test cooldown with varying times
+            -- Create test cooldown with varying times
                 local testCDLeft = random(1, 5) * 10
                 self:setCooldown(spellId, "Testframe" .. random(1, 4), testCDLeft, nil, nil, true)
             end
         end
     else
-        -- Remove all test frames
+    -- Remove all test frames
         self:removeCooldownFrames(nil, nil, nil, true)
     end
 
