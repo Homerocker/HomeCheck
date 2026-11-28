@@ -200,6 +200,12 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
         self:ScheduleTimer(function()
             self:updateRaidCooldowns()
         end, 30)
+
+        -- Initialize test mode if it was enabled
+        if self.db.global.testMode then
+            self:removeCooldownFrames(nil, nil, nil, true)
+            self:setTestMode(true)
+        end
     elseif event == "ADDON_LOADED" then
         if (...) ~= "HomeCheck" then
             return
@@ -251,11 +257,6 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
             if self.db.global.comms[k] then
                 self:RegisterComm(k)
             end
-        end
-
-        -- Initialize test mode if it was enabled
-        if self.db.global.testMode then
-            self:setTestMode(true)
         end
 
         self:ScheduleRepeatingTimer(function()
