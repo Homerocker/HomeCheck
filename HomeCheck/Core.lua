@@ -31,6 +31,7 @@ local UnitInRaid = UnitInRaid
 local UnitIsConnected = UnitIsConnected
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost
 local UnitName = UnitName
+local UnitRace = UnitRace
 local unpack = unpack
 
 HomeCheck = CreateFrame("Frame")
@@ -874,11 +875,13 @@ end
 
 function HomeCheck:refreshPlayerCooldowns(playerName, class)
     if not class then
-        class = select(2, UnitClass(playerName))
+        _, class = UnitClass(playerName)
     end
+    local _, race = UnitRace(playerName)
 
     for spellID, spellConfig in pairs(self.spells) do
-        if not spellConfig.class or spellConfig.class == class then
+        if (not class or not spellConfig.class or spellConfig.class == class)
+                        and (not race or not spellConfig.race or spellConfig.race == race) then
             if self.db.profile.spells[spellID] and self:isSpellEnabled(spellID) and self:UnitHasAbility(playerName, spellID)
             and (not self:isSpellTanksOnly(spellID) or LibGroupTalents:GetUnitRole(playerName) == "tank")
             and (not self.db.global.selfignore or playerName ~= currentPlayer) then
