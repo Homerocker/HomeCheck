@@ -1519,8 +1519,8 @@ function HomeCheck:setTestMode(enable)
     self:removeCooldownFrames(nil, nil, nil, true)
     if enable then
         for spellId, _ in pairs(self.db.profile.spells) do
-            if self.spells[spellId] then
-            -- Create test cooldown with varying times
+            if self.spells[spellId] and not self.spells[spellId].parent and not self.spells[spellId].ignore then
+                -- Create test cooldown with varying times
                 local testCDLeft = random(1, 5) * 10
                 self:setCooldown(spellId, "Testframe" .. random(1, 4), testCDLeft, nil, nil, true)
             end
