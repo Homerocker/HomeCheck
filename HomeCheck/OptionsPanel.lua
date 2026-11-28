@@ -197,8 +197,8 @@ function HomeCheck:OptionsPanel()
                                         for k = 1, #self.groups[j].CooldownFrames do
                                             self:setFrameHeight(self.groups[j].CooldownFrames[k], val)
                                         end
+                                        self:repositionFrames(j)
                                     end
-                                    self:repositionFrames(j)
                                 end
                             end
                         },
