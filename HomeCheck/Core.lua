@@ -1,6 +1,5 @@
 local CanInspect = CanInspect
 local CheckInteractDistance = CheckInteractDistance
-local date = date
 local floor = floor
 local format = format
 local GetInventoryItemID = GetInventoryItemID
@@ -713,14 +712,16 @@ function HomeCheck:EnableMouse(frame, disable)
     else
         frame:SetScript("OnMouseDown", function(_, button)
             if button == "LeftButton" and (IsShiftKeyDown() or IsControlKeyDown()) then
-                local message = frame.playerName .. " " .. (GetSpellLink(frame.spellID))
-                if frame.CDLeft == 0 then
+                local message = GetSpellLink(frame.spellID) .. " " .. frame.playerName
+                local CDLeft = floor(frame.CDLeft)
+                if CDLeft <= 0 then
                     message = message .. " READY"
                 else
                     if frame.target then
-                        message = message .. " (" .. frame.target .. ")"
+                        message = message .. ">" .. frame.target
                     end
-                    message = message .. " " .. date("!%M:%S", frame.CDLeft)
+
+                    message = message .. " " .. format("%d:%02d", floor(CDLeft / 60), CDLeft % 60)
                 end
                 if IsShiftKeyDown() then
                     ChatThrottleLib:SendChatMessage("NORMAL", "HomeCheck", message, playerInRaid and "RAID" or "PARTY")
@@ -1162,7 +1163,7 @@ function HomeCheck:setTarget(frame, target)
     frame.target = target
     self.db.global.CDs[frame.playerName][frame.spellID].target = target
     frame.targetFontString:SetText(target)
-    local class = select(2, UnitClass(target))
+    local _, class = UnitClass(target)
     if class then
         local targetClassColor = RAID_CLASS_COLORS[class]
         frame.targetFontString:SetTextColor(targetClassColor.r, targetClassColor.g, targetClassColor.b, 1)
