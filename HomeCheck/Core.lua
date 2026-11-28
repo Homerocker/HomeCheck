@@ -203,7 +203,6 @@ HomeCheck:SetScript("OnEvent", function(self, event, ...)
 
         -- Initialize test mode if it was enabled
         if self.db.global.testMode then
-            self:removeCooldownFrames(nil, nil, nil, true)
             self:setTestMode(true)
         end
     elseif event == "ADDON_LOADED" then
@@ -1126,18 +1125,6 @@ function HomeCheck:getGroup(i)
     return frame
 end
 
----@param playerName string
----@param spellID number
-function HomeCheck:getCDLeft(playerName, spellID)
-    for i = 1, #self.groups[self:getSpellGroup(spellID)].CooldownFrames do
-        if playerName == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].playerName
-        and spellID == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].spellID then
-            return self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].CDLeft
-        end
-    end
-    return 0
-end
-
 function HomeCheck:getTarget(playerName, spellID)
     for i = 1, #self.groups[self:getSpellGroup(spellID)].CooldownFrames do
         if playerName == self.groups[self:getSpellGroup(spellID)].CooldownFrames[i].playerName
@@ -1529,6 +1516,7 @@ end
 
 function HomeCheck:setTestMode(enable)
     self.db.global.testMode = enable
+    self:removeCooldownFrames(nil, nil, nil, true)
     if enable then
         for spellId, _ in pairs(self.db.profile.spells) do
             if self.spells[spellId] then
@@ -1537,9 +1525,6 @@ function HomeCheck:setTestMode(enable)
                 self:setCooldown(spellId, "Testframe" .. random(1, 4), testCDLeft, nil, nil, true)
             end
         end
-    else
-    -- Remove all test frames
-        self:removeCooldownFrames(nil, nil, nil, true)
     end
 
     self:repositionFrames()
