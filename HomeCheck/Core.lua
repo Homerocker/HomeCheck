@@ -827,7 +827,7 @@ function HomeCheck:updateRaidRoster(instant)
     for i = 1, #self.groups do
         for j = #self.groups[i].CooldownFrames, 1, -1 do
             local frame = self.groups[i].CooldownFrames[j]
-            if frame then
+            if frame and not frame.testMode then
                 local playerName = frame.playerName
                 if not UnitInRaid(playerName) and not UnitInParty(playerName) or not UnitIsConnected(playerName) then
                     self:removeCooldownFrames(playerName)
