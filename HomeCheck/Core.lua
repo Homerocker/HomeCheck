@@ -1506,19 +1506,17 @@ function HomeCheck:updateFramesVisibility(groupIndex)
     if groupIndex then
         if self.groups[groupIndex]:IsShown() then
             if #self.groups[groupIndex].CooldownFrames == 0
-                    or (self.db.global.hidesolo and not playerInRaid and GetNumPartyMembers() == 0) then
+                    or (self.db.global.hidesolo and not playerInRaid and GetNumPartyMembers() == 0 and not self.db.global.testMode) then
                 self.groups[groupIndex]:Hide()
             end
         elseif #self.groups[groupIndex].CooldownFrames ~= 0
-                and (not self.db.global.hidesolo or playerInRaid or GetNumPartyMembers() ~= 0) then
+                and (not self.db.global.hidesolo or playerInRaid or GetNumPartyMembers() ~= 0 or self.db.global.testMode) then
             self.groups[groupIndex]:Show()
         end
-
-        return
-    end
-
-    for i = 1, #self.groups do
-        self:updateFramesVisibility(i)
+    else
+        for i = 1, #self.groups do
+            self:updateFramesVisibility(i)
+        end
     end
 end
 
